@@ -16,6 +16,8 @@ and to also access the database to update the ViewModels.
 /**
  * Represents Ui State for a Reservation.
  */
+
+/*
 data class ReservationsUiState(
     val id: Int = 0,
     val user: String = "",
@@ -64,3 +66,4 @@ fun ReservationsUiState.isValid() : Boolean {
 }
 
 
+*/

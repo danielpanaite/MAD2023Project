@@ -1,11 +1,12 @@
 package com.example.courtreservationapplicationjetpack.reservations
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -21,37 +22,48 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.courtreservationapplicationjetpack.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.navigation.Screens
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+//import com.example.courtreservationapplicationjetpack.navigation.Screens
 //import com.example.courtreservationapplicationjetpack.routes.MyReservationsBody
 import kotlinx.coroutines.launch
 
+import java.util.Currency
+import java.util.Locale
+
+object ReserveACourtDestination : NavigationDestination {
+    override val route = "reserve_court"
+    override val titleRes = "Reserve"
+    override val icon = Icons.Default.Star
 
 
+}
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @ExperimentalMaterial3Api
 @Composable
 fun ReserveACourt(
+    navigateBack: () -> Unit,
+    onNavigateUp: () -> Unit,
+    canNavigateBack: Boolean = true,
     //navigateToMyReservations: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
-    //viewModel: ReserveACourtViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ReserveACourtViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            CourtTopAppBar(canNavigateBack = false)
+            CourtTopAppBar(canNavigateBack = canNavigateBack,
+                navigateUp = onNavigateUp)
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
 
     ) {
 
-    }}
-        /*
+
+        
             innerPadding ->
         ReservationEntryBody(
             reservationsUiState = viewModel.reservationsUiState,
@@ -65,15 +77,16 @@ fun ReserveACourt(
             modifier = modifier.padding(innerPadding),
         )
     }
-    */
+    
+    }
 
 
 
-/*
+
 @Composable
 fun ReservationEntryBody(
     reservationsUiState: ReservationsUiState,
-    onReservationValueChange: (ReservationsUiState) -> Unit,
+    onReservationValueChange: (ReservationDetails) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ){
@@ -84,9 +97,9 @@ fun ReservationEntryBody(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ){
-        ReservationInputForm(reservationsUiState = reservationsUiState, onValueChange = onReservationValueChange)
+        ReservationInputForm(reservationDetails = reservationsUiState.reservationDetails, onValueChange = onReservationValueChange)
         Button(onClick = onSaveClick,
-        enabled = reservationsUiState.actionEnabled,
+        enabled = reservationsUiState.isEntryValid,
         modifier = Modifier.fillMaxWidth())
         {
             Text(text = "save")
@@ -97,25 +110,25 @@ fun ReservationEntryBody(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationInputForm(
-    reservationsUiState: ReservationsUiState,
+    reservationDetails: ReservationDetails,
     modifier: Modifier = Modifier,
-    onValueChange: (ReservationsUiState) -> Unit ={},
+    onValueChange: (ReservationDetails) -> Unit ={},
     enabled: Boolean = true
 ){
     Column(modifier=modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp))
     {
         OutlinedTextField(
-            value =reservationsUiState.user ,
-            onValueChange = {onValueChange(reservationsUiState.copy(user = it))},
+            value =reservationDetails.user ,
+            onValueChange = {onValueChange(reservationDetails.copy(user = it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = {Text(text = "id")},
+            label = {Text(text = "userId")},
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true
         )
         OutlinedTextField(
-            value =reservationsUiState.courtId ,
-            onValueChange = {onValueChange(reservationsUiState.copy(courtId = it))},
+            value =reservationDetails.courtId ,
+            onValueChange = {onValueChange(reservationDetails.copy(courtId = it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = {Text(text = "courtId")},
             modifier = Modifier.fillMaxWidth(),
@@ -123,24 +136,24 @@ fun ReservationInputForm(
             singleLine = true
         )
         OutlinedTextField(
-            value =reservationsUiState.date ,
-            onValueChange = {onValueChange(reservationsUiState.copy(date = it))},
+            value =reservationDetails.date ,
+            onValueChange = {onValueChange(reservationDetails.copy(date = it))},
             label = {Text(text = "date")},
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true
         )
         OutlinedTextField(
-            value =reservationsUiState.slot ,
-            onValueChange = {onValueChange(reservationsUiState.copy(slot = it))},
+            value =reservationDetails.slot ,
+            onValueChange = {onValueChange(reservationDetails.copy(slot = it))},
             label = {Text(text = "id")},
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true
         )
         OutlinedTextField(
-            value =reservationsUiState.additions ,
-            onValueChange = {onValueChange(reservationsUiState.copy(additions = it))},
+            value =reservationDetails.additions ,
+            onValueChange = {onValueChange(reservationDetails.copy(additions = it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = {Text(text = "additions")},
             modifier = Modifier.fillMaxWidth(),
@@ -148,8 +161,8 @@ fun ReservationInputForm(
             singleLine = true
         )
         OutlinedTextField(
-            value =reservationsUiState.people ,
-            onValueChange = {onValueChange(reservationsUiState.copy(people = it))},
+            value =reservationDetails.people ,
+            onValueChange = {onValueChange(reservationDetails.copy(people = it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = {Text(text = "people")},
             modifier = Modifier.fillMaxWidth(),
@@ -169,17 +182,19 @@ fun ReservationInputForm(
 private fun ItemEntryScreenPreview() {
         ReservationEntryBody(
             reservationsUiState = ReservationsUiState(
-                id = 1,
-                user = "1",
-                courtId = "2",
-                date = "20-12-2023",
-                slot = "11.30-12.30",
-                additions = "",
-                people = "2"
+                ReservationDetails(
+                    id = 1,
+                    user = "1",
+                    courtId = "2",
+                    date = "20-12-2023",
+                    slot = "11.30-12.30",
+                    additions = "",
+                    people = "2"
+                )
+
             ),
             onReservationValueChange = {},
             onSaveClick = {}
         )
 
 }
-*/

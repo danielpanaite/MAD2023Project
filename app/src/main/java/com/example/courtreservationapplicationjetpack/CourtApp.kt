@@ -33,6 +33,8 @@ fun CourtTopAppBar(
     canNavigateBack: Boolean,
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit = {}
+
+
 ) {
     if (canNavigateBack) {
         CenterAlignedTopAppBar(

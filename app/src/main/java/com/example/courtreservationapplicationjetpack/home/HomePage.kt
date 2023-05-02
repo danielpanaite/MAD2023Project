@@ -17,14 +17,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.Icons.Default
+import androidx.compose.material.icons.filled.Home
 
 import androidx.compose.material3.*
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.navigation.Screens
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 
+//import com.example.courtreservationapplicationjetpack.navigation.Screens
+
+
+object MainScreenDestination : NavigationDestination {
+    override val route = "home"
+    override val titleRes = "Home"
+    override val icon = Icons.Default.Home
+
+}
 
 @ExperimentalMaterial3Api
 @Composable
@@ -62,7 +74,7 @@ private fun HomeBody(
     Card(
         //onClick = {navController.navigate(route = Screens.ReserveACourt.route)},
         //onClick = navigateToReserveACourt,
-        onClick = {navigateToReserveACourt()},
+        onClick = navigateToReserveACourt,
 
 
         modifier = Modifier

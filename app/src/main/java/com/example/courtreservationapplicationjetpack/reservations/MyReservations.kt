@@ -29,16 +29,34 @@ import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.models.Reservations
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 
+object MyReservationsDestination : NavigationDestination {
+    override val route = "my_reservation"
+    override val titleRes = "My Reservations"
+    override val icon = Icons.Default.Star
+
+
+}
 
 @ExperimentalMaterial3Api
 @Composable
 fun MyReservations(
-    navigateToEditReservation: () -> Unit,
+    navigateToReservationDetailsDestination: (Int) -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
-) {
+    viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
+
+) {
+    val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
     Scaffold(
         topBar = {
             CourtTopAppBar(canNavigateBack = false)
@@ -48,10 +66,10 @@ fun MyReservations(
     ) {
             innerPadding ->
         MyReservationsBody(
-            reservationList = listOf(),
+            reservationList = myReservationsUiState.reservationsList,
             navController = rememberNavController(),
             modifier = modifier.padding(innerPadding),
-            navigateToEditReservation = navigateToEditReservation
+            onReservationClick = navigateToReservationDetailsDestination,
         )
     }
 
@@ -64,7 +82,10 @@ fun MyReservationsBody(
     reservationList: List<Reservations>,
     navController: NavController = rememberNavController(),
     modifier: Modifier = Modifier,
-    navigateToEditReservation: () -> Unit
+    //navigateToDetailsReservation: () -> Unit
+    onReservationClick: (Int) -> Unit,
+
+
 ){
     Column(
         modifier = modifier
@@ -81,7 +102,10 @@ fun MyReservationsBody(
             )
         } else {
             ReservationsList(reservationList = reservationList,
-                navigateToEditReservation = navigateToEditReservation)
+                //navigateToDetailsReservation = navigateToDetailsReservation
+                onReservationClick = { onReservationClick(it.id) }
+
+        )
         }
     }
 }
@@ -89,13 +113,17 @@ fun MyReservationsBody(
 @Composable
 private fun ReservationsList(
     reservationList: List<Reservations>,
-    navigateToEditReservation: () -> Unit,
-    modifier: Modifier = Modifier
+    //navigateToDetailsReservation: () -> Unit,
+    modifier: Modifier = Modifier,
+    onReservationClick: (Reservations) -> Unit,
 ) {
     LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(items = reservationList, key = { it.id }
         ) { reservation ->
-            ReservationItem(reservation = reservation, navigateToEditReservation = navigateToEditReservation)
+            ReservationItem(reservation = reservation,
+                //navigateToDetailsReservation = navigateToDetailsReservation
+                onReservationClick = onReservationClick
+            )
             Divider()
         }
     }
@@ -117,14 +145,16 @@ private fun ReservationsListHeader(modifier: Modifier = Modifier) {
 @Composable
 private fun ReservationItem(
     reservation: Reservations,
-    navigateToEditReservation: () -> Unit,
-    modifier: Modifier = Modifier
+    //navigateToDetailsReservation: () -> Unit,
+    modifier: Modifier = Modifier,
+            onReservationClick: (Reservations) -> Unit,
+
 ) {
     Row(modifier = modifier
         .fillMaxWidth()
         .clickable {
-            navigateToEditReservation()
-            //navController.navigate(route = Screens.ReserveACourt.route)
+            //navigateToDetailsReservation()
+            onReservationClick(reservation)
         }
         .padding(vertical = 16.dp)
     ) {
@@ -163,6 +193,7 @@ fun MyReservationsPreview() {
                 Reservations(2, 1, 2, "11-03-2023", "11.30-12.30", "", 4),
                 Reservations(3, 1, 3, "15-04-2023", "11.30-12.30", "", 6)
             ),
-            navigateToEditReservation = {}
+            //navigateToDetailsReservation = {}
+            onReservationClick = {  }
         )
 }

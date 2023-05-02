@@ -15,8 +15,12 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.courtreservationapplicationjetpack.home.MainScreenDestination
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
-import com.example.courtreservationapplicationjetpack.navigation.Screens
+import com.example.courtreservationapplicationjetpack.reservations.MyReservationsDestination
+//import com.example.courtreservationapplicationjetpack.navigation.Screens
+import com.example.courtreservationapplicationjetpack.routes.ProfileDestination
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,9 +38,9 @@ fun BarNavigation(
 @Composable
 fun BottomBar(navController: NavHostController){
     val screens = listOf(
-        Screens.MainScreen,
-        Screens.Profile,
-        Screens.MyReservations
+        MainScreenDestination,
+        ProfileDestination,
+        MyReservationsDestination
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -53,14 +57,14 @@ fun BottomBar(navController: NavHostController){
 
 @Composable
 fun RowScope.AddItem(
-    screen: Screens,
+    screen: NavigationDestination,
     currentDestination: NavDestination?,
     navController: NavHostController
 
 ){
     NavigationBarItem(
         label ={
-            Text(text = screen.title)
+            Text(text = screen.titleRes)
         },
         icon ={
             Icon(

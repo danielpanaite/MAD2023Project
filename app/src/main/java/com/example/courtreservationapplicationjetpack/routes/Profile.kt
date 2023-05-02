@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,12 +32,21 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.R
-import com.example.courtreservationapplicationjetpack.navigation.Screens
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+
+//import com.example.courtreservationapplicationjetpack.navigation.Screens
+
+object ProfileDestination : NavigationDestination {
+    override val route = "profile"
+    override val titleRes = "Profile"
+    override val icon = Icons.Default.Person
 
 
+}
 @ExperimentalMaterial3Api
 @Composable
 fun Profile(
+    navigateToEditProfileDestination: () -> Unit,
     navController: NavController
 ){
 
@@ -125,7 +137,7 @@ fun Profile(
             .padding(top = 8.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            Button(onClick = { navController.navigate(route = Screens.EditProfile.route) }) {
+            Button(onClick = { navigateToEditProfileDestination}) {
                 Text(text = "Edit Profile")
             }
         }
@@ -175,5 +187,5 @@ fun ProfileImage(){
 @Composable
 @Preview(showBackground = true)
 fun ProfileScreenPreview(){
-    Profile(navController = rememberNavController())
+    Profile(navController = rememberNavController(), navigateToEditProfileDestination = {})
 }

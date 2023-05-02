@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -39,8 +42,15 @@ import com.example.courtreservationapplicationjetpack.R
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+
+object EditProfileDestination : NavigationDestination {
+    override val route = "profile_edit"
+    override val titleRes = "edit Profile"
+    override val icon = Icons.Default.Edit
 
 
+}
 @ExperimentalMaterial3Api
 @Composable
 fun EditProfile(){
