@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">CourtReservationApplicationJetpack</string>
+    <string name="back_button">Back</string>
+    <string name="no_reservations_description">No reservations in the database</string>
+    <string name="attention">Attention</string>
+
+    <string name="delete">Delete</string>
+    <string name="edit_item_title">Edit Item</string>
+    <string name="reservation">Reservation</string>
+    <string name="item_detail_title">Item Details</string>
+    <string name="item_entry_title">Add Item</string>
+    <string name="item_name_req">Item Name *</string>
+    <string name="item_price_req">Item Price *</string>
+    <string name="no">No</string>
+    <string name="price">Price</string>
+    <string name="quantity_req">Quantity in Stock *</string>
+    <string name="save_action">Save</string>
+    <string name="sell">Sell</string>
+    <string name="yes">Yes</string>
+
+    <string name="user_id">User id</string>
+    <string name="court_id">Court id</string>
+    <string name="date">Date</string>
+    <string name="slot">Slot</string>
+    <string name="additions">Additions</string>
+    <string name="people">People</string>
+
+
 </resources>
