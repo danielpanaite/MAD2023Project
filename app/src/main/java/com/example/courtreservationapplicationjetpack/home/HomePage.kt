@@ -2,7 +2,6 @@ package com.example.courtreservationapplicationjetpack.home
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.Image
@@ -23,7 +22,6 @@ import androidx.compose.material3.*
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
-import com.example.courtreservationapplicationjetpack.components.BarNavigation
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.Screens
 
@@ -46,6 +44,7 @@ fun MainScreen(
         innerPadding ->
           HomeBody(
               navController = rememberNavController(),
+              //navController = navController,
               modifier = modifier.padding(innerPadding),
               navigateToReserveACourt = navigateToReserveACourt
           )
@@ -58,13 +57,13 @@ fun MainScreen(
 private fun HomeBody(
     navController: NavController = rememberNavController(),
     modifier: Modifier = Modifier,
-            navigateToReserveACourt: () -> Unit
+    navigateToReserveACourt: () -> Unit
 ){
     Card(
-        onClick = {
-                  navigateToReserveACourt()
-            //navController.navigate(route = Screens.ReserveACourt.route)
-        },
+        //onClick = {navController.navigate(route = Screens.ReserveACourt.route)},
+        //onClick = navigateToReserveACourt,
+        onClick = {navigateToReserveACourt()},
+
 
         modifier = Modifier
             .height(280.dp)

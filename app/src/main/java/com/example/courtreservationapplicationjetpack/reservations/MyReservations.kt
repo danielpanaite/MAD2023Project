@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.routes
+package com.example.courtreservationapplicationjetpack.reservations
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -28,7 +28,6 @@ import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.models.Reservations
-import com.example.courtreservationapplicationjetpack.navigation.Screens
 import androidx.compose.foundation.lazy.items
 
 

@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.routes
+package com.example.courtreservationapplicationjetpack.reservations
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.routes
 
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

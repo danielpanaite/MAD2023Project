@@ -6,10 +6,11 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-/*import com.example.courtreservationapplicationjetpack.routes.reservations.ReservationEditViewModel
-import com.example.courtreservationapplicationjetpack.routes.reservations.ReservationEntryViewModel
 import com.example.courtreservationapplicationjetpack.CourtApplication
+import com.example.courtreservationapplicationjetpack.reservations.EditReservationViewModel
 
+import com.example.courtreservationapplicationjetpack.reservations.ReserveACourtViewModel
+import com.example.courtreservationapplicationjetpack.reservations.MyReservationsViewModel
 
 
 /**
@@ -17,15 +18,15 @@ import com.example.courtreservationapplicationjetpack.CourtApplication
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer for ItemEditViewModel
+        // Initializer for ReservationEdit View Model
         initializer {
-            ReservationEditViewModel(
+            EditReservationViewModel(
                 this.createSavedStateHandle()
             )
         }
-        // Initializer for ItemEntryViewModel
+        // Initializer for RserveCourtViewModel
         initializer {
-            ReservationEntryViewModel(courtApplication().container.reservationsRepository)
+            ReserveACourtViewModel(courtApplication().container.reservationsRepository)
         }
         /*
                 // Initializer for ItemDetailsViewModel
@@ -34,11 +35,11 @@ object AppViewModelProvider {
                         this.createSavedStateHandle()
                     )
                 }
-
-                // Initializer for HomeViewModel
+*/
+                // Initializer for HomeViewModel MyReservationViewModel
                 initializer {
-                    HomeViewModel()
-                }*/
+                    MyReservationsViewModel()
+                }
     }
 }
 
@@ -46,6 +47,6 @@ object AppViewModelProvider {
  * Extension function to queries for [Application] object and returns an instance of
  * [CourtApplication].
  */
+
 fun CreationExtras.courtApplication(): CourtApplication =
     (this[AndroidViewModelFactory.APPLICATION_KEY] as CourtApplication)
-*/
