@@ -1,31 +1,47 @@
 package com.example.courtreservationapplicationjetpack.courts
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.courtreservationapplicationjetpack.models.courts.Court
+import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
+import com.example.courtreservationapplicationjetpack.reservations.EditReservationDestination
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+
 
 /**
- * View Model to retrieve all courts in the Room database.
+ * View Model to retrieve all courts of that sport in the Room database.
  */
 
-/*
-class MyCourtsViewModel(courtRepository: CourtRepository) : ViewModel() {
+/**
+* View Model to retrieve all reservations in the Room database.
+*/
+class CourtsAvailableViewModel(courtRepository: CourtRepository) : ViewModel() {
     /**
-     * Holds my courts ui state. The list of courts are retrieved from [CourtsRepository] and mapped to
-     * [CourtsUiState]
+     * Holds my court ui state. The list of all court are retrieved from [CourtRepository] and mapped to
+     * [courtsAvailableUiState]
      */
-    val myCourtsUiState: StateFlow<MyCourtsUiState> =
-        courtRepository.getAllCourts().map { MyCoourtsUiState(it) }
+    //riprendere la stringa da passare a getCourtsSport
+    //private val sport: String = checkNotNull(savedStateHandle[navigateToCourtsAvailable.reservationIdArg])
+/*
+    val courtsAvailableUiState: StateFlow<CourtsAvailableUiState> =
+        courtRepository.getCourtsSport(sport).map { CourtsAvailableUiState(it) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = MyCourtsUiState()
+                initialValue = CourtsAvailableUiState()
             )
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
+    */
+
 }
 
 /**
  * Ui State for HomeScreen
  */
-data class MyCourtsUiState(val courtList: List<Court> = listOf())
-*/
+data class CourtsAvailableUiState(val courtsAvailableList: List<Court> = listOf())

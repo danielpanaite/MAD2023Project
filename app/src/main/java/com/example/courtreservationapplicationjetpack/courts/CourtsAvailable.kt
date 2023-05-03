@@ -16,7 +16,7 @@ object CourtsAvailableDestination : NavigationDestination {
     override val route  = "my_courts"
     override val titleRes = "My Courts"
     override val icon = Icons.Default.Star
-
+    const val sportChoosen = "reservationId"
 
 }
 

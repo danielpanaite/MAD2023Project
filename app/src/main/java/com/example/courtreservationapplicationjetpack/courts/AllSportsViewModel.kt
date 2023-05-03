@@ -25,7 +25,7 @@ class AllSportsViewModel(courtRepository: CourtRepository) : ViewModel() {
      * [SportsUiState]
      */
     val allSportsUiState: StateFlow<AllSportsUiState> =
-        courtRepository.getSports().map { AllSportsUiState() }
+        courtRepository.getSports().map { AllSportsUiState(it) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),

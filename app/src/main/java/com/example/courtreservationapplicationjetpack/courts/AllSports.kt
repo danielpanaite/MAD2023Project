@@ -42,7 +42,6 @@ object AllSportsDestination : NavigationDestination {
     override val titleRes = "All sports"
     override val icon = Icons.Default.Place
 
-
 }
 
 
@@ -53,6 +52,7 @@ fun AllSports(
     navController: NavController,
     modifier: Modifier = Modifier,
     navigateToCourtsAvailable: (String) -> Unit,
+    //cercare di riprendere uesta stringa per prendere tutti i campi di quello sport
     onNavigateUp: () -> Unit,
 
     viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -82,7 +82,7 @@ fun AllSports(
 fun SportsBody(
     sportsList: List<String>,
     modifier: Modifier = Modifier,
-    onSportClick: (String) -> Unit
+    onSportClick: (String) -> Unit,
 
     ){
 
@@ -101,8 +101,8 @@ fun SportsBody(
                 )
             } else {
                 SportsList(
-                    sportsList = sportsList
-                    //onSportClick = { onSportClick(passargli la stringa dello sport) }
+                    sportsList = sportsList,
+                    onSportClick = onSportClick
                 )
             }
         }
@@ -112,14 +112,14 @@ fun SportsBody(
     private fun SportsList(
         sportsList: List<String>,
         modifier: Modifier = Modifier,
-        //onSportClick: (String) -> Unit,
+        onSportClick: (String) -> Unit,
     ) {
         LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(items = sportsList, //key = { it.id }
             ) { sport ->
                 SportItem(sport = sport,
                     //navigateToDetailsReservation = navigateToDetailsReservation
-                    //onSportlick = onSportClick
+                    onSportClick = onSportClick
                 )
                 Divider()
             }
@@ -131,13 +131,13 @@ fun SportsBody(
     private fun SportItem(
         sport: String,
         modifier: Modifier = Modifier,
-        //onSportClick: (String) -> Unit,
+        onSportClick: (String) -> Unit,
 
         ) {
         Row(modifier = modifier
             .fillMaxWidth()
             .clickable {
-                //onSportClick(sport)
+                onSportClick(sport)
             }
             .padding(vertical = 16.dp)
         ) {

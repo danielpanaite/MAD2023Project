@@ -22,12 +22,14 @@ abstract class ReservationsDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): ReservationsDatabase {
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, ReservationsDatabase::class.java, "reservation_database")
+                Room.databaseBuilder(context, ReservationsDatabase::class.java, "fields")
                     // Setting this option in your app's database builder means that Room
                     // permanently deletes all data from the tables in your database when it
                     // attempts to perform a migration with no defined migration path.
                     .fallbackToDestructiveMigration()
+                    .createFromAsset("database/fields.db")
                     .build()
+
                     .also { Instance = it }
             }
         }

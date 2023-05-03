@@ -118,9 +118,7 @@ fun NavigationGraph(
         }
         composable(
             //route = Screens.EditReservation.route
-            route = AllSportsDestination.route,
-
-
+            route = AllSportsDestination.route
 
         ){
             AllSports(
