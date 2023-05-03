@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsViewModel
+import com.example.courtreservationapplicationjetpack.reservations.EditReservationViewModel
 
 import com.example.courtreservationapplicationjetpack.reservations.ReserveACourtViewModel
 import com.example.courtreservationapplicationjetpack.reservations.MyReservationsViewModel
@@ -17,8 +18,15 @@ import com.example.courtreservationapplicationjetpack.reservations.MyReservation
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
+
+        // Initializer for EditReservationViewModel
+        initializer {
+            EditReservationViewModel(
+                this.createSavedStateHandle(),
+                courtApplication().container.reservationsRepository
+            )
+        }
         // Initializer for ReservationDetails View Model
-        // Initializer for ItemDetailsViewModel
         initializer {
             ReservationDetailsViewModel(
                 this.createSavedStateHandle(),
@@ -36,6 +44,8 @@ object AppViewModelProvider {
                 initializer {
                     MyReservationsViewModel(courtApplication().container.reservationsRepository)
                 }
+
+
     }
 }
 

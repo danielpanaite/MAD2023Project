@@ -128,7 +128,7 @@ private fun ReservationDetailsBody(
             onClick = { deleteConfirmationRequired = true },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("you want to delete?")
+            Text("delete")
         }
         if (deleteConfirmationRequired) {
             DeleteConfirmationDialog(
