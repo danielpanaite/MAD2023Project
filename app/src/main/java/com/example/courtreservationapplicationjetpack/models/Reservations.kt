@@ -4,6 +4,16 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
+
+/**
+ Room entities rapresent tables in the app's database. Used to update tha date stored in rows tables
+ and create new rows for insertion.
+ An entity class defines a table, each instance of this class rapresents a row in the database table.
+ The entity class has mapping to tell Room how it intends to present and intercat with the information
+ in the database (entritu class name = reservations)
+ For each entity class the app creates a database table to hold the reservations
+ Data classes are primarly used to hold data in Kotlin.
+ */
 @Entity(tableName = "reservations")
 data class Reservations(
 
@@ -17,3 +27,4 @@ data class Reservations(
     var people: Int,
 
 )
+

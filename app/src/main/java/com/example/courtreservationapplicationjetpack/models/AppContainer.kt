@@ -1,12 +1,16 @@
 package com.example.courtreservationapplicationjetpack.models
 
 import android.content.Context
+import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
+import com.example.courtreservationapplicationjetpack.models.courts.OfflineCourtRepository
 
 /**
  * App container for Dependency injection.
  */
 interface AppContainer {
     val reservationsRepository: ReservationsRepository
+
+    val courtRepository: CourtRepository
 }
 
 /**
@@ -18,6 +22,9 @@ class AppDataContainer(private val context: Context) : AppContainer {
      */
     override val reservationsRepository: ReservationsRepository by lazy {
         OfflineReservationsRepository(ReservationsDatabase.getDatabase(context).reservationsDao())
+    }
+    override val courtRepository: CourtRepository by lazy {
+        OfflineCourtRepository(ReservationsDatabase.getDatabase(context).courtDao())
     }
 }
 

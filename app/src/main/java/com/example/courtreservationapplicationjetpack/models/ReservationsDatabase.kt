@@ -4,11 +4,18 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.courtreservationapplicationjetpack.models.courts.Court
+import com.example.courtreservationapplicationjetpack.models.courts.CourtDao
 
-
-@Database(entities = [Reservations::class], version = 1, exportSchema = false)
+/**
+ * Database class is the database class that provides the app with instances
+ * of the DAOs associated with that database
+ */
+@Database(entities = [Reservations::class, Court::class], version = 1, exportSchema = false)
 abstract class ReservationsDatabase : RoomDatabase() {
     abstract fun reservationsDao(): ReservationsDao
+    abstract fun courtDao(): CourtDao
+
     companion object {
         @Volatile
         private var Instance: ReservationsDatabase? = null
