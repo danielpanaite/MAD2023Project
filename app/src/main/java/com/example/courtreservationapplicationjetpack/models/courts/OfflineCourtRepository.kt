@@ -10,7 +10,7 @@ class OfflineCourtRepository(private val courtDao: CourtDao) :
     CourtRepository {
     override fun getAllCourts(): Flow<List<Court>> = courtDao.getAllCourts()
 
-    override fun getSports(): Flow<List<Court>> = courtDao.getSports()
+    override fun getSports(): Flow<List<String>> = courtDao.getSports()
 
     override  fun getCourtsSport(sport: String) = courtDao.getCourtsSport(sport)
 

@@ -17,8 +17,8 @@ interface CourtDao {
     fun getCourtName(): String*/
 
     //prende tutti gli sport disponibili
-    @Query("SELECT sport from court")
-    fun getSports(): Flow<List<Court>>
+    @Query("SELECT DISTINCT sport from court")
+    fun getSports(): Flow<List<String>>
 
     //prendi tutti i campi di quello sport
     @Query("SELECT * from court WHERE sport = :sport")

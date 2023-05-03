@@ -16,7 +16,7 @@ interface CourtRepository {
     /**
      * Retrieve the sports from the given data source .
      */
-    fun getSports(): Flow<List<Court>>
+    fun getSports(): Flow<List<String>>
 
     /**
      * Retrieve all the courts of that specified sport

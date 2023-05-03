@@ -11,7 +11,7 @@ import com.example.courtreservationapplicationjetpack.models.courts.CourtDao
  * Database class is the database class that provides the app with instances
  * of the DAOs associated with that database
  */
-@Database(entities = [Reservations::class, Court::class], version = 1, exportSchema = false)
+@Database(entities = [Reservations::class, Court::class], version = 2, exportSchema = false)
 abstract class ReservationsDatabase : RoomDatabase() {
     abstract fun reservationsDao(): ReservationsDao
     abstract fun courtDao(): CourtDao

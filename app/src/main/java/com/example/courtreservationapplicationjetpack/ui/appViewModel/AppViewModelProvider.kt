@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
+import com.example.courtreservationapplicationjetpack.courts.AllSportsViewModel
 import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsViewModel
 import com.example.courtreservationapplicationjetpack.reservations.EditReservationViewModel
 
@@ -40,10 +41,16 @@ object AppViewModelProvider {
 
 
 
-                // Initializer for HomeViewModel MyReservationViewModel
+                // Initializer for  MyReservationViewModel
                 initializer {
                     MyReservationsViewModel(courtApplication().container.reservationsRepository)
                 }
+
+        // Initializer for AllSportsViewModel
+        initializer {
+            AllSportsViewModel(courtApplication().container.courtRepository)
+        }
+
 
 
     }

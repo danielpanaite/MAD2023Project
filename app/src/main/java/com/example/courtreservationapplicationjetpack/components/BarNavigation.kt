@@ -15,6 +15,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.courtreservationapplicationjetpack.courts.AllSportsDestination
 import com.example.courtreservationapplicationjetpack.home.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
@@ -39,7 +40,8 @@ fun BarNavigation(
 fun BottomBar(navController: NavHostController){
     val screens = listOf(
         MainScreenDestination,
-        ProfileDestination,
+        //ProfileDestination,
+        AllSportsDestination,
         MyReservationsDestination
     )
 

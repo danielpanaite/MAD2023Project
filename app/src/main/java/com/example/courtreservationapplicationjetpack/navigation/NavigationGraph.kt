@@ -9,6 +9,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.courtreservationapplicationjetpack.courts.AllSports
+import com.example.courtreservationapplicationjetpack.courts.AllSportsDestination
+import com.example.courtreservationapplicationjetpack.courts.CourtsAvailable
+import com.example.courtreservationapplicationjetpack.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.home.MainScreen
 import com.example.courtreservationapplicationjetpack.home.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.routes.EditProfile
@@ -110,6 +114,38 @@ fun NavigationGraph(
                 navController = navController,
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(
+            //route = Screens.EditReservation.route
+            route = AllSportsDestination.route,
+
+
+
+        ){
+            AllSports(
+                navController = navController,
+                //courtsAvailable = i campi disponibili per quello sport
+                //passargli la stringa dello sport
+                navigateToCourtsAvailable = { navController.navigate(CourtsAvailableDestination.route) },
+                onNavigateUp = { navController.navigateUp() }
+
+            )
+        }
+
+        composable(
+            //route = Screens.EditReservation.route
+            route = CourtsAvailableDestination.route,
+
+
+
+            ){
+            CourtsAvailable(
+                navController = navController,
+                //aggiungere = navigate to reserve a court  con calendario e tutto
+                //navigateToCourtsAvailable = { navController.navigate("${EditReservationDestination.route}/$it") },
+                //onNavigateUp = { navController.navigateUp() }
+
             )
         }
     }
