@@ -41,7 +41,6 @@ fun BottomBar(navController: NavHostController){
     val screens = listOf(
         MainScreenDestination,
         //ProfileDestination,
-        AllSportsDestination,
         MyReservationsDestination
     )
 

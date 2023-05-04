@@ -17,6 +17,8 @@ import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
+import com.example.courtreservationapplicationjetpack.courts.ReservationEntryBody
+
 
 object EditReservationDestination : NavigationDestination {
     override val route = "edit_reservation"

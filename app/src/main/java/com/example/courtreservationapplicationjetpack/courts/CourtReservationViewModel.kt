@@ -1,18 +1,18 @@
-package com.example.courtreservationapplicationjetpack.reservations
-
+package com.example.courtreservationapplicationjetpack.courts
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.courtreservationapplicationjetpack.models.Reservations
 import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
+import com.example.courtreservationapplicationjetpack.reservations.ReservationDetails
+import com.example.courtreservationapplicationjetpack.reservations.ReservationsUiState
+import com.example.courtreservationapplicationjetpack.reservations.toReservation
 
 /**
  * View Model to validate and insert items in the Room database.
  */
-/*
-class ReserveACourtViewModel(private val reservationsRepository: ReservationsRepository) : ViewModel() {
+class CourtReservationViewModel(private val reservationsRepository: ReservationsRepository) : ViewModel() {
 
     /**
      * Holds current reservation ui state
@@ -44,7 +44,10 @@ class ReserveACourtViewModel(private val reservationsRepository: ReservationsRep
     }
 
 }
-*/
+
+
+
+/*
 
 
 
@@ -98,7 +101,7 @@ fun Reservations.toReservationsUiState(isEntryValid: Boolean = false): Reservati
  */
 fun Reservations.toReservationDetails(): ReservationDetails = ReservationDetails(
 
-            id = id,
+    id = id,
     user = user.toString(),
     courtId = courtId.toString(),
     date = date,
@@ -107,5 +110,4 @@ fun Reservations.toReservationDetails(): ReservationDetails = ReservationDetails
     people = people.toString(),
 )
 
-
-
+*/

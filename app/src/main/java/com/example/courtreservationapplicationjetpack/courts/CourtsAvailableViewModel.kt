@@ -1,10 +1,13 @@
 package com.example.courtreservationapplicationjetpack.courts
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
 import com.example.courtreservationapplicationjetpack.reservations.EditReservationDestination
+import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsDestination
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -18,14 +21,16 @@ import kotlinx.coroutines.flow.stateIn
 /**
 * View Model to retrieve all reservations in the Room database.
 */
-class CourtsAvailableViewModel(courtRepository: CourtRepository) : ViewModel() {
+class CourtsAvailableViewModel(savedStateHandle: SavedStateHandle,
+                               private val courtRepository: CourtRepository,) : ViewModel() {
+
     /**
      * Holds my court ui state. The list of all court are retrieved from [CourtRepository] and mapped to
      * [courtsAvailableUiState]
      */
     //riprendere la stringa da passare a getCourtsSport
-    //private val sport: String = checkNotNull(savedStateHandle[navigateToCourtsAvailable.reservationIdArg])
-/*
+    private val sport: String = checkNotNull(savedStateHandle[CourtsAvailableDestination.sportArg])
+
     val courtsAvailableUiState: StateFlow<CourtsAvailableUiState> =
         courtRepository.getCourtsSport(sport).map { CourtsAvailableUiState(it) }
             .stateIn(
@@ -37,7 +42,7 @@ class CourtsAvailableViewModel(courtRepository: CourtRepository) : ViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
-    */
+
 
 }
 

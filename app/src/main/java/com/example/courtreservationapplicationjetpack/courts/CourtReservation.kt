@@ -1,6 +1,6 @@
-package com.example.courtreservationapplicationjetpack.reservations
+package com.example.courtreservationapplicationjetpack.courts
 
-/*
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,31 +27,34 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-//import com.example.courtreservationapplicationjetpack.navigation.Screens
-//import com.example.courtreservationapplicationjetpack.routes.MyReservationsBody
+import com.example.courtreservationapplicationjetpack.reservations.ReservationDetails
+import com.example.courtreservationapplicationjetpack.reservations.ReservationsUiState
 import kotlinx.coroutines.launch
 
-import java.util.Currency
-import java.util.Locale
-
-object ReserveACourtDestination : NavigationDestination {
-    override val route = "reserve_court"
-    override val titleRes = "Reserve"
-    override val icon = Icons.Default.Star
 
 
-}
+object CourtReservation : NavigationDestination {
+        override val route  = "court_reservation"
+        override val titleRes = "Court Reservation"
+        override val icon = Icons.Default.Star
+        const val courtArg = "courtArg"
+        val routeWithArgs = "$route/{$courtArg}"
+
+    }
+
+
+
 
 @ExperimentalMaterial3Api
 @Composable
-fun ReserveACourt(
+fun CourtReservation(
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     canNavigateBack: Boolean = true,
     //navigateToMyReservations: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: ReserveACourtViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: CourtReservationViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
@@ -64,7 +67,7 @@ fun ReserveACourt(
     ) {
 
 
-        
+
             innerPadding ->
         ReservationEntryBody(
             reservationsUiState = viewModel.reservationsUiState,
@@ -78,8 +81,8 @@ fun ReserveACourt(
             modifier = modifier.padding(innerPadding),
         )
     }
-    
-    }
+
+}
 
 
 
@@ -100,8 +103,8 @@ fun ReservationEntryBody(
     ){
         ReservationInputForm(reservationDetails = reservationsUiState.reservationDetails, onValueChange = onReservationValueChange)
         Button(onClick = onSaveClick,
-        enabled = reservationsUiState.isEntryValid,
-        modifier = Modifier.fillMaxWidth())
+            enabled = reservationsUiState.isEntryValid,
+            modifier = Modifier.fillMaxWidth())
         {
             Text(text = "save")
         }
@@ -118,6 +121,8 @@ fun ReservationInputForm(
 ){
     Column(modifier=modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp))
     {
+        //user id gia impostato da noi e anche court id perchè è quello che sceglie prima da eliminare questi primi due
+
         OutlinedTextField(
             value =reservationDetails.user ,
             onValueChange = {onValueChange(reservationDetails.copy(user = it))},
@@ -136,6 +141,8 @@ fun ReservationInputForm(
             enabled = enabled,
             singleLine = true
         )
+
+
         OutlinedTextField(
             value =reservationDetails.date ,
             onValueChange = {onValueChange(reservationDetails.copy(date = it))},
@@ -181,22 +188,21 @@ fun ReservationInputForm(
 @Preview(showBackground = true)
 @Composable
 private fun ItemEntryScreenPreview() {
-        ReservationEntryBody(
-            reservationsUiState = ReservationsUiState(
-                ReservationDetails(
-                    id = 1,
-                    user = "1",
-                    courtId = "2",
-                    date = "20-12-2023",
-                    slot = "11.30-12.30",
-                    additions = "",
-                    people = "2"
-                )
+    ReservationEntryBody(
+        reservationsUiState = ReservationsUiState(
+            ReservationDetails(
+                id = 1,
+                user = "1",
+                courtId = "2",
+                date = "20-12-2023",
+                slot = "11.30-12.30",
+                additions = "",
+                people = "2"
+            )
 
-            ),
-            onReservationValueChange = {},
-            onSaveClick = {}
-        )
+        ),
+        onReservationValueChange = {},
+        onSaveClick = {}
+    )
 
 }
-*/

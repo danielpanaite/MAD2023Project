@@ -41,7 +41,7 @@ object MainScreenDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun MainScreen(
-    navigateToReserveACourt: () -> Unit,
+    navigateToAllSports: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -58,7 +58,7 @@ fun MainScreen(
               navController = rememberNavController(),
               //navController = navController,
               modifier = modifier.padding(innerPadding),
-              navigateToReserveACourt = navigateToReserveACourt
+              navigateToAllSports = navigateToAllSports
           )
     }
 
@@ -69,12 +69,12 @@ fun MainScreen(
 private fun HomeBody(
     navController: NavController = rememberNavController(),
     modifier: Modifier = Modifier,
-    navigateToReserveACourt: () -> Unit
+    navigateToAllSports: () -> Unit
 ){
     Card(
         //onClick = {navController.navigate(route = Screens.ReserveACourt.route)},
         //onClick = navigateToReserveACourt,
-        onClick = navigateToReserveACourt,
+        onClick = navigateToAllSports,
 
 
         modifier = Modifier

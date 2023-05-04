@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.courtreservationapplicationjetpack.courts.AllSports
 import com.example.courtreservationapplicationjetpack.courts.AllSportsDestination
+import com.example.courtreservationapplicationjetpack.courts.CourtReservation
 import com.example.courtreservationapplicationjetpack.courts.CourtsAvailable
 import com.example.courtreservationapplicationjetpack.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.home.MainScreen
@@ -23,10 +24,8 @@ import com.example.courtreservationapplicationjetpack.routes.Profile
 import com.example.courtreservationapplicationjetpack.reservations.MyReservations
 import com.example.courtreservationapplicationjetpack.reservations.MyReservationsDestination
 import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsDestination
-import com.example.courtreservationapplicationjetpack.reservations.ReserveACourt
-import com.example.courtreservationapplicationjetpack.reservations.ReserveACourtDestination
-import com.example.courtreservationapplicationjetpack.routes.EditProfileDestination
-import com.example.courtreservationapplicationjetpack.routes.ProfileDestination
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,25 +35,22 @@ fun NavigationGraph(
 ){
     NavHost(
         navController = navController,
-        //startDestination = Screens.MainScreen.route,
         startDestination = MainScreenDestination.route,
         modifier = modifier
     ){
         composable(
-            //route = Screens.MainScreen.route
             route = MainScreenDestination.route
 
         ){
             MainScreen(
                 navController = navController,
-                //navigateToReserveACourt = { navController.navigate(route = Screens.ReserveACourt.route) }
-                navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
-
+                //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
+                navigateToAllSports = {navController.navigate(AllSportsDestination.route)}
             )
         }
 
+        /*
         composable(
-            //route = Screens.ReserveACourt.route
             route = ReserveACourtDestination.route
 
         ){
@@ -62,9 +58,9 @@ fun NavigationGraph(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
                 navController = navController
-                //navigateToMyReservations = { navController.navigate(Screens.MyReservations.route) }
             )
         }
+
 
         composable(
             route = EditProfileDestination.route
@@ -76,8 +72,9 @@ fun NavigationGraph(
         ){
             Profile(navController = navController, navigateToEditProfileDestination = { navController.navigate(EditProfileDestination.route) })
         }
+        */
+
         composable(
-            //route = Screens.MyReservations.route
             route = MyReservationsDestination.route
         ){
             MyReservations(
@@ -87,7 +84,6 @@ fun NavigationGraph(
             )
         }
         composable(
-            //route = Screens.ReservationDetails.route
             route = ReservationDetailsDestination.routeWithArgs,
             arguments = listOf(navArgument(ReservationDetailsDestination.reservationIdArg) {
                 type = NavType.IntType
@@ -95,14 +91,11 @@ fun NavigationGraph(
         ){
             ReservationDetails(
                 navController = navController,
-                //navigateToEditReservation = { navController.navigate(route = ("${Screens.EditReservation.route}/$it")) }
-                //navigateToEditReservation = { navController.navigate(route = ("${Screens.EditReservation.route}/$it")) }
                 navigateToEditReservation = { navController.navigate("${EditReservationDestination.route}/$it") },
                 navigateBack = { navController.navigateUp() }
             )
         }
         composable(
-            //route = Screens.EditReservation.route
             route = EditReservationDestination.routeWithArgs,
             arguments = listOf(navArgument(EditReservationDestination.reservationIdArg) {
                 type = NavType.IntType
@@ -117,32 +110,37 @@ fun NavigationGraph(
             )
         }
         composable(
-            //route = Screens.EditReservation.route
             route = AllSportsDestination.route
 
         ){
             AllSports(
                 navController = navController,
-                //courtsAvailable = i campi disponibili per quello sport
-                //passargli la stringa dello sport
-                navigateToCourtsAvailable = { navController.navigate(CourtsAvailableDestination.route) },
+                navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
                 onNavigateUp = { navController.navigateUp() }
-
+            )
+        }
+        composable(
+            route = CourtsAvailableDestination.routeWithArgs,
+            arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {
+                type = NavType.StringType
+            })
+            ){
+            CourtsAvailable(
+                navController = navController,
+                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
             )
         }
 
         composable(
-            //route = Screens.EditReservation.route
-            route = CourtsAvailableDestination.route,
-
-
-
-            ){
-            CourtsAvailable(
+            route = CourtReservation.routeWithArgs,
+            arguments = listOf(navArgument(CourtReservation.courtArg) {
+                type = NavType.IntType
+            })
+        ){
+            CourtReservation(
                 navController = navController,
-                //aggiungere = navigate to reserve a court  con calendario e tutto
-                //navigateToCourtsAvailable = { navController.navigate("${EditReservationDestination.route}/$it") },
-                //onNavigateUp = { navController.navigateUp() }
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
 
             )
         }

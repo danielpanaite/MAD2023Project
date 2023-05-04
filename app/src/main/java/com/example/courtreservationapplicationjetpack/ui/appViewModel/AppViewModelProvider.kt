@@ -8,10 +8,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.courts.AllSportsViewModel
+import com.example.courtreservationapplicationjetpack.courts.CourtReservationViewModel
+import com.example.courtreservationapplicationjetpack.courts.CourtsAvailableViewModel
 import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsViewModel
 import com.example.courtreservationapplicationjetpack.reservations.EditReservationViewModel
 
-import com.example.courtreservationapplicationjetpack.reservations.ReserveACourtViewModel
 import com.example.courtreservationapplicationjetpack.reservations.MyReservationsViewModel
 
 /**
@@ -34,21 +35,31 @@ object AppViewModelProvider {
                 courtApplication().container.reservationsRepository
             )
         }
+        /*
         // Initializer for RserveCourtViewModel
         initializer {
             ReserveACourtViewModel(courtApplication().container.reservationsRepository)
         }
+        */
 
-
-
-                // Initializer for  MyReservationViewModel
-                initializer {
-                    MyReservationsViewModel(courtApplication().container.reservationsRepository)
-                }
+        // Initializer for  MyReservationViewModel
+        initializer {
+            MyReservationsViewModel(courtApplication().container.reservationsRepository)
+        }
 
         // Initializer for AllSportsViewModel
         initializer {
             AllSportsViewModel(courtApplication().container.courtRepository)
+        }
+
+        // Initializer for CourtAvailableViewModel
+        initializer {
+            CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository)
+        }
+
+        // Initializer for CourtReservationViewModel
+        initializer {
+            CourtReservationViewModel(courtApplication().container.reservationsRepository)
         }
 
 
