@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -95,21 +96,26 @@ fun ReservationEntryBody(
     modifier: Modifier = Modifier
 ){
 
-    Column (
+    LazyColumn (
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ){
-        ReservationInputForm(reservationDetails = reservationsUiState.reservationDetails, onValueChange = onReservationValueChange)
-        Button(onClick = onSaveClick,
-            enabled = reservationsUiState.isEntryValid,
-            modifier = Modifier.fillMaxWidth())
-        {
-            Text(text = "save")
+        item {
+            ReservationInputForm(reservationDetails = reservationsUiState.reservationDetails, onValueChange = onReservationValueChange)
+        }
+        item {
+            Button(onClick = onSaveClick,
+                enabled = reservationsUiState.isEntryValid,
+                modifier = Modifier.fillMaxWidth())
+            {
+                Text(text = "save")
+            }
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
