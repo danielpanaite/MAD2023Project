@@ -1,8 +1,7 @@
-package com.example.courtreservationapplicationjetpack.models
+package com.example.courtreservationapplicationjetpack.models.reservations
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
 
 
 /**
@@ -14,11 +13,11 @@ import java.util.Date
  For each entity class the app creates a database table to hold the reservations
  Data classes are primarly used to hold data in Kotlin.
  */
-@Entity(tableName = "reservations")
-data class Reservations(
+@Entity(tableName = "reservation")
+data class Reservation(
 
     @PrimaryKey(autoGenerate = true)
-    var id: Int,
+    var id: Int?,
     var user: Int, //user id of the reservations
     var courtId: Int, // id del campo prenotato
     var date: String,

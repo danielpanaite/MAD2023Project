@@ -25,14 +25,14 @@ object AppViewModelProvider {
         initializer {
             EditReservationViewModel(
                 this.createSavedStateHandle(),
-                courtApplication().container.reservationsRepository
+                courtApplication().container.reservationRepository
             )
         }
         // Initializer for ReservationDetails View Model
         initializer {
             ReservationDetailsViewModel(
                 this.createSavedStateHandle(),
-                courtApplication().container.reservationsRepository
+                courtApplication().container.reservationRepository
             )
         }
         /*
@@ -44,7 +44,7 @@ object AppViewModelProvider {
 
         // Initializer for  MyReservationViewModel
         initializer {
-            MyReservationsViewModel(courtApplication().container.reservationsRepository)
+            MyReservationsViewModel(courtApplication().container.reservationRepository)
         }
 
         // Initializer for AllSportsViewModel
@@ -59,7 +59,7 @@ object AppViewModelProvider {
 
         // Initializer for CourtReservationViewModel
         initializer {
-            CourtReservationViewModel(courtApplication().container.reservationsRepository)
+            CourtReservationViewModel(courtApplication().container.reservationRepository)
         }
 
 

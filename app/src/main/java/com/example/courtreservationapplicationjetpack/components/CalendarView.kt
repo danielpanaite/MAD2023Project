@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.courtreservationapplicationjetpack.R
-import com.example.courtreservationapplicationjetpack.models.Reservations
+import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import com.example.courtreservationapplicationjetpack.ui.theme.GreyItemInactive
 import com.kizitonwose.calendar.compose.CalendarLayoutInfo
 import com.kizitonwose.calendar.compose.CalendarState
@@ -79,7 +79,7 @@ private val selectedItemColor: Color @Composable get() = MaterialTheme.colorSche
 private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 
 @Composable
-fun MonthCalendar(reservations: List<Reservations>) {
+fun MonthCalendar(reservations: List<Reservation>) {
     println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZz $reservations")
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -240,7 +240,7 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun LazyItemScope.FlightInformation(reservation: Reservations) {
+private fun LazyItemScope.FlightInformation(reservation: Reservation) {
     println("RESERV $reservation")
     Row(
         modifier = Modifier

@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.reservations
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -8,17 +7,17 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
+import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 
 
 /**
- * ViewModel to retrieve and update a reservation from the [ReservationsRepository]'s data source.
+ * ViewModel to retrieve and update a reservation from the [ReservationRepository]'s data source.
  */
 class EditReservationViewModel(
     savedStateHandle: SavedStateHandle,
-    private val reservationsRepository: ReservationsRepository
+    private val reservationRepository: ReservationRepository
 ) : ViewModel() {
 
     /**
@@ -31,7 +30,7 @@ class EditReservationViewModel(
 
     init {
         viewModelScope.launch {
-            reservationsUiState = reservationsRepository.getReservationStream(reservationId)
+            reservationsUiState = reservationRepository.getReservationStream(reservationId)
                 .filterNotNull()
                 .first()
                 .toReservationsUiState(true)
@@ -39,11 +38,11 @@ class EditReservationViewModel(
     }
 
     /**
-     * Update the reservation in the [ReservationsRepository]'s data source
+     * Update the reservation in the [ReservationRepository]'s data source
      */
     suspend fun updateReservation() {
         if (validateInput(reservationsUiState.reservationDetails)) {
-            reservationsRepository.updateReservation(reservationsUiState.reservationDetails.toReservation())
+            reservationRepository.updateReservation(reservationsUiState.reservationDetails.toReservation())
         }
     }
 

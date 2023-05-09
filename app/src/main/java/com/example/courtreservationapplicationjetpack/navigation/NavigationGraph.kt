@@ -100,8 +100,6 @@ fun NavigationGraph(
             arguments = listOf(navArgument(EditReservationDestination.reservationIdArg) {
                 type = NavType.IntType
             })
-
-
         ){
             EditReservation(
                 navController = navController,

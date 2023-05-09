@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.models
+package com.example.courtreservationapplicationjetpack.models.reservations
 
 
 import androidx.room.Dao
@@ -21,10 +21,10 @@ import kotlinx.coroutines.flow.Flow
  * Room generates an implementation of this class at compile time.
  */
 @Dao
-interface ReservationsDao {
+interface ReservationDao {
 
-    @Query("SELECT * from reservations ORDER BY id ASC")
-    fun getAllReservations(): Flow<List<Reservations>>
+    @Query("SELECT * from reservation ORDER BY id ASC")
+    fun getAllReservations(): Flow<List<Reservation>>
 
     /**
      * query select all columns from the reservations, where the id matches the :id argument.
@@ -33,8 +33,8 @@ interface ReservationsDao {
      * which means we only need to explicity get the data once.
      * Because of the Flow return type, Room also runs the wury on the background thread
      */
-    @Query("SELECT * from reservations WHERE id = :id")
-    fun getReservation(id: Int): Flow<Reservations>
+    @Query("SELECT * from reservation WHERE id = :id")
+    fun getReservation(id: Int): Flow<Reservation>
 
     /**
      * mark the function with the suspend keyword to let it run on a separate thread.
@@ -44,11 +44,11 @@ interface ReservationsDao {
      * the conflict strategy to ignore
      */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(reservation: Reservations)
+    suspend fun insert(reservation: Reservation)
 
     @Update
-    suspend fun update(reservation: Reservations)
+    suspend fun update(reservation: Reservation)
 
     @Delete
-    suspend fun delete(reservation: Reservations)
+    suspend fun delete(reservation: Reservation)
 }

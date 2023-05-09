@@ -2,11 +2,7 @@ package com.example.courtreservationapplicationjetpack.courts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.courtreservationapplicationjetpack.models.Reservations
-import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
-import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
-import com.example.courtreservationapplicationjetpack.reservations.ReservationsUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map

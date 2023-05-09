@@ -3,19 +3,16 @@ package com.example.courtreservationapplicationjetpack.reservations
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
+import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-
-
 
 
 /**
- * ViewModel to retrieve, update and delete an item from the [ReservationsRepository]'s data source.
+ * ViewModel to retrieve, update and delete an item from the [ReservationRepository]'s data source.
  */
 /*
 class DetailsReservationViewModel(
@@ -34,17 +31,17 @@ class DetailsReservationViewModel(
 */
 class ReservationDetailsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val reservationsRepository: ReservationsRepository,
+    private val reservationRepository: ReservationRepository,
 ) : ViewModel() {
 
     private val reservationId: Int = checkNotNull(savedStateHandle[ReservationDetailsDestination.reservationIdArg])
 
     /**
-     * Holds the reservations details ui state. The data is retrieved from [ReservationsRepository] and mapped to
+     * Holds the reservations details ui state. The data is retrieved from [ReservationRepository] and mapped to
      * the UI state.
      */
     val uiState: StateFlow<ReservationDetailsUiState> =
-        reservationsRepository.getReservationStream(reservationId)
+        reservationRepository.getReservationStream(reservationId)
             .filterNotNull()
             .map {
                 ReservationDetailsUiState(reservationDetails = it.toReservationDetails())
@@ -57,10 +54,10 @@ class ReservationDetailsViewModel(
 
 
     /**
-     * Deletes the reservation from the [ReservationsRepository]'s data source.
+     * Deletes the reservation from the [ReservationRepository]'s data source.
      */
     suspend fun deleteReservation() {
-        reservationsRepository.deleteReservation(uiState.value.reservationDetails.toReservation())
+        reservationRepository.deleteReservation(uiState.value.reservationDetails.toReservation())
     }
 
     companion object {

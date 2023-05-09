@@ -6,23 +6,25 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtDao
+import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
+import com.example.courtreservationapplicationjetpack.models.reservations.ReservationDao
 
 /**
  * Database class is the database class that provides the app with instances
  * of the DAOs associated with that database
  */
-@Database(entities = [Reservations::class, Court::class], version = 2, exportSchema = false)
-abstract class ReservationsDatabase : RoomDatabase() {
-    abstract fun reservationsDao(): ReservationsDao
+@Database(entities = [Reservation::class, Court::class], version = 2, exportSchema = false)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun reservationsDao(): ReservationDao
     abstract fun courtDao(): CourtDao
 
     companion object {
         @Volatile
-        private var Instance: ReservationsDatabase? = null
+        private var Instance: AppDatabase? = null
 
-        fun getDatabase(context: Context): ReservationsDatabase {
+        fun getDatabase(context: Context): AppDatabase {
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, ReservationsDatabase::class.java, "fields")
+                Room.databaseBuilder(context, AppDatabase::class.java, "fields")
                     // Setting this option in your app's database builder means that Room
                     // permanently deletes all data from the tables in your database when it
                     // attempts to perform a migration with no defined migration path.

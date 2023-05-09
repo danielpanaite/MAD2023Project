@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.courts
 
-import com.example.courtreservationapplicationjetpack.models.Reservations
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 
 

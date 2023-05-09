@@ -74,7 +74,7 @@ fun ReservationDetails(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navigateToEditReservation(uiState.value.reservationDetails.id) },
+                onClick = { navigateToEditReservation(uiState.value.reservationDetails.id!!) },
                 modifier = Modifier.navigationBarsPadding()
             ) {
                 Icon(

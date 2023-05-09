@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
+import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import com.example.courtreservationapplicationjetpack.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.reservations.ReservationsUiState
 import com.example.courtreservationapplicationjetpack.reservations.toReservation
@@ -12,7 +12,7 @@ import com.example.courtreservationapplicationjetpack.reservations.toReservation
 /**
  * View Model to validate and insert items in the Room database.
  */
-class CourtReservationViewModel(private val reservationsRepository: ReservationsRepository) : ViewModel() {
+class CourtReservationViewModel(private val reservationRepository: ReservationRepository) : ViewModel() {
 
     /**
      * Holds current reservation ui state
@@ -31,7 +31,7 @@ class CourtReservationViewModel(private val reservationsRepository: Reservations
 
     suspend fun saveReservation() {
         if (validateInput()) {
-            reservationsRepository.insertReservation(reservationsUiState.reservationDetails.toReservation())
+            reservationRepository.insertReservation(reservationsUiState.reservationDetails.toReservation())
         }
     }
 

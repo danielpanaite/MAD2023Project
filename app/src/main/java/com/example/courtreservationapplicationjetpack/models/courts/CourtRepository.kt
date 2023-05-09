@@ -1,11 +1,11 @@
 package com.example.courtreservationapplicationjetpack.models.courts
 
-import com.example.courtreservationapplicationjetpack.models.Reservations
+import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import kotlinx.coroutines.flow.Flow
 
 
 /**
- * Repository that provides insert, update, delete, and retrieve of [Reservations] from a given data source.
+ * Repository that provides insert, update, delete, and retrieve of [Reservation] from a given data source.
  */
 interface CourtRepository {
     /**

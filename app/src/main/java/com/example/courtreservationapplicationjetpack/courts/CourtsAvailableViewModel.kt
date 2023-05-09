@@ -3,11 +3,8 @@ package com.example.courtreservationapplicationjetpack.courts
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.courtreservationapplicationjetpack.models.ReservationsRepository
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
-import com.example.courtreservationapplicationjetpack.reservations.EditReservationDestination
-import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsDestination
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
