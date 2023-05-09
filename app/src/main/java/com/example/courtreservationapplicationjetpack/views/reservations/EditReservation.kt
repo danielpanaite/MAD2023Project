@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.reservations
+package com.example.courtreservationapplicationjetpack.views.reservations
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,7 +17,7 @@ import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
-import com.example.courtreservationapplicationjetpack.courts.ReservationEntryBody
+import com.example.courtreservationapplicationjetpack.views.courts.ReservationEntryBody
 
 
 object EditReservationDestination : NavigationDestination {

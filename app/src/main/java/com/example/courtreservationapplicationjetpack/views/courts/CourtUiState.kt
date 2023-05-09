@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.courts
+package com.example.courtreservationapplicationjetpack.views.courts
 
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 

@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.reservations
+package com.example.courtreservationapplicationjetpack.views.reservations
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle

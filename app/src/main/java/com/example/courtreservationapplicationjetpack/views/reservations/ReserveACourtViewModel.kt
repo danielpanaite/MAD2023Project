@@ -1,18 +1,13 @@
-package com.example.courtreservationapplicationjetpack.courts
+package com.example.courtreservationapplicationjetpack.views.reservations
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
-import com.example.courtreservationapplicationjetpack.reservations.ReservationDetails
-import com.example.courtreservationapplicationjetpack.reservations.ReservationsUiState
-import com.example.courtreservationapplicationjetpack.reservations.toReservation
+
+import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 
 /**
  * View Model to validate and insert items in the Room database.
  */
-class CourtReservationViewModel(private val reservationRepository: ReservationRepository) : ViewModel() {
+/*
+class ReserveACourtViewModel(private val reservationsRepository: ReservationsRepository) : ViewModel() {
 
     /**
      * Holds current reservation ui state
@@ -31,7 +26,7 @@ class CourtReservationViewModel(private val reservationRepository: ReservationRe
 
     suspend fun saveReservation() {
         if (validateInput()) {
-            reservationRepository.insertReservation(reservationsUiState.reservationDetails.toReservation())
+            reservationsRepository.insertReservation(reservationsUiState.reservationDetails.toReservation())
         }
     }
 
@@ -44,10 +39,7 @@ class CourtReservationViewModel(private val reservationRepository: ReservationRe
     }
 
 }
-
-
-
-/*
+*/
 
 
 
@@ -60,7 +52,7 @@ data class ReservationsUiState(
 )
 
 data class ReservationDetails(
-    val id: Int = 0,
+    val id: Int? = 0,
     val user: String = "",
     val courtId: String = "",
     val date: String = "",
@@ -72,11 +64,11 @@ data class ReservationDetails(
 
 
 /**
- * Extension function to convert [ReservationsUiState] to [Reservations]. If the value of [ReservationsUiState.additions] is
+ * Extension function to convert [ReservationsUiState] to [Reservation]. If the value of [ReservationsUiState.additions] is
  * not a valid [String], then the addittions will be set to empty. Similarly if the value of
  * [peopleUiState] is not a valid [Int], then the quantity will be set to 2
  */
-fun ReservationDetails.toReservation(): Reservations = Reservations(
+fun ReservationDetails.toReservation(): Reservation = Reservation(
     id = id,
     user = user.toIntOrNull() ?: 0,
     courtId = courtId.toIntOrNull() ?:0,
@@ -89,9 +81,9 @@ fun ReservationDetails.toReservation(): Reservations = Reservations(
 
 
 /**
- * Extension function to convert [Reservations] to [ReservationsUiState]
+ * Extension function to convert [Reservation] to [ReservationsUiState]
  */
-fun Reservations.toReservationsUiState(isEntryValid: Boolean = false): ReservationsUiState = ReservationsUiState(
+fun Reservation.toReservationsUiState(isEntryValid: Boolean = false): ReservationsUiState = ReservationsUiState(
     reservationDetails = this.toReservationDetails(),
     isEntryValid = isEntryValid
 )
@@ -99,8 +91,7 @@ fun Reservations.toReservationsUiState(isEntryValid: Boolean = false): Reservati
 /**
  * Extension function to convert [Item] to [ItemDetails]
  */
-fun Reservations.toReservationDetails(): ReservationDetails = ReservationDetails(
-
+fun Reservation.toReservationDetails(): ReservationDetails = ReservationDetails(
     id = id,
     user = user.toString(),
     courtId = courtId.toString(),
@@ -110,4 +101,5 @@ fun Reservations.toReservationDetails(): ReservationDetails = ReservationDetails
     people = people.toString(),
 )
 
-*/
+
+

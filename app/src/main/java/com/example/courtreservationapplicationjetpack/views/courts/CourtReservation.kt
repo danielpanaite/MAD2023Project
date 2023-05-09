@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.courts
+package com.example.courtreservationapplicationjetpack.views.courts
 
 
 import androidx.compose.foundation.layout.Arrangement
@@ -28,8 +28,8 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.reservations.ReservationDetails
-import com.example.courtreservationapplicationjetpack.reservations.ReservationsUiState
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationsUiState
 import kotlinx.coroutines.launch
 
 

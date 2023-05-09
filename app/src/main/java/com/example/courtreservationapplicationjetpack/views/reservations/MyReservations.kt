@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.reservations
+package com.example.courtreservationapplicationjetpack.views.reservations
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.home
+package com.example.courtreservationapplicationjetpack.views
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable

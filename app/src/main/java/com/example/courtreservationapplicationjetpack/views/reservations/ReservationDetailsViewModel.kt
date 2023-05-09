@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.reservations
+package com.example.courtreservationapplicationjetpack.views.reservations
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

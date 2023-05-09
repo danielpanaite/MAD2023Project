@@ -7,13 +7,13 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
-import com.example.courtreservationapplicationjetpack.courts.AllSportsViewModel
-import com.example.courtreservationapplicationjetpack.courts.CourtReservationViewModel
-import com.example.courtreservationapplicationjetpack.courts.CourtsAvailableViewModel
-import com.example.courtreservationapplicationjetpack.reservations.ReservationDetailsViewModel
-import com.example.courtreservationapplicationjetpack.reservations.EditReservationViewModel
+import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
+import com.example.courtreservationapplicationjetpack.views.courts.CourtReservationViewModel
+import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
+import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
 
-import com.example.courtreservationapplicationjetpack.reservations.MyReservationsViewModel
+import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire Court app

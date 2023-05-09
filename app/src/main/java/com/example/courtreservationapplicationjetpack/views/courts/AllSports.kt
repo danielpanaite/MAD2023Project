@@ -1,4 +1,4 @@
-package com.example.courtreservationapplicationjetpack.courts
+package com.example.courtreservationapplicationjetpack.views.courts
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
