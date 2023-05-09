@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.Icons.Default
 import androidx.compose.material.icons.filled.Home
 
 import androidx.compose.material3.*
@@ -26,6 +25,8 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.components.MonthCalendar
+import com.example.courtreservationapplicationjetpack.models.Reservations
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 
 //import com.example.courtreservationapplicationjetpack.navigation.Screens
@@ -41,7 +42,7 @@ object MainScreenDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun MainScreen(
-    navigateToAllSports: () -> Unit,
+    navigateToReserveACourt: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -58,7 +59,7 @@ fun MainScreen(
               navController = rememberNavController(),
               //navController = navController,
               modifier = modifier.padding(innerPadding),
-              navigateToAllSports = navigateToAllSports
+              navigateToReserveACourt = navigateToReserveACourt
           )
     }
 
@@ -69,12 +70,12 @@ fun MainScreen(
 private fun HomeBody(
     navController: NavController = rememberNavController(),
     modifier: Modifier = Modifier,
-    navigateToAllSports: () -> Unit
+    navigateToReserveACourt: () -> Unit
 ){
     Card(
         //onClick = {navController.navigate(route = Screens.ReserveACourt.route)},
         //onClick = navigateToReserveACourt,
-        onClick = navigateToAllSports,
+        onClick = navigateToReserveACourt,
 
 
         modifier = Modifier
