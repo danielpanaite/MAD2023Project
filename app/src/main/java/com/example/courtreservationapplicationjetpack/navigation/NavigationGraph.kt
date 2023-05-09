@@ -124,7 +124,7 @@ fun NavigationGraph(
             arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {
                 type = NavType.StringType
             })
-            ){
+        ){
             CourtsAvailable(
                 navController = navController,
                 navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
