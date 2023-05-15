@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.views.reservations
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +32,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.courtreservationapplicationjetpack.components.MonthCalendar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 
@@ -76,9 +75,9 @@ fun MyReservations(
 
 @Composable
 fun MyReservationsBody(
+    modifier: Modifier = Modifier,
     reservationList: List<Reservation>,
     navController: NavController = rememberNavController(),
-    modifier: Modifier = Modifier,
     //navigateToDetailsReservation: () -> Unit
     onReservationClick: (Int) -> Unit,
 
@@ -90,19 +89,16 @@ fun MyReservationsBody(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ReservationsListHeader()
-        Divider()
         if (reservationList.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_reservations_description),
-                style = MaterialTheme.typography.bodySmall //trovare subtitle
+                style = MaterialTheme.typography.bodySmall
             )
         } else {
-            ReservationsList(reservationList = reservationList,
-                //navigateToDetailsReservation = navigateToDetailsReservation
-                onReservationClick = { onReservationClick(it.id!!) }
-
-        )
+            MonthCalendar(reservations = reservationList)
+//            ReservationsList(reservationList = reservationList,
+//                //navigateToDetailsReservation = navigateToDetailsReservation
+//                onReservationClick = { onReservationClick(it.id!!) }
         }
     }
 }
@@ -122,19 +118,6 @@ private fun ReservationsList(
                 onReservationClick = onReservationClick
             )
             Divider()
-        }
-    }
-}
-
-@Composable
-private fun ReservationsListHeader(modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        headerList.forEach {
-            Text(
-                text = stringResource(it.headerStringId),
-                modifier = Modifier.weight(it.weight),
-                style = MaterialTheme.typography.bodyMedium //h6
-            )
         }
     }
 }
@@ -166,21 +149,6 @@ private fun ReservationItem(
     }
 }
 
-private data class ReservationsHeader(@StringRes val headerStringId: Int, val weight: Float)
-
-private val headerList = listOf(
-    ReservationsHeader(headerStringId = R.string.reservation, weight = 0.7f),
-    ReservationsHeader(headerStringId = R.string.user_id, weight = 0.7f),
-    ReservationsHeader(headerStringId = R.string.court_id, weight = 0.7f),
-    ReservationsHeader(headerStringId = R.string.date, weight = 0.7f),
-    ReservationsHeader(headerStringId = R.string.slot, weight = 0.7f),
-    ReservationsHeader(headerStringId = R.string.additions, weight = 0.7f),
-    ReservationsHeader(headerStringId = R.string.people, weight = 0.7f),
-)
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun MyReservationsPreview() {

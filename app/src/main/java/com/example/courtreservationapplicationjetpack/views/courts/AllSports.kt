@@ -47,11 +47,7 @@ fun AllSports(
     navigateToCourtsAvailable: (String) -> Unit,
     //cercare di riprendere uesta stringa per prendere tutti i campi di quello sport
     onNavigateUp: () -> Unit,
-
     viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
-
-
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
     //val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
