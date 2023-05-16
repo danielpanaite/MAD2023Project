@@ -132,6 +132,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     // Stampa il risultato della query per lo sport "tennis"
 
+
     CalendarDialog(
         state = calendarState,
         config = CalendarConfig(
