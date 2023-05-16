@@ -15,13 +15,11 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
 import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
-//import com.example.courtreservationapplicationjetpack.navigation.Screens
-import com.example.courtreservationapplicationjetpack.routes.ProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,7 +38,7 @@ fun BarNavigation(
 fun BottomBar(navController: NavHostController){
     val screens = listOf(
         MainScreenDestination,
-        //ProfileDestination,
+        ProfileDestination,
         MyReservationsDestination
     )
 

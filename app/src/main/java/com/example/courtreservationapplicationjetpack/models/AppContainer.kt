@@ -5,6 +5,10 @@ import com.example.courtreservationapplicationjetpack.models.courts.CourtReposit
 import com.example.courtreservationapplicationjetpack.models.courts.OfflineCourtRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.OfflineReservationRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
+import com.example.courtreservationapplicationjetpack.models.sport.OfflineSportRepository
+import com.example.courtreservationapplicationjetpack.models.sport.SportRepository
+import com.example.courtreservationapplicationjetpack.models.user.OfflineUserRepository
+import com.example.courtreservationapplicationjetpack.models.user.UserRepository
 
 /**
  * App container for Dependency injection.
@@ -13,6 +17,10 @@ interface AppContainer {
     val reservationRepository: ReservationRepository
 
     val courtRepository: CourtRepository
+
+    val userRepository: UserRepository
+
+    val sportRepository: SportRepository
 }
 
 /**
@@ -27,6 +35,14 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val courtRepository: CourtRepository by lazy {
         OfflineCourtRepository(AppDatabase.getDatabase(context).courtDao())
+    }
+
+    override val userRepository: UserRepository by lazy {
+        OfflineUserRepository(AppDatabase.getDatabase(context).userDao())
+    }
+
+    override val sportRepository: SportRepository by lazy {
+        OfflineSportRepository(AppDatabase.getDatabase(context).sportDao())
     }
 }
 

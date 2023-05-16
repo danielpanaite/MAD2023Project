@@ -8,15 +8,24 @@ import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtDao
 import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationDao
+import com.example.courtreservationapplicationjetpack.models.sport.SportDao
+import com.example.courtreservationapplicationjetpack.models.user.User
+import com.example.courtreservationapplicationjetpack.models.user.UserDao
+import com.example.courtreservationapplicationjetpack.models.sport.Sport
+
 
 /**
  * Database class is the database class that provides the app with instances
  * of the DAOs associated with that database
  */
-@Database(entities = [Reservation::class, Court::class], version = 2, exportSchema = false)
+@Database(entities = [Reservation::class, Court::class, User::class, Sport::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun reservationsDao(): ReservationDao
     abstract fun courtDao(): CourtDao
+
+    abstract fun userDao(): UserDao
+
+    abstract fun sportDao(): SportDao
 
     companion object {
         @Volatile
@@ -31,7 +40,6 @@ abstract class AppDatabase : RoomDatabase() {
                     .fallbackToDestructiveMigration()
                     .createFromAsset("database/fields.db")
                     .build()
-
                     .also { Instance = it }
             }
         }
