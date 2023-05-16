@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,8 +39,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -94,7 +97,9 @@ fun MonthCalendar(
         }
     }
     //main column that contains the whole page
-    Column( modifier = Modifier.fillMaxSize().background(pageBackgroundColor)) {
+    Column( modifier = Modifier
+        .fillMaxSize()
+        .background(pageBackgroundColor)) {
         val state = rememberCalendarState(
             startMonth = startMonth,
             endMonth = endMonth,
@@ -248,16 +253,24 @@ private fun LazyItemScope.FlightInformation(reservation: Reservation) {
                 modifier = Modifier
                     .background(color = colorResource(R.color.teal_700))
                     .fillParentMaxWidth(1 / 7f)
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = reservation.slot,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 17.sp,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onTertiary
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                    Text(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        text = reservation.slot,
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onTertiary
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.baseline_sports_tennis_24),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(Color.White)
+                    )
+                }
             }
         }
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
