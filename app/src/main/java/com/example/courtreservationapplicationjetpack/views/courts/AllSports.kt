@@ -152,7 +152,7 @@ fun SportsBody(
 //                )
 //            }
 //        }
-        PrenotaCampo()
+        PrenotaCampo(sportsList = sportsList)
     }
 
     @Composable
@@ -198,7 +198,7 @@ fun SportsBody(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo() {
+fun PrenotaCampo(sportsList: List<String>) {
     val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
     val calendarState = rememberUseCaseState()
     val disabledDates = remember {
@@ -212,7 +212,9 @@ fun PrenotaCampo() {
     val future = now.plusYears(5) // aggiunge 5 anni alla data odierna
 
     val dateRange = now..future //creo closedRange per boundary
-    OptionSample3 {
+    val optionState = rememberUseCaseState()
+
+    OptionSample3(sportList = sportsList, optionState = optionState){
         Log.d("Test", "SportPressed")
     }
     CalendarDialog(
@@ -258,7 +260,7 @@ fun PrenotaCampo() {
                 ) {
                     // Bottone 1
                     OutlinedButton(
-                        onClick = {},
+                        onClick = {optionState.show()},
                         modifier = Modifier.weight(2f),
                         border = BorderStroke(1.dp, Color.Black),
                         shape = RoundedCornerShape(25),
