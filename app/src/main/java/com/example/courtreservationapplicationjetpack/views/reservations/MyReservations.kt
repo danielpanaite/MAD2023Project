@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
@@ -49,21 +48,16 @@ fun MyReservations(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
-
 ) {
     val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
     Scaffold(
-        topBar = {
-            CourtTopAppBar(canNavigateBack = false)
-        },
+        topBar = { CourtTopAppBar(canNavigateBack = false) },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
-
     ) {
             innerPadding ->
         MyReservationsBody(
             reservationList = myReservationsUiState.reservationList,
-            navController = rememberNavController(),
+            //navController = rememberNavController(),
             modifier = modifier.padding(innerPadding),
             onReservationClick = navigateToReservationDetailsDestination,
         )
@@ -77,11 +71,9 @@ fun MyReservations(
 fun MyReservationsBody(
     modifier: Modifier = Modifier,
     reservationList: List<Reservation>,
-    navController: NavController = rememberNavController(),
+    //navController: NavController = rememberNavController(),
     //navigateToDetailsReservation: () -> Unit
     onReservationClick: (Int) -> Unit,
-
-
     ){
     Column(
         modifier = modifier
@@ -95,7 +87,7 @@ fun MyReservationsBody(
                 style = MaterialTheme.typography.bodySmall
             )
         } else {
-            MonthCalendar(reservations = reservationList)
+            MonthCalendar(reservations = reservationList, onReservationClick = { onReservationClick(it.id!!) })
 //            ReservationsList(reservationList = reservationList,
 //                //navigateToDetailsReservation = navigateToDetailsReservation
 //                onReservationClick = { onReservationClick(it.id!!) }
