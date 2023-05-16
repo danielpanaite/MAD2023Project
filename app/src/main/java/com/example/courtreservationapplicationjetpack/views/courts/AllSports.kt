@@ -101,29 +101,33 @@ fun AllSports(
     //cercare di riprendere uesta stringa per prendere tutti i campi di quello sport
     onNavigateUp: () -> Unit,
 
-    viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
-
-
+    viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
-    //val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
+    val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
+
+    // Imposta lo sport su "tennis"
+    courtsViewModel.setSport("tennis")
+
+    // Stampa il risultato della query per lo sport "tennis"
+    println(courtsAvailableUiState.courtsAvailableList)
+
     Scaffold(
         topBar = {
-           // CourtTopAppBar(canNavigateBack = false)
+            // CourtTopAppBar(canNavigateBack = false)
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
-
-    ) {
-            innerPadding ->
+    ) { innerPadding ->
         SportsBody(
             sportsList = allSportsUiState.sportsList,
             modifier = modifier.padding(innerPadding),
             onSportClick = navigateToCourtsAvailable,
         )
     }
-
 }
+
+
 @Composable
 fun SportsBody(
     sportsList: List<String>,
