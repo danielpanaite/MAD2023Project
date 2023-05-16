@@ -2,7 +2,6 @@ package com.example.courtreservationapplicationjetpack.views.courts
 
 import OptionSample3
 import android.annotation.SuppressLint
-import android.media.Image
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -26,13 +25,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,14 +37,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
@@ -58,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -67,7 +61,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -107,13 +100,7 @@ fun AllSports(
     courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
-    val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
-    // Imposta lo sport su "tennis"
-    courtsViewModel.setSport("tennis")
-
-    // Stampa il risultato della query per lo sport "tennis"
-    println(courtsAvailableUiState.courtsAvailableList)
 
     Scaffold(
         topBar = {
@@ -121,39 +108,36 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-        PrenotaCampo(sportsList = allSportsUiState.sportsList)
+        PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>) {
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel) {
     val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
+    val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
-    val disabledDates = remember {
-        val today = LocalDate.now()
-        val startDate = LocalDate.of(1980, 1, 1)
-        generateSequence(today.minusDays(1)) { it.minusDays(1) }
-            .takeWhile { it >= startDate }
-            .toMutableList()
-    }
     val now = LocalDate.now() // ottiene la data odierna
     val future = now.plusYears(5) // aggiunge 5 anni alla data odierna
 
     val dateRange = now..future //creo closedRange per boundary
     val optionState = rememberUseCaseState()
+    val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
-    OptionSample3(sportList = sportsList, optionState = optionState){
-        Log.d("Test", "SportPressed")
-    }
+    OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
+    // Imposta lo sport su pickedSport
+    courtsViewModel.setSport(pickedSport)
+
+    // Stampa il risultato della query per lo sport "tennis"
+
     CalendarDialog(
         state = calendarState,
         config = CalendarConfig(
             monthSelection = true,
             yearSelection = true,
             style = CalendarStyle.MONTH,
-            disabledDates = disabledDates,
             boundary = dateRange
         ),
         selection = CalendarSelection.Date { date ->
@@ -209,7 +193,7 @@ fun PrenotaCampo(sportsList: List<String>) {
                                 modifier = Modifier.size(24.dp)
                             )
                             Text(
-                                text = "Calcio a 5",
+                                text = pickedSport,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Start,
@@ -274,51 +258,53 @@ fun PrenotaCampo(sportsList: List<String>) {
                 onRefresh = viewModel2::loadStuff,)
             {
                 LazyColumn(content = {
-                    items(10){_ ->
-                        Box(modifier = Modifier.aspectRatio(1.5f)) {
-                            CoilImage(
-                                modifier = Modifier
-                                    .shadow(10.dp, RoundedCornerShape(0.dp))
-                                    .fillMaxSize()
-                                    .height(100.dp))
-                            Text(
-                                text = "Campo da calcio - Torino",
-                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
-                                    color = Color.White
-                                ),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 26.sp,
-                                textAlign = TextAlign.Start,
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(16.dp)
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp)
-                        ) {
-                            Column {
-                                Text(
-                                    text = "433m - Torino (cittá metropolitana di Torino)",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-                                val hours = listOf("8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00")
-                                HourButtons(hours = hours)
-                                Box(
+                    items(courtsAvailableUiState.courtsAvailableList.size){_ ->
+                        courtsAvailableUiState.courtsAvailableList.forEach {
+                            Box(modifier = Modifier.aspectRatio(1.5f)) {
+                                CoilImage(
                                     modifier = Modifier
-                                        .size(16.dp)
-                                        .background(Color.White)
-                                        .shadow(10.dp, shape = RoundedCornerShape(8.dp))
-                                ) {}
+                                        .shadow(10.dp, RoundedCornerShape(0.dp))
+                                        .fillMaxSize()
+                                        .height(100.dp),
+                                    sport = it.sport)
+                                Text(
+                                    text = it.name,
+                                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
+                                        color = Color.White
+                                    ),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 26.sp,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(16.dp)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(0.dp)
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "433m - Torino (cittá metropolitana di Torino)",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                    val hours = listOf("8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00")
+                                    HourButtons(hours = hours)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .background(Color.White)
+                                            .shadow(10.dp, shape = RoundedCornerShape(8.dp))
+                                    ) {}
 
 
+                                }
                             }
                         }
-
                     }
                 })
             }
@@ -369,12 +355,18 @@ fun HourButtons(hours: List<String>) {
 }
 
 @Composable
-fun CoilImage(modifier: Modifier = Modifier){
-    Box(modifier = modifier
-    ){
+fun CoilImage(modifier: Modifier = Modifier, sport: String) {
+    val imageUrl = when (sport) {
+        "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
+        "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+        "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
+    }
+
+    Box(modifier = modifier) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                .data(imageUrl)
                 .crossfade(true)
                 .build(),
             placeholder = painterResource(R.drawable.placeholder),
@@ -396,4 +388,5 @@ fun CoilImage(modifier: Modifier = Modifier){
         )
     }
 }
+
 
