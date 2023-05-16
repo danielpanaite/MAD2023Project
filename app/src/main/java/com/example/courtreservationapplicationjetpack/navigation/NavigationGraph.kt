@@ -16,11 +16,15 @@ import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailab
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.views.MainScreen
 import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
-import com.example.courtreservationapplicationjetpack.routes.EditProfile
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
-import com.example.courtreservationapplicationjetpack.routes.Profile
+import com.example.courtreservationapplicationjetpack.views.profile.Profile
+import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
+import com.example.courtreservationapplicationjetpack.views.profile.EditProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
+import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservations
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
@@ -61,21 +65,36 @@ fun NavigationGraph(
             )
         }
 
+         */
 
         composable(
-            route = EditProfileDestination.route
+            route = EditProfileDestination.routeWithArgs,
+            arguments = listOf(navArgument(EditProfileDestination.profileIdArg) {
+                type = NavType.IntType
+            })
         ){
-            EditProfile()
+            EditProfile(
+                navController = navController,
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
         }
         composable(
             route = ProfileDestination.route
         ){
-            Profile(navController = navController, navigateToEditProfileDestination = { navController.navigate(EditProfileDestination.route) })
+            Profile(navController = navController,
+                navigateToEditProfileDestination = { navController.navigate("${EditProfileDestination.route}/${it}") },
+                navigateBack = { navController.navigateUp() },
+                navigateToSportPreferencesDestination = {navController.navigate(SportPreferencesDestination.route)},
+            )
+
         }
-        */
+
 
         composable(
             route = MyReservationsDestination.route
+
+
         ){
             MyReservations(
                 navController = navController,
@@ -140,6 +159,17 @@ fun NavigationGraph(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
 
+            )
+        }
+
+        composable(
+            route = SportPreferencesDestination.route
+
+        ){
+            SportPreferences(
+                navController = navController,
+                //navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
+                onNavigateUp = { navController.navigateUp() }
             )
         }
     }
