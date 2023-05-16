@@ -78,8 +78,9 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 @Composable
 fun MonthCalendar(
     reservations: List<Reservation>,
+    modifier: Modifier = Modifier,
+    onReservationClick: (Reservation) -> Unit,
     //navigateToDetailsReservation: () -> Unit,
-    //onReservationClick: (Reservation) -> Unit,
 ) {
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -157,8 +158,8 @@ fun MonthCalendar(
             )
             Divider(color = pageBackgroundColor)
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(items = reservationsInSelectedDate.value) { flight ->
-                    FlightInformation(flight)
+                items(items = reservationsInSelectedDate.value) { reservation ->
+                    FlightInformation(reservation, onReservationClick)
                 }
             }
         }
@@ -242,11 +243,17 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun LazyItemScope.FlightInformation(reservation: Reservation) {
+private fun LazyItemScope.FlightInformation(
+    reservation: Reservation,
+    onReservationClick: (Reservation) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
-            .height(IntrinsicSize.Max),
+            .height(IntrinsicSize.Max)
+            .clickable {
+                onReservationClick(reservation)
+            }
     ) {
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
             Box(

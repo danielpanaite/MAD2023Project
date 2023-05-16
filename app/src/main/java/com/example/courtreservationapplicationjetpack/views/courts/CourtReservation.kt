@@ -30,6 +30,8 @@ import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationsUiState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
@@ -74,10 +76,10 @@ fun CourtReservation(
             reservationsUiState = viewModel.reservationsUiState,
             onReservationValueChange = viewModel::updateUiState,
             onSaveClick = {
-                coroutineScope.launch {
+                CoroutineScope(Dispatchers.IO).launch {
                     viewModel.saveReservation()
-                    //navigateToMyReservations()
                 }
+                //navController.navigate(MainScreenDestination.route)
             },
             modifier = modifier.padding(innerPadding),
         )
