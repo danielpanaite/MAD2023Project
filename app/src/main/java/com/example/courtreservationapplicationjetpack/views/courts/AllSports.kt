@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.courts
 
 import OptionSample3
+import android.annotation.SuppressLint
 import android.media.Image
 import android.os.Build
 import android.util.Log
@@ -94,6 +95,7 @@ object AllSportsDestination : NavigationDestination {
 
 @ExperimentalMaterial3Api
 @Composable
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun AllSports(
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -118,86 +120,10 @@ fun AllSports(
             // CourtTopAppBar(canNavigateBack = false)
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
-    ) { innerPadding ->
-        SportsBody(
-            sportsList = allSportsUiState.sportsList,
-            modifier = modifier.padding(innerPadding),
-            onSportClick = navigateToCourtsAvailable,
-        )
+    ) {
+        PrenotaCampo(sportsList = allSportsUiState.sportsList)
     }
 }
-
-
-@Composable
-fun SportsBody(
-    sportsList: List<String>,
-    modifier: Modifier = Modifier,
-    onSportClick: (String) -> Unit,
-
-    ){
-
-//        Column(
-//            modifier = modifier
-//                .fillMaxSize()
-//                .padding(16.dp),
-//            verticalArrangement = Arrangement.spacedBy(16.dp)
-//        ) {
-//            //ReservationsListHeader()
-//            //Divider()
-//            if (sportsList.isEmpty()) {
-//                Text(
-//                    text = "no sports in the db",
-//                    style = MaterialTheme.typography.bodySmall //trovare subtitle
-//                )
-//            } else {
-//                SportsList(
-//                    sportsList = sportsList,
-//                    onSportClick = onSportClick
-//                )
-//            }
-//        }
-        PrenotaCampo(sportsList = sportsList)
-    }
-
-    @Composable
-    private fun SportsList(
-        sportsList: List<String>,
-        modifier: Modifier = Modifier,
-        onSportClick: (String) -> Unit,
-    ) {
-        LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(items = sportsList, //key = { it.id }
-            ) { sport ->
-                SportItem(sport = sport,
-                    //navigateToDetailsReservation = navigateToDetailsReservation
-                    onSportClick = onSportClick
-                )
-                Divider()
-            }
-        }
-    }
-
-
-    @Composable
-    private fun SportItem(
-        sport: String,
-        modifier: Modifier = Modifier,
-        onSportClick: (String) -> Unit,
-
-        ) {
-        Row(modifier = modifier
-            .fillMaxWidth()
-            .clickable {
-                onSportClick(sport)
-            }
-            .padding(vertical = 16.dp)
-        ) {
-            Text(text = sport,  modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-
-
-        }
-    }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
