@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,11 +19,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,12 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -70,7 +68,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val flights = generateFlights().groupBy { it.time.toLocalDate() }
 
 private val pageBackgroundColor: Color @Composable get() = MaterialTheme.colorScheme.background
 private val itemBackgroundColor: Color @Composable get() = MaterialTheme.colorScheme.primaryContainer
@@ -79,8 +76,12 @@ private val selectedItemColor: Color @Composable get() = MaterialTheme.colorSche
 private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 
 @Composable
-fun MonthCalendar(reservations: List<Reservation>) {
-    println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZz $reservations")
+fun MonthCalendar(
+    reservations: List<Reservation>,
+    modifier: Modifier = Modifier,
+    onReservationClick: (Reservation) -> Unit,
+    //navigateToDetailsReservation: () -> Unit,
+) {
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val reservationList = reservations.groupBy { LocalDate.parse(it.date, reservationFormatter) }
@@ -97,7 +98,9 @@ fun MonthCalendar(reservations: List<Reservation>) {
         }
     }
     //main column that contains the whole page
-    Column( modifier = Modifier.fillMaxSize().background(pageBackgroundColor)) {
+    Column( modifier = Modifier
+        .fillMaxSize()
+        .background(pageBackgroundColor)) {
         val state = rememberCalendarState(
             startMonth = startMonth,
             endMonth = endMonth,
@@ -155,8 +158,8 @@ fun MonthCalendar(reservations: List<Reservation>) {
             )
             Divider(color = pageBackgroundColor)
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(items = reservationsInSelectedDate.value) { flight ->
-                    FlightInformation(flight)
+                items(items = reservationsInSelectedDate.value) { reservation ->
+                    FlightInformation(reservation, onReservationClick)
                 }
             }
         }
@@ -240,28 +243,41 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun LazyItemScope.FlightInformation(reservation: Reservation) {
-    println("RESERV $reservation")
+private fun LazyItemScope.FlightInformation(
+    reservation: Reservation,
+    onReservationClick: (Reservation) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
-            .height(IntrinsicSize.Max),
+            .height(IntrinsicSize.Max)
+            .clickable {
+                onReservationClick(reservation)
+            }
     ) {
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
             Box(
                 modifier = Modifier
                     .background(color = colorResource(R.color.teal_700))
                     .fillParentMaxWidth(1 / 7f)
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = reservation.slot,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 17.sp,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onTertiary
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                    Text(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        text = reservation.slot,
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onTertiary
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.baseline_sports_tennis_24),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(Color.White)
+                    )
+                }
             }
         }
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
@@ -292,52 +308,6 @@ private fun LazyItemScope.FlightInformation(reservation: Reservation) {
 }
 
 @Composable
-private fun AirportInformation(airport: Flight.Airport, isDeparture: Boolean) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
-    ) {
-//        val resource = if (isDeparture) {
-//            R.drawable.ic_airplane_takeoff
-//        } else {
-//            R.drawable.ic_airplane_landing
-//        }
-//        Box(
-//            modifier = Modifier
-//                .weight(0.3f)
-//                .fillMaxHeight()
-//                .fillMaxHeight(),
-//            contentAlignment = Alignment.CenterEnd,
-//        ) {
-//            Image(painter = painterResource(resource), contentDescription = null)
-//        }
-        Column(
-            modifier = Modifier
-                .weight(0.7f)
-                .fillMaxHeight()
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = airport.code,
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-            )
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = airport.city,
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Light,
-            )
-        }
-    }
-}
-
-@Composable
 fun SimpleCalendarTitle(
     modifier: Modifier,
     currentMonth: YearMonth,
@@ -348,7 +318,7 @@ fun SimpleCalendarTitle(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(){
+        Column{
             Text(
                 modifier = Modifier
                     .weight(1f)
@@ -373,28 +343,6 @@ fun SimpleCalendarTitle(
     }
 }
 
-@Composable
-private fun CalendarNavigationIcon(
-    icon: Painter,
-    contentDescription: String,
-    onClick: () -> Unit,
-) = Box(
-    modifier = Modifier
-        .fillMaxHeight()
-        .aspectRatio(1f)
-        .clip(shape = CircleShape)
-        .clickable(role = Role.Button, onClick = onClick),
-) {
-    Icon(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(4.dp)
-            .align(Alignment.Center),
-        painter = icon,
-        contentDescription = contentDescription,
-    )
-}
-
 // The default dark them ripple is too bright so we tone it down.
 private object Example3RippleTheme : RippleTheme {
     @Composable
@@ -404,7 +352,7 @@ private object Example3RippleTheme : RippleTheme {
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(Color.Gray, lightTheme = false)
 }
 
-fun YearMonth.displayYear(short: Boolean = false): String {
+fun YearMonth.displayYear(): String {
     return "${this.year}"
 }
 
