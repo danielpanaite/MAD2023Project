@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.models.sport
 
-import com.example.courtreservationapplicationjetpack.models.user.User
 import kotlinx.coroutines.flow.Flow
 
 interface SportRepository {
@@ -15,5 +14,8 @@ interface SportRepository {
     fun getSportByName(sportName: String, idUser: Int): Flow<Sport>
 
 
-    suspend fun updateSport(sport: Sport)
+    suspend fun updateSport(sport: List<Sport>)
+
+    suspend fun insertOrUpdateSports(sports: List<Sport>)
+
 }
