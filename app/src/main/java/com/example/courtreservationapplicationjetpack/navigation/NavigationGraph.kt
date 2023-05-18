@@ -98,8 +98,7 @@ fun NavigationGraph(
         ){
             MyReservations(
                 navController = navController,
-                navigateToReservationDetailsDestination = { navController.navigate("${ReservationDetailsDestination.route}/${it}") }
-
+                navigateToEditReservation = { navController.navigate("${EditReservationDestination.route}/$it") },
             )
         }
         composable(

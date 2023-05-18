@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
 import com.example.courtreservationapplicationjetpack.R.string
+import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
 
 
 /**
@@ -33,14 +33,50 @@ fun CourtTopAppBar(
     canNavigateBack: Boolean,
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit = {}
-
-
 ) {
     if (canNavigateBack) {
         CenterAlignedTopAppBar(
             title = {
                 Text(
                     "Time to play",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            modifier = modifier,
+            navigationIcon = {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = stringResource(string.back_button)
+                    )
+                }
+            }
+        )
+    } else {
+        CenterAlignedTopAppBar(title = {
+            Text(
+                "Time to play",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }, modifier = modifier)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CourtTopAppBar(
+    canNavigateBack: Boolean,
+    modifier: Modifier = Modifier,
+    navigateUp: () -> Unit = {},
+    text: String
+) {
+    if (canNavigateBack) {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

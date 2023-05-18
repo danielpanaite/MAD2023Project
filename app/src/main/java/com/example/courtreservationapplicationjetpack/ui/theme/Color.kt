@@ -19,4 +19,5 @@ val DarkBG = Color(0xFF2B2B2B)
 
 //Calendar
 val GreyItemBG = Color(0xFFDFDFDF)
+val GreyReservationBG = Color(0xFFEEEEEE)
 val GreyItemInactive = Color(0xFF808080)

@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
-import androidx.compose.material3.Divider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -78,9 +77,7 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 @Composable
 fun MonthCalendar(
     reservations: List<Reservation>,
-    modifier: Modifier = Modifier,
     onReservationClick: (Reservation) -> Unit,
-    //navigateToDetailsReservation: () -> Unit,
 ) {
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -116,7 +113,7 @@ fun MonthCalendar(
 
         // Draw dark content on light background.
         CompositionLocalProvider(LocalContentColor provides lightColorScheme().onSurface) {
-            Surface(shadowElevation = 7.dp) {
+            Surface(shadowElevation = 8.dp) {
                 SimpleCalendarTitle(
                     modifier = Modifier
                         .background(toolbarColor)
@@ -125,7 +122,7 @@ fun MonthCalendar(
                 )
             }
             HorizontalCalendar(
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier.wrapContentWidth().padding(8.dp),
                 state = state,
                 dayContent = { day ->
                     CompositionLocalProvider(LocalRippleTheme provides Example3RippleTheme) {
@@ -156,10 +153,12 @@ fun MonthCalendar(
                     )
                 },
             )
-            Divider(color = pageBackgroundColor)
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(items = reservationsInSelectedDate.value) { reservation ->
-                    FlightInformation(reservation, onReservationClick)
+            Surface(modifier = Modifier.fillMaxSize(), shadowElevation = 8.dp){
+                //Bottom reservation details
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(items = reservationsInSelectedDate.value) { reservation ->
+                        ReservationInformation(reservation, onReservationClick)
+                    }
                 }
             }
         }
@@ -243,7 +242,7 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun LazyItemScope.FlightInformation(
+private fun LazyItemScope.ReservationInformation(
     reservation: Reservation,
     onReservationClick: (Reservation) -> Unit
 ) {
@@ -251,6 +250,7 @@ private fun LazyItemScope.FlightInformation(
         modifier = Modifier
             .fillParentMaxWidth()
             .height(IntrinsicSize.Max)
+            .padding(top = 8.dp)
             .clickable {
                 onReservationClick(reservation)
             }
@@ -300,11 +300,9 @@ private fun LazyItemScope.FlightInformation(
                         fontWeight = FontWeight.Black,
                     )
                 }
-                //AirportInformation(flight.departure, isDeparture = true)
             }
         }
     }
-    Divider(color = pageBackgroundColor, thickness = 2.dp)
 }
 
 @Composable

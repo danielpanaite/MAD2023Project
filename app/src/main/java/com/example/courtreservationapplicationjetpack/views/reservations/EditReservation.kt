@@ -1,14 +1,14 @@
 package com.example.courtreservationapplicationjetpack.views.reservations
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -16,8 +16,10 @@ import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
-import kotlinx.coroutines.launch
 import com.example.courtreservationapplicationjetpack.views.courts.ReservationEntryBody
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 object EditReservationDestination : NavigationDestination {
@@ -29,28 +31,21 @@ object EditReservationDestination : NavigationDestination {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditReservation(
     navController: NavController,
-
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EditReservationViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
 ){
+    val toastUpdate = Toast.makeText(LocalContext.current, "Reservation updated!", Toast.LENGTH_SHORT)
+    val toastDelete = Toast.makeText(LocalContext.current, "Reservation deleted!", Toast.LENGTH_SHORT)
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
-        topBar = {
-            CourtTopAppBar(canNavigateBack = true,
-                navigateUp = onNavigateUp)
-        },
+        topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Reservation details") },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
-
     ) {
-
-
 
             innerPadding ->
         ReservationEntryBody(
@@ -59,8 +54,16 @@ fun EditReservation(
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.updateReservation()
-                    //navigateToMyReservations()
                 }
+                toastUpdate.show()
+                navController.navigate(MyReservationsDestination.route)
+            },
+            onDeleteClick = {
+                CoroutineScope(Dispatchers.IO).launch {
+                    viewModel.deleteReservation()
+                }
+                toastDelete.show()
+                navController.navigate(MyReservationsDestination.route)
             },
             modifier = modifier.padding(innerPadding),
         )
