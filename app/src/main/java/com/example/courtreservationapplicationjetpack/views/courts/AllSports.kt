@@ -313,13 +313,12 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     )}
 
                                     LaunchedEffect(pickedDate) {
-                                        val slotFlow = viewModel.getSlot(pickedDate.toString(), it.id)
+                                        val slotFlow = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id)
                                         slotFlow.collectLatest { list ->
-                                            setSlots(list)
+                                            setSlots(slots - list.toSet())
                                             println("${it.name} $list")
                                         }
                                     }
-
 
 
                                     HourButtons(hours = slots)
