@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -49,6 +50,7 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -76,8 +78,10 @@ import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object AllSportsDestination : NavigationDestination {
     override val route  = "all_sports"
@@ -103,12 +107,6 @@ fun AllSports(
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
 
-    val slot = viewModel.getSlot("28/05/2023", 0)
-    runBlocking {
-        slot.collect { list ->
-            println(list) // Stampa ogni volta che il flusso emette una nuova lista
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -137,8 +135,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
     // Imposta lo sport su pickedSport
     courtsViewModel.setSport(pickedSport)
-
-    // Stampa il risultato della query per lo sport "tennis"
 
 
     CalendarDialog(
@@ -266,8 +262,8 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                 state = swipeRefreshState,
                 onRefresh = viewModel2::loadStuff,)
             {
-                LazyColumn(content = {
-                    items(courtsAvailableUiState.courtsAvailableList.size){_ ->
+                LazyColumn {
+                    items(courtsAvailableUiState.courtsAvailableList.size) { _ ->
                         courtsAvailableUiState.courtsAvailableList.forEach {
                             Box(modifier = Modifier.aspectRatio(1.5f)) {
                                 CoilImage(
@@ -275,7 +271,8 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         .shadow(10.dp, RoundedCornerShape(0.dp))
                                         .fillMaxSize()
                                         .height(100.dp),
-                                    sport = it.sport)
+                                    sport = it.sport
+                                )
                                 Text(
                                     text = it.name,
                                     style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
@@ -296,13 +293,37 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             ) {
                                 Column {
                                     Text(
-                                        text = "433m - Torino (cittá metropolitana di Torino)",
+                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.format(
+                                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                        )}",
                                         fontSize = 14.sp,
                                         color = Color.Gray,
                                         modifier = Modifier.padding(16.dp)
                                     )
-                                    val hours = listOf("8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00")
-                                    HourButtons(hours = hours)
+                                    val (slots, setSlots) = remember { mutableStateOf(
+                                        listOf(
+                                            "8:00",
+                                            "9:00",
+                                            "10:00",
+                                            "11:00",
+                                            "12:00",
+                                            "13:00",
+                                            "14:00"
+                                        )
+                                    )}
+
+                                    LaunchedEffect(Unit) {
+                                        val slotFlow = viewModel.getSlot(pickedDate.toString(), it.id)
+                                        slotFlow.collectLatest { list ->
+                                            setSlots(list)
+                                            println("${it.name} ${list}")
+                                        }
+                                    }
+
+                                    HourButtons(hours = slots)
+
+
+
                                     Box(
                                         modifier = Modifier
                                             .size(16.dp)
@@ -315,7 +336,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             }
                         }
                     }
-                })
+                }
             }
 
 
