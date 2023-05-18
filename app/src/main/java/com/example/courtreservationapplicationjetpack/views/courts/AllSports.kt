@@ -116,14 +116,14 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-        PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel)
+        PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel) {
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel) {
     val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
