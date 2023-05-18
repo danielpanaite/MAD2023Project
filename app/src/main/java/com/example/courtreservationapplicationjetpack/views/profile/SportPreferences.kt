@@ -149,7 +149,10 @@ fun SportsBody(
                     selectedSports -= sport
                     sportsWithLevels.remove(sport)
                 }
-            }
+            },
+            selectedSportsWithLevels = selectedSportsWithLevels,
+            initialLevels = selectedSportsWithLevels.sportsList.associateBy({it.sportName}, {it.masteryLevel?:""})
+
 
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -161,7 +164,10 @@ fun SportsBody(
 private fun SportsList(
     sportsList: List<String>,
     onSportCheckedChange: (String, Boolean, String) -> Unit,
-    viewModel: SportPreferencesViewModel
+    viewModel: SportPreferencesViewModel,
+    selectedSportsWithLevels: SportsPreferencesUiState,
+    initialLevels:Map<String, String>
+
 ) {
 
     LazyColumn(
@@ -171,7 +177,7 @@ private fun SportsList(
         items(items = sportsList, key = { it }) { sport ->
             val isChecked = remember { mutableStateOf(false) }
             val selectedLevel = remember {
-                mutableStateOf("")
+                mutableStateOf(initialLevels[sport]?:"")
             }
             Row(
                 modifier = Modifier
@@ -180,6 +186,13 @@ private fun SportsList(
                     .padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Check if the sport exists in the user's preference
+                val sportPreference = selectedSportsWithLevels.sportsList.find { it.sportName == sport }
+                if (sportPreference != null) {
+                    // If the sport exists, set isChecked to true and pre-populate the selectedLevel state
+                    isChecked.value = true
+                    selectedLevel.value = sportPreference.masteryLevel ?: ""
+                }
                 Checkbox(
                     checked = isChecked.value,
                     onCheckedChange = { isChecked.value = it; onSportCheckedChange(sport, it, selectedLevel.value) },
@@ -202,42 +215,45 @@ private fun SportsList(
                         //Log.d("level", "${level}")
 
 
-                    })
+                    }, currentLevel = sportPreference?.masteryLevel ?: ""
+                    )
                 }
             }
             Divider()
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SportLevelInput(onLevelChanged: (String) -> Unit) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
+private fun SportLevelInput(
+    onLevelChanged: (String) -> Unit,
+    currentLevel: String = ""
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val levels = listOf("Beginner", "Intermediate", "Advanced", "Expert")
+    var selectedLevel by remember { mutableStateOf(currentLevel) }
 
-
-    val levels = listOf("Beginner", "Intermediate","Advanced","Expert")
-    var selectedLevel by remember { mutableStateOf(levels.first()) }
-    Box(modifier = Modifier.wrapContentSize()){
-        OutlinedButton(onClick = { expanded = true },
+    Box(modifier = Modifier.wrapContentSize()) {
+        OutlinedButton(
+            onClick = { expanded = true },
             modifier = Modifier.width(150.dp)
         ) {
-            Text(text = selectedLevel, fontWeight = FontWeight.Bold
+            Text(
+                text = selectedLevel,
+                fontWeight = FontWeight.Bold
             )
-            Log.d("selectedLevel", "$selectedLevel")
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = null,
                 modifier = Modifier.padding(start = 2.dp)
             )
         }
-        DropdownMenu(expanded = expanded,
+        DropdownMenu(
+            expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier.align(Alignment.TopStart)
         ) {
-            levels.forEach{level ->
+            levels.forEach { level ->
                 DropdownMenuItem(
                     text = { Text(level, color = Color.Black) },
                     onClick = {
@@ -249,4 +265,3 @@ private fun SportLevelInput(onLevelChanged: (String) -> Unit) {
         }
     }
 }
-
