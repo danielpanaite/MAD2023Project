@@ -1,6 +1,7 @@
 
 package com.example.courtreservationapplicationjetpack.views.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
@@ -9,8 +10,10 @@ import com.example.courtreservationapplicationjetpack.models.sport.SportReposito
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 
 /**
@@ -50,6 +53,23 @@ class SportPreferencesViewModel(
 
     suspend fun insertOrUpdateSportsWithLevels(sports: List<Sport>){
         sportRepository.insertOrUpdateSports(sports)
+    }
+
+    fun updateSportMastery(sportName: String, masteryLevel: String) {
+        val currentUser = 1 // replace with the actual user ID
+        viewModelScope.launch {
+            val existingSport = sportRepository.getSportByName(sportName, currentUser).firstOrNull()
+            if (existingSport == null) {
+                // If the sport doesn't exist, insert it
+                sportRepository.insertOrUpdateSports(listOf(Sport(idUser = currentUser, sportName = sportName, masteryLevel = masteryLevel, achievements = null)))
+            } else {
+                // If the sport exists, update its mastery level
+                val updatedSport = existingSport.copy(masteryLevel = masteryLevel)
+                Log.d("sportName", "$sportName")
+                Log.d("sportName", "$masteryLevel")
+                sportRepository.updateSport(listOf(updatedSport))
+            }
+        }
     }
 
 

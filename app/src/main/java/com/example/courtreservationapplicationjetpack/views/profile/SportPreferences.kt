@@ -99,6 +99,8 @@ fun SportsBody(
     modifier: Modifier = Modifier,
     viewModel: SportPreferencesViewModel
 ){
+    val selectedSportsWithLevels by viewModel.sportPreferencesUiState.collectAsState()
+
     var selectedSports by remember { mutableStateOf(emptySet<String>()) }
     val sportsWithLevels = remember { mutableStateMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
@@ -115,9 +117,10 @@ fun SportsBody(
 
                 val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
                     Sport(1,  sportName, masteryLevel, null)
+                    viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
                 }
 
-                viewModel.insertOrUpdateSportsWithLevels(sports)
+                //viewModel.insertOrUpdateSportsWithLevels(sports)
 
                 //navigateToMyReservations()
             }
@@ -129,19 +132,25 @@ fun SportsBody(
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
         )
+        Log.d("sportsList in SportsBody", "$sportsList")
+        Log.d("sportList with levels", "$sportsWithLevels")
+
         SportsList(
+            viewModel =viewModel,
             sportsList = sportsList,
             onSportCheckedChange = { sport, isChecked, masteryLevel ->
                 if (isChecked) {
+                    Log.d("asteryLevel passato a sportList", "$masteryLevel")
+
+                    println("masteryLevel passato a sportList $masteryLevel")
                     selectedSports += sport
-                    // Add the sport to the map of sports with their levels
-                    sportsWithLevels[sport] = masteryLevel
+                    sportsWithLevels[sport] = masteryLevel // Update mastery level for the selected sport in the map
                 } else {
                     selectedSports -= sport
-                    // Remove the sport from the map of sports with their levels
                     sportsWithLevels.remove(sport)
                 }
             }
+
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -152,6 +161,7 @@ fun SportsBody(
 private fun SportsList(
     sportsList: List<String>,
     onSportCheckedChange: (String, Boolean, String) -> Unit,
+    viewModel: SportPreferencesViewModel
 ) {
 
     LazyColumn(
@@ -174,12 +184,24 @@ private fun SportsList(
                     checked = isChecked.value,
                     onCheckedChange = { isChecked.value = it; onSportCheckedChange(sport, it, selectedLevel.value) },
                     modifier = Modifier.weight(0.3f)
+
                 )
+                Log.d("selectedValue in SportsList", "$selectedLevel")
+                Log.d("sportName in SportsList", "$sport")
+
                 Text(text = sport, modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
                 if (isChecked.value) {
-                    SportLevelInput(onLevelChanged = { level ->
+                    SportLevelInput(onLevelChanged = {
                         // save the level for this sport
-                        selectedLevel.value = level
+                        // update the selected level
+                        selectedLevel.value = it
+
+                        // pass the selected level as a plain string to the onSportCheckedChange lambda
+                        onSportCheckedChange(sport, isChecked.value, selectedLevel.value)
+                        //Log.d("selectedLevel.level", "${selectedLevel.value}")
+                        //Log.d("level", "${level}")
+
+
                     })
                 }
             }
@@ -204,6 +226,7 @@ private fun SportLevelInput(onLevelChanged: (String) -> Unit) {
         ) {
             Text(text = selectedLevel, fontWeight = FontWeight.Bold
             )
+            Log.d("selectedLevel", "$selectedLevel")
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = null,
