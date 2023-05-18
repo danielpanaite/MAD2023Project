@@ -103,7 +103,7 @@ fun AllSports(
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
 
-    val slot = viewModel.getSlot("28/05/2023", 0, 0)
+    val slot = viewModel.getSlot("28/05/2023", 0)
     runBlocking {
         slot.collect { list ->
             println(list) // Stampa ogni volta che il flusso emette una nuova lista

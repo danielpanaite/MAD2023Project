@@ -33,5 +33,5 @@ interface ReservationRepository {
      */
     suspend fun updateReservation(reservation: Reservation)
 
-    fun getSlot(date: String, courtId: Int, userId: Int): Flow<List<String>>
+    fun getSlot(date: String, courtId: Int): Flow<List<String>>
 }

@@ -53,8 +53,8 @@ private val reservationRepository: ReservationRepository
                 initialValue = AllSportsUiState()
             )
 
-    fun getSlot(date:String, courtId: Int, user:Int): Flow<List<String>> {
-        return reservationRepository.getSlot(date, courtId, user)
+    fun getSlot(date:String, courtId: Int): Flow<List<String>> {
+        return reservationRepository.getSlot(date, courtId)
     }
 
     companion object {
