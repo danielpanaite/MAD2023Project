@@ -18,4 +18,9 @@ interface SportRepository {
 
     suspend fun insertOrUpdateSports(sports: List<Sport>)
 
+    suspend fun deleteSport(sports: List<Sport>)
+
+    suspend fun deleteSportByName(sportName: String, userId: Int)
+
+
 }

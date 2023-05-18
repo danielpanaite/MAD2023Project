@@ -51,26 +51,54 @@ class SportPreferencesViewModel(
 
     }
 
+    /*
     suspend fun insertOrUpdateSportsWithLevels(sports: List<Sport>){
         sportRepository.insertOrUpdateSports(sports)
+    }*/
+
+    /*
+    suspend fun insertOrUpdateSportsWithLevels(selectedSports: Set<String>, sportsWithLevels: Map<String, String>) {
+        val currentUser = 1 // replace with the actual user ID
+        val selectedSportsWithLevels = sportsWithLevels.filterKeys { selectedSports.contains(it) }
+            .map { (sportName, masteryLevel) ->
+                Sport(idUser = currentUser, sportName = sportName, masteryLevel = masteryLevel, achievements = null)
+            }
+        sportRepository.insertOrUpdateSports(selectedSportsWithLevels)
     }
 
-    fun updateSportMastery(sportName: String, masteryLevel: String) {
+     */
+
+
+
+    fun updateSportMastery(sportName: String, masteryLevel: String?) {
         val currentUser = 1 // replace with the actual user ID
         viewModelScope.launch {
-            val existingSport = sportRepository.getSportByName(sportName, currentUser).firstOrNull()
-            if (existingSport == null) {
-                // If the sport doesn't exist, insert it
-                sportRepository.insertOrUpdateSports(listOf(Sport(idUser = currentUser, sportName = sportName, masteryLevel = masteryLevel, achievements = null)))
+            if (masteryLevel == null) { // Remove the sport from the database
+                sportRepository.deleteSportByName(sportName, currentUser)
             } else {
-                // If the sport exists, update its mastery level
-                val updatedSport = existingSport.copy(masteryLevel = masteryLevel)
-                Log.d("sportName", "$sportName")
-                Log.d("sportName", "$masteryLevel")
-                sportRepository.updateSport(listOf(updatedSport))
+                val existingSport = sportRepository.getSportByName(sportName, currentUser).firstOrNull()
+                if (existingSport == null) {
+                    // If the sport doesn't exist, insert it
+                    sportRepository.insertOrUpdateSports(listOf(Sport(idUser = currentUser, sportName = sportName, masteryLevel = masteryLevel, achievements = null)))
+                } else {
+                    // If the sport exists, update its mastery level
+                    val updatedSport = existingSport.copy(masteryLevel = masteryLevel)
+                    sportRepository.updateSport(listOf(updatedSport))
+                }
             }
         }
     }
+
+    /*
+    private suspend fun deleteUncheckedSports(currentUser: Int, selectedSports: Set<String>) {
+        // First, delete all sports that are not selected by the user
+        val uncheckedSports = sportRepository.getSportUser(currentUser)
+            .filter { !selectedSports.contains(it.sportName) }
+        sportRepository.deleteSports(uncheckedSports)
+    }
+
+     */
+
 
 
 

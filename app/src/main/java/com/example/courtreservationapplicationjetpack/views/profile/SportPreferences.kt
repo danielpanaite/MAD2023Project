@@ -102,7 +102,7 @@ fun SportsBody(
     val selectedSportsWithLevels by viewModel.sportPreferencesUiState.collectAsState()
 
     var selectedSports by remember { mutableStateOf(emptySet<String>()) }
-    val sportsWithLevels = remember { mutableStateMapOf<String, String>() }
+    val sportsWithLevels = remember { mutableMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -159,70 +159,80 @@ fun SportsBody(
 
     }
 }
-
 @Composable
 private fun SportsList(
     sportsList: List<String>,
     onSportCheckedChange: (String, Boolean, String) -> Unit,
     viewModel: SportPreferencesViewModel,
     selectedSportsWithLevels: SportsPreferencesUiState,
-    initialLevels:Map<String, String>
-
+    initialLevels: Map<String, String>
 ) {
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items = sportsList, key = { it }) { sport ->
-            val isChecked = remember { mutableStateOf(false) }
-            val selectedLevel = remember {
-                mutableStateOf(initialLevels[sport]?:"")
+            val isChecked = remember {
+                mutableStateOf(initialLevels.containsKey(sport))
             }
+            val selectedLevel = remember {
+                mutableStateOf(initialLevels[sport] ?: "")
+            }
+
+            // Check if the sport exists in the user's preference
+            val sportPreference =
+                selectedSportsWithLevels.sportsList.find { it.sportName == sport }
+            if (sportPreference != null && !initialLevels.containsKey(sport)) {
+                // If the sport exists and wasn't pre-selected, set isChecked to true and pre-populate the selectedLevel state
+                isChecked.value = true
+                selectedLevel.value = sportPreference.masteryLevel ?: ""
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = { isChecked.value = !isChecked.value })
-                    .padding(vertical = 16.dp),
+                    .clickable(onClick = {
+                        isChecked.value = !isChecked.value
+                        onSportCheckedChange(sport, isChecked.value, selectedLevel.value)
+                    }),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Check if the sport exists in the user's preference
-                val sportPreference = selectedSportsWithLevels.sportsList.find { it.sportName == sport }
-                if (sportPreference != null) {
-                    // If the sport exists, set isChecked to true and pre-populate the selectedLevel state
-                    isChecked.value = true
-                    selectedLevel.value = sportPreference.masteryLevel ?: ""
-                }
                 Checkbox(
                     checked = isChecked.value,
-                    onCheckedChange = { isChecked.value = it; onSportCheckedChange(sport, it, selectedLevel.value) },
-                    modifier = Modifier.weight(0.3f)
-
-                )
-                Log.d("selectedValue in SportsList", "$selectedLevel")
-                Log.d("sportName in SportsList", "$sport")
-
-                Text(text = sport, modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-                if (isChecked.value) {
-                    SportLevelInput(onLevelChanged = {
-                        // save the level for this sport
-                        // update the selected level
-                        selectedLevel.value = it
-
-                        // pass the selected level as a plain string to the onSportCheckedChange lambda
+                    onCheckedChange = {
+                        isChecked.value = it
                         onSportCheckedChange(sport, isChecked.value, selectedLevel.value)
-                        //Log.d("selectedLevel.level", "${selectedLevel.value}")
-                        //Log.d("level", "${level}")
+                    },
+                    modifier = Modifier.weight(0.3f)
+                )
 
+                Text(
+                    text = sport,
+                    modifier = Modifier.weight(0.7f),
+                    fontWeight = FontWeight.Bold
+                )
 
-                    }, currentLevel = sportPreference?.masteryLevel ?: ""
+                if (isChecked.value) {
+                    SportLevelInput(
+                        onLevelChanged = {
+                            // save the level for this sport
+                            // update the selected level
+                            selectedLevel.value = it
+
+                            // pass the selected level as a plain string to the onSportCheckedChange lambda
+                            onSportCheckedChange(sport, isChecked.value, selectedLevel.value)
+                        },
+                        currentLevel = sportPreference?.masteryLevel ?: ""
                     )
                 }
             }
+
             Divider()
         }
     }
 }
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SportLevelInput(

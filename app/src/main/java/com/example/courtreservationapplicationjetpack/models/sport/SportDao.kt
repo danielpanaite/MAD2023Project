@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.models.sport
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -38,6 +39,13 @@ interface SportDao {
             }
         }
     }
+
+    @Delete
+    suspend fun deleteSport(sports: List<Sport>)
+
+    @Query("DELETE FROM sport WHERE idUser = :userId AND sportName = :sportName")
+    suspend fun deleteSportByName(sportName: String, userId: Int)
+
 
 
 }
