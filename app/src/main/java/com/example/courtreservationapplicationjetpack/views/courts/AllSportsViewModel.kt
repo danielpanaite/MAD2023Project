@@ -3,7 +3,9 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
+import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +21,10 @@ import kotlinx.coroutines.launch
 /**
  * View Model to retrieve all reservations in the Room database.
  */
-class AllSportsViewModel(courtRepository: CourtRepository) : ViewModel() {
+class AllSportsViewModel(
+courtRepository: CourtRepository,
+private val reservationRepository: ReservationRepository
+) : ViewModel() {
     /**
      * Holds my sport ui state. The list of all sport are retrieved from [CourtRepository] and mapped to
      * [SportsUiState]
@@ -47,6 +52,10 @@ class AllSportsViewModel(courtRepository: CourtRepository) : ViewModel() {
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = AllSportsUiState()
             )
+
+    fun getSlot(date:String, courtId: Int, user:Int): Flow<List<String>> {
+        return reservationRepository.getSlot(date, courtId, user)
+    }
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

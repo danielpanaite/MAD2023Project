@@ -75,6 +75,8 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 
 object AllSportsDestination : NavigationDestination {
@@ -101,6 +103,12 @@ fun AllSports(
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
 
+    val slot = viewModel.getSlot("28/05/2023", 0, 0)
+    runBlocking {
+        slot.collect { list ->
+            println(list) // Stampa ogni volta che il flusso emette una nuova lista
+        }
+    }
 
     Scaffold(
         topBar = {
