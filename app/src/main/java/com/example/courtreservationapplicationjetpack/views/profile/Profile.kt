@@ -219,7 +219,8 @@ private fun UserDetails(
                 .clip(shape = CircleShape),
             //this should be the image in the db for each user
             painter = if(profileUiState.userDetails.imageUri!=="" && profileUiState.userDetails.imageUri!==null){
-                rememberAsyncImagePainter(model = Uri.parse(profileUiState.userDetails.imageUri))
+                Log.d("siamo dentro image painter", "${profileUiState.userDetails.imageUri}")
+                rememberAsyncImagePainter(model = Uri.parse(profileUiState.userDetails.imageUri)?: R.drawable.baseline_person_24)
             }else{
                 painterResource(id = R.drawable.baseline_person_24)
             },

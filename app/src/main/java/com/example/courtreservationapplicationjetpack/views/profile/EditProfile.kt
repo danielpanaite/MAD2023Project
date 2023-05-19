@@ -52,6 +52,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -68,6 +69,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -170,8 +172,8 @@ fun ProfileEntryBody(
         item {
             Button(onClick = {
                 // Set the imageUri field in the UserDetails object
+
                 //val updatedDetails = profileUiState.userDetails.copy(imageUri = profileUiState.userDetails.imageUri)
-                //onProfileValueChange(updatedDetails)
                 // Call the onSaveClick callback
                 onSaveClick()
             },
@@ -229,6 +231,19 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
     Log.d("photoUri", "$photoUri")
     Log.d("chosenPhotoUri", "$chosenPhoto")
 
+    val chosenPhotUriState = rememberUpdatedState(chosenPhoto)
+
+    if (chosenPhotUriState.value != chosenPhoto) {
+        Log.d("ma qui ci entri", "${chosenPhoto}")
+        onValueChange(userDetails.copy(imageUri = chosenPhoto.toString()))
+    }
+
+    LaunchedEffect(chosenPhoto){
+
+        Log.d("ma qui ci entri launched Effect", "${chosenPhoto}")
+        onValueChange(userDetails.copy(imageUri = chosenPhoto.toString()))
+
+    }
 
     Column(modifier = modifier) {
         Box(
@@ -247,25 +262,50 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
                                 placeholder(R.drawable.baseline_person_24)
                                 transformations(CircleCropTransformation())
                             }).build()
+
                     )
 
+
                 } else {
-                    rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current)
-                            .data(data = Uri.parse(userDetails.imageUri)?: R.drawable.baseline_person_24)
-                            .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
-                                crossfade(true)
-                                placeholder(R.drawable.baseline_person_24)
-                                transformations(CircleCropTransformation())
-                            }).build()
-                    )
+                    if(userDetails.imageUri!=null){
+
+                        rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(data = Uri.parse(userDetails.imageUri))
+                                .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                                    crossfade(true)
+                                    placeholder(R.drawable.baseline_person_24)
+                                    transformations(CircleCropTransformation())
+                                }).build()
+                        )
+                        }else{
+                        rememberAsyncImagePainter(
+
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(data = R.drawable.baseline_person_24)
+                                .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                                    crossfade(true)
+                                    placeholder(R.drawable.baseline_person_24)
+                                    transformations(CircleCropTransformation())
+                                }).build()
+                        )
+                        }
+
                 },
                 contentDescription = "Selected Image",
                 modifier = Modifier
                     .size(100.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape) ,
+
             )
+
         }
+
+        Log.d("chosenPhotoUri state", "$chosenPhotUriState")
+        Log.d("chosenPhoto", "$chosenPhoto")
+
+
+//con le immagini prese dalla galleria inizialmente non le mostra, con quelle prese dalla camera su
 
         Button(
             onClick = { launcher.launch("image/*") },
@@ -313,14 +353,11 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
                     value = userDetails.name,
                     onValueChange = {
                         if(chosenPhoto!=null){
-                            val updatedDetails =userDetails.copy(name=it, imageUri = chosenPhoto.toString())
 
-                            onValueChange(updatedDetails)
-                        }else{
-                            val updatedDetails =userDetails.copy(name=it, imageUri = photoUri.toString())
-                            onValueChange(updatedDetails)
+                            onValueChange(userDetails.copy(name = it, imageUri = chosenPhoto.toString()))
+
                         }
-                        },
+                                    },
                     label = { Text(text = "name") },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
@@ -419,6 +456,7 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
                 )
             }
         }
+
 
 
     }
