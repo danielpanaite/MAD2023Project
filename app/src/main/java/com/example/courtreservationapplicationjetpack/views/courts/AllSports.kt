@@ -17,9 +17,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,6 +39,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,8 +68,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
@@ -114,7 +119,8 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-        PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel)
+    Ciao()
+    //PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel)
     }
 }
 
@@ -408,6 +414,90 @@ fun CoilImage(modifier: Modifier = Modifier, sport: String) {
                 .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
         )
     }
+}
+
+//--------------------------------------------------------------------------------
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Ciao(){
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(Color.Red)
+                .align(Alignment.TopCenter)
+        )
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                .crossfade(true)
+                .build(),
+            placeholder = painterResource(R.drawable.placeholder),
+            contentDescription = "Court Image",
+            contentScale = ContentScale.Crop,
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.0001f to Color.Transparent,
+                        1f to Color.Black
+                    )
+                )
+                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .offset(y = (185).dp)
+                .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Column(modifier = Modifier.weight(3f)) {
+                    Text(
+                        text = "Centro Sportivo Robilant",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Piazza Generale, Torino",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Start
+                    )
+                }
+                Box(modifier = Modifier.weight(1f).align(Alignment.CenterVertically)) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_calcio5),
+                        contentDescription = "Sport icon",
+                        colorFilter = ColorFilter.tint(Color.Black),
+                        modifier = Modifier.size(29.dp).align(Alignment.Center)
+                    )
+                }
+            }
+        }
+    }
+
+
+
+}
+//--------------------------------------------------------------------------------
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun CourtPreview(){
+    Ciao()
 }
 
 
