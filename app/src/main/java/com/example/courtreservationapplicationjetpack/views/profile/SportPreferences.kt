@@ -105,6 +105,10 @@ fun SportsBody(
     val sportsWithLevels = remember { mutableMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
 
+    // Initialize selectedSports with the names of the sports that are already selected
+    selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
+
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -120,6 +124,17 @@ fun SportsBody(
                     viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
                 }
 
+
+                val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
+
+                Log.d("Unchecked sports", "$uncheckedSports")
+
+                Log.d("sportList", "$sportsList")
+
+                Log.d("selectedSports", "$selectedSports")
+
+
+                viewModel.deleteSports(1, uncheckedSports)
                 //viewModel.insertOrUpdateSportsWithLevels(sports)
 
                 //navigateToMyReservations()

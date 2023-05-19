@@ -70,6 +70,7 @@ class SportPreferencesViewModel(
 
 
 
+
     fun updateSportMastery(sportName: String, masteryLevel: String?) {
         val currentUser = 1 // replace with the actual user ID
         viewModelScope.launch {
@@ -89,6 +90,24 @@ class SportPreferencesViewModel(
         }
     }
 
+    fun deleteSports(currentUser: Int, uncheckedSports: List<String>){
+        viewModelScope.launch {
+            uncheckedSports.forEach { sport ->
+                sportRepository.deleteSportByName(sport, 1)
+
+            }
+        }
+    }
+
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
+    }
+}
+
+data class AllSportsUiState(val sportsList: List<String> = listOf())
+
+
     /*
     private suspend fun deleteUncheckedSports(currentUser: Int, selectedSports: Set<String>) {
         // First, delete all sports that are not selected by the user
@@ -98,37 +117,6 @@ class SportPreferencesViewModel(
     }
 
      */
-
-
-
-
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
-    }
-}
-
-/*
-
-suspend fun updateProfile() {
-    if (validateInput(profileUiState.userDetails)) {
-        userRepository.update(profileUiState.userDetails.toUser())
-    }
-}
-
-/**
- * Updates the [profileUiState] with the value provided in the argument. This method also triggers
- * a validation for input values.
- */
-fun updateUiState(userDetails: UserDetails) {
-    profileUiState =
-        ProfileUiState(userDetails = userDetails, isEntryValid = validateInput(userDetails))
-}
-
- */
-
-data class AllSportsUiState(val sportsList: List<String> = listOf())
-
-
 data class  SportsPreferencesUiState(val sportsList: List<Sport> = listOf())
 
 
