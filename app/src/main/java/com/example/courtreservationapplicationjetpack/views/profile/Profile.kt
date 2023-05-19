@@ -2,6 +2,8 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -206,13 +208,22 @@ private fun UserDetails(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
+        Log.d("imageUri in User Details", "${profileUiState.userDetails.imageUri}")
+        Log.d("imageUri in User Details in Uri form", "${Uri.parse(profileUiState.userDetails.imageUri)}")
+
+
         // User's image
         Image(
             modifier = Modifier
                 .size(72.dp)
                 .clip(shape = CircleShape),
             //this should be the image in the db for each user
-            painter = painterResource(id = R.drawable.baseline_person_24),
+            painter = if(profileUiState.userDetails.imageUri!=="" && profileUiState.userDetails.imageUri!==null){
+                rememberAsyncImagePainter(model = Uri.parse(profileUiState.userDetails.imageUri))
+            }else{
+                painterResource(id = R.drawable.baseline_person_24)
+            },
+
             contentDescription = "Your Image"
         )
 
@@ -284,7 +295,7 @@ private fun OptionsItemStyle(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-                /*
+            /*
             .clickable(enabled = true) {
                 Toast
                     .makeText(item.title, Toast.LENGTH_SHORT)
@@ -293,8 +304,8 @@ private fun OptionsItemStyle(
             .padding(all = 16.dp)
             .clickable(
                 onClick = {
-                navigateToSportPreferencesDestination()
-            }),
+                    navigateToSportPreferencesDestination()
+                }),
 
         verticalAlignment = Alignment.CenterVertically
     ) {

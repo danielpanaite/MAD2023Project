@@ -3,6 +3,8 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.content.ContentValues
+import android.content.Context
+import android.content.pm.PackageManager
 
 import android.net.Uri
 import android.provider.ContactsContract.Profile
@@ -74,6 +76,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -83,6 +88,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.example.courtreservationapplicationjetpack.BuildConfig
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -93,8 +99,12 @@ import com.example.courtreservationapplicationjetpack.views.reservations.EditRes
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationsUiState
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Objects
 
 object EditProfileDestination : NavigationDestination {
     override val route = "profile_edit"
@@ -151,9 +161,8 @@ fun ProfileEntryBody(
     LazyColumn (
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .padding(top = 60.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ){
         item {
             ProfileInputForm(userDetails = profileUiState.userDetails, onValueChange = onProfileValueChange)
@@ -184,43 +193,66 @@ fun ProfileInputForm(
     onValueChange: (UserDetails) -> Unit ={},
     enabled: Boolean = true
 ) {
-    val notification = rememberSaveable { mutableStateOf("") }
-    if (notification.value.isNotEmpty()) {
-        Toast.makeText(LocalContext.current, notification.value, Toast.LENGTH_LONG).show()
-        notification.value = ""
-    }
 
+    val context = LocalContext.current
+    val file = context.createImageFile()
+    val uri = FileProvider.getUriForFile(
+        Objects.requireNonNull(context),
+        BuildConfig.APPLICATION_ID + ".provider", file
+    )
 
-    var photoUri by rememberSaveable { mutableStateOf(userDetails.imageUri?.toString()) }
+    var photoUri by rememberSaveable { mutableStateOf<Uri?>(Uri.parse(userDetails.imageUri)) }
+    var chosenPhoto by rememberSaveable { mutableStateOf<Uri?>(null)}
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        photoUri = uri.toString()
+        chosenPhoto = uri
+    }
+    var cameraLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
+            chosenPhoto = uri
+        }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        if (it) {
+            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            cameraLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
     }
 
+Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
+    Log.d("imageUri in ProfileInputForm in uri form", "${Uri.parse(userDetails.imageUri)}")
 
+    Log.d("photoUri", "$photoUri")
+    Log.d("chosenPhotoUri", "$chosenPhoto")
 
 
     Column(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
+                .height(100.dp),
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = if (photoUri != null) {
+                painter = if (chosenPhoto != null) {
                     rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = photoUri!!)
-                            .apply(block = fun ImageRequest.Builder.() {
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(data = chosenPhoto)
+                            .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
                                 crossfade(true)
                                 placeholder(R.drawable.baseline_person_24)
                                 transformations(CircleCropTransformation())
                             }).build()
                     )
+
                 } else {
                     rememberAsyncImagePainter(
                         ImageRequest.Builder(LocalContext.current)
-                            .data(data = userDetails.imageUri ?: "")
+                            .data(data = Uri.parse(userDetails.imageUri)?: R.drawable.baseline_person_24)
                             .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
                                 crossfade(true)
                                 placeholder(R.drawable.baseline_person_24)
@@ -238,12 +270,32 @@ fun ProfileInputForm(
         Button(
             onClick = { launcher.launch("image/*") },
             modifier = Modifier
-                .padding(top = 16.dp)
+                .padding(top = 10.dp)
                 .fillMaxWidth()
                 .align(CenterHorizontally)
         ) {
-            Text("Select Photo")
+            Text("Select Image from gallery")
         }
+
+        Button(onClick = {
+            val permissionCheckResult =
+                ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA)
+            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                cameraLauncher.launch(uri)
+            } else {
+                // Request a permission
+                permissionLauncher.launch(android.Manifest.permission.CAMERA)
+            }
+        }, modifier = Modifier
+            .padding(top = 12.dp)
+            .fillMaxWidth()
+            .align(CenterHorizontally)) {
+            Text(text = "Capture Image From Camera")
+        }
+
+        /*
+        if (capturedImageUri.path?.isNotEmpty() == true) {
+        */
 
         Column(
             modifier = Modifier
@@ -256,15 +308,19 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = "Name",
-                    modifier = Modifier.width(100.dp)
-                )
+
                 OutlinedTextField(
                     value = userDetails.name,
                     onValueChange = {
-                        val updatedDetails =userDetails.copy(name=it, imageUri = photoUri)
-                        onValueChange(updatedDetails) },
+                        if(chosenPhoto!=null){
+                            val updatedDetails =userDetails.copy(name=it, imageUri = chosenPhoto.toString())
+
+                            onValueChange(updatedDetails)
+                        }else{
+                            val updatedDetails =userDetails.copy(name=it, imageUri = photoUri.toString())
+                            onValueChange(updatedDetails)
+                        }
+                        },
                     label = { Text(text = "name") },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
@@ -277,10 +333,7 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = "Nickname",
-                    modifier = Modifier.width(100.dp)
-                )
+
                 OutlinedTextField(
                     value = userDetails.nickname,
                     onValueChange = { onValueChange(userDetails.copy(nickname = it)) },
@@ -296,10 +349,7 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = "Email",
-                    modifier = Modifier.width(100.dp)
-                )
+
                 OutlinedTextField(
                     value = userDetails.email,
                     onValueChange = { onValueChange(userDetails.copy(email = it)) },
@@ -315,16 +365,20 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = "Address",
-                    modifier = Modifier.width(100.dp)
-                )
+
                 OutlinedTextField(
                     value = userDetails.address,
                     onValueChange = {
-                        val updatedDetails = userDetails.copy(address = it, imageUri = photoUri)
-                        onValueChange(updatedDetails)
+                        if(chosenPhoto!=null){
+                            val updatedDetails =userDetails.copy(address=it, imageUri = chosenPhoto.toString())
+
+                            onValueChange(updatedDetails)
+                        }else{
+                            val updatedDetails =userDetails.copy(address=it, imageUri = photoUri.toString())
+                            onValueChange(updatedDetails)
+                        }
                     },
+
                     label = { Text(text = "address") },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
@@ -337,11 +391,7 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = "Phone number",
-                    modifier =
-                    Modifier.width(100.dp)
-                )
+
                 OutlinedTextField(
                     value = userDetails.phone,
                     onValueChange = { onValueChange(userDetails.copy(phone = it)) },
@@ -357,10 +407,7 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = "Age",
-                    modifier = Modifier.width(100.dp)
-                )
+
                 OutlinedTextField(
                     value = userDetails.age,
                     onValueChange = { onValueChange(userDetails.copy(age = it)) },
@@ -372,6 +419,21 @@ fun ProfileInputForm(
                 )
             }
         }
+
+
     }
 
+}
+
+
+fun Context.createImageFile(): File {
+    // Create an image file name
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    val image = File.createTempFile(
+        imageFileName, /* prefix */
+        ".jpg", /* suffix */
+        externalCacheDir      /* directory */
+    )
+    return image
 }
