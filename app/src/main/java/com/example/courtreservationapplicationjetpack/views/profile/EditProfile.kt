@@ -245,6 +245,8 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
 
     }
 
+
+
     Column(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -308,7 +310,10 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
 //con le immagini prese dalla galleria inizialmente non le mostra, con quelle prese dalla camera su
 
         Button(
-            onClick = { launcher.launch("image/*") },
+            onClick = {
+                  launcher.launch("image/*")
+
+                },
             modifier = Modifier
                 .padding(top = 10.dp)
                 .fillMaxWidth()
@@ -316,6 +321,7 @@ Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
         ) {
             Text("Select Image from gallery")
         }
+
 
         Button(onClick = {
             val permissionCheckResult =
