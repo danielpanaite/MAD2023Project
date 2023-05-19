@@ -13,6 +13,9 @@ interface CourtDao {
     @Query("SELECT * FROM court ORDER BY id DESC")
     fun getAllCourts(): Flow<List<Court>>
 
+    @Query("SELECT * FROM court WHERE id IN (:courts)")
+    fun getCourtsWithId(courts: List<Int>): Flow<List<Court>>
+
     /*@Query("SELECT name FROM court")
     fun getCourtName(): String*/
 

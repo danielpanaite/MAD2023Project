@@ -7,21 +7,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.components.MonthCalendar
+import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
@@ -41,12 +38,17 @@ fun MyReservations(
     viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
+    val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
+
+    viewModel.setCourts(myReservationsUiState.reservationList.map { it.courtId })
+
     Scaffold(
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
             innerPadding ->
         MyReservationsBody(
             reservationList = myReservationsUiState.reservationList,
+            courtList = reservationCourtsState.courtList,
             //navController = rememberNavController(),
             modifier = modifier.padding(innerPadding),
             onReservationClick = navigateToEditReservation,
@@ -59,6 +61,7 @@ fun MyReservations(
 fun MyReservationsBody(
     modifier: Modifier = Modifier,
     reservationList: List<Reservation>,
+    courtList: List<Court>,
     //navController: NavController = rememberNavController(),
     onReservationClick: (Int) -> Unit,
     ){
@@ -67,14 +70,23 @@ fun MyReservationsBody(
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (reservationList.isEmpty()) {
-            Text(
-                text = stringResource(R.string.no_reservations_description),
-                style = MaterialTheme.typography.bodySmall
+        if (reservationList.isEmpty() && courtList.isEmpty()) {
+//            Card(modifier = Modifier.fillMaxWidth().padding(8.dp)){
+//                Text(
+//                    text = stringResource(R.string.no_reservations_description),
+//                    style = MaterialTheme.typography.headlineMedium,
+//                    modifier = Modifier.padding(16.dp)
+//                )
+//            }
+            MonthCalendar(
+                reservations = emptyList(),
+                courts = emptyList(),
+                onReservationClick = { onReservationClick(it.id!!) }
             )
         } else {
             MonthCalendar(
                 reservations = reservationList,
+                courts = courtList,
                 onReservationClick = { onReservationClick(it.id!!) }
             )
         }

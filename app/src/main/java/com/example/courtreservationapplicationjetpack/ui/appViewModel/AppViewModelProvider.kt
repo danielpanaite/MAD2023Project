@@ -13,10 +13,9 @@ import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailab
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesViewModel
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
-
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire Court app
@@ -54,7 +53,7 @@ object AppViewModelProvider {
 
         // Initializer for  MyReservationViewModel
         initializer {
-            MyReservationsViewModel(courtApplication().container.reservationRepository)
+            MyReservationsViewModel(courtApplication().container.reservationRepository, courtApplication().container.courtRepository)
         }
 
         // Initializer for AllSportsViewModel
@@ -69,7 +68,10 @@ object AppViewModelProvider {
 
         // Initializer for CourtReservationViewModel
         initializer {
-            CourtReservationViewModel(courtApplication().container.reservationRepository)
+            CourtReservationViewModel(
+                this.createSavedStateHandle(),
+                courtApplication().container.reservationRepository,
+                courtApplication().container.courtRepository)
         }
 
         initializer {

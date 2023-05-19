@@ -1,15 +1,15 @@
 package com.example.courtreservationapplicationjetpack.views.courts
 
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -17,17 +17,25 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -44,6 +52,7 @@ import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationsUiState
 import kotlinx.coroutines.CoroutineScope
@@ -52,16 +61,12 @@ import kotlinx.coroutines.launch
 
 
 object CourtReservation : NavigationDestination {
-        override val route  = "court_reservation"
-        override val titleRes = "Court Reservation"
-        override val icon = Icons.Default.Star
-        const val courtArg = "courtArg"
-        val routeWithArgs = "$route/{$courtArg}"
-
-    }
-
-
-
+    override val route  = "court_reservation"
+    override val titleRes = "Court Reservation"
+    override val icon = Icons.Default.Star
+    const val courtArg = "courtArg"
+    val routeWithArgs = "$route/{$courtArg}"
+}
 
 @ExperimentalMaterial3Api
 @Composable
@@ -108,21 +113,71 @@ fun ReservationEntryBody(
     onReservationValueChange: (ReservationDetails) -> Unit,
     onSaveClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    myReservationViewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ){
+    val courtUiState by myReservationViewModel.reservationCourtsState.collectAsState()
+    if(reservationsUiState.reservationDetails.courtId.isNotBlank()){
+        myReservationViewModel.setCourts(listOf(reservationsUiState.reservationDetails.courtId.toInt()))
+    }
     var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState()
+    val firstItemTranslationY by remember {
+        derivedStateOf {
+            when {
+                lazyListState.layoutInfo.visibleItemsInfo.isNotEmpty() &&
+                lazyListState.firstVisibleItemIndex == 0 ->
+                lazyListState.firstVisibleItemScrollOffset * .7f
+                else -> 0f
+            }
+        }
+    }
+    println("AAAAAAAAAAAAAAA" + courtUiState)
+    println("BBBBBBBBBBBBBBB" + reservationsUiState)
     LazyColumn (
         modifier = modifier
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        state = lazyListState
     ){
         item {
-            ReservationInputForm(reservationDetails = reservationsUiState.reservationDetails, onValueChange = onReservationValueChange)
+            Box{// Court image box
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(R.drawable.placeholder),
+                    contentDescription = "Court Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(200.dp)
+                        .graphicsLayer { translationY = firstItemTranslationY }
+                )
+                if(courtUiState.courtList.isNotEmpty()) {
+                    Text(
+                        text = courtUiState.courtList[0].name,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomStart)
+                            .padding(bottom = 32.dp, start = 16.dp)
+                            .shadow(50.dp),
+                        color = Color.White,
+                    )
+                }
+            }
+            ReservationInputForm(
+                reservationDetails = reservationsUiState.reservationDetails,
+                onValueChange = onReservationValueChange
+            )
         }
         item {
             Button(onClick = onSaveClick,
                 enabled = reservationsUiState.isEntryValid,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp))
             {
                 Text(text = "Save")
             }
@@ -130,7 +185,9 @@ fun ReservationEntryBody(
         item {
             OutlinedButton(onClick = { deleteConfirmationRequired = true },
                 enabled = reservationsUiState.isEntryValid,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp))
             {
                 Text(text = "Delete")
             }
@@ -149,63 +206,56 @@ fun ReservationEntryBody(
 }
 
 
-@SuppressLint("UnrememberedMutableState")
 @Composable
 fun ReservationInputForm(
     reservationDetails: ReservationDetails,
-    modifier: Modifier = Modifier,
-    onValueChange: (ReservationDetails) -> Unit ={}
+    onValueChange: (ReservationDetails) -> Unit = {}
 ){
-    Column(modifier=modifier.fillMaxWidth())
-    {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
-                .crossfade(true)
-                .build(),
-            placeholder = painterResource(R.drawable.placeholder),
-            contentDescription = "Court Image",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.height(200.dp)
+    Card( //text fields
+        modifier = Modifier
+            .fillMaxSize()
+            .offset(y = (-16).dp)
+    ){
+        OutlinedTextField(
+            value = reservationDetails.date ,
+            onValueChange = {onValueChange(reservationDetails.copy(date = it))},
+            label = {Text(text = "Date")},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            singleLine = true,
         )
-        Card(
-            modifier = Modifier.fillMaxSize().offset(y = (-16).dp)
-        ){
-            OutlinedTextField(
-                value = reservationDetails.date ,
-                onValueChange = {onValueChange(reservationDetails.copy(date = it))},
-                label = {Text(text = "Date")},
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                singleLine = true,
-            )
-            OutlinedTextField(
-                value =reservationDetails.slot ,
-                onValueChange = {onValueChange(reservationDetails.copy(slot = it))},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                label = {Text(text = "Time slot")},
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                singleLine = true
-            )
-            OutlinedTextField(
-                value = reservationDetails.additions ,
-                onValueChange = {onValueChange(reservationDetails.copy(additions = it))},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                label = {Text(text = "Notes")},
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                singleLine = true
-            )
-            OutlinedTextField(
-                value =reservationDetails.people ,
-                onValueChange = {onValueChange(reservationDetails.copy(people = it))},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = {Text(text = "People")},
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                singleLine = true
-            )
-        }
+        OutlinedTextField(
+            value =reservationDetails.slot ,
+            onValueChange = {onValueChange(reservationDetails.copy(slot = it))},
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            label = {Text(text = "Time slot")},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = reservationDetails.additions ,
+            onValueChange = {onValueChange(reservationDetails.copy(additions = it))},
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            label = {Text(text = "Notes")},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value =reservationDetails.people ,
+            onValueChange = {onValueChange(reservationDetails.copy(people = it))},
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = {Text(text = "People")},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            singleLine = true
+        )
     }
-
-
 }
 
 @Composable
