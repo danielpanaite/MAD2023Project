@@ -323,16 +323,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
                                     HourButtons(hours = slots)
 
-
-
-                                    Box(
-                                        modifier = Modifier
-                                            .size(16.dp)
-                                            .background(Color.White)
-                                            .shadow(10.dp, shape = RoundedCornerShape(8.dp))
-                                    ) {}
-
-
                                 }
                             }
                         }
