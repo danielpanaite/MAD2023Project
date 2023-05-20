@@ -74,6 +74,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -516,8 +517,8 @@ fun Ciao(){
                         .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
                 )
                 CalendarScreen()
-            }
 
+            }
         }
     }
 }
@@ -549,8 +550,72 @@ fun CalendarScreen() {
                 )
             }
         }
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "Timeslot disponibili per il giorno ${selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.Gray
+            )
+        }
+
+        TextGrid(listOf("10:00","11:00","12:00","13:00","14:00","15:00","16:00"))
     }
 }
+@Composable
+fun TextGrid(textList: List<String>) {
+    val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
+
+    Column {
+        repeat(rows) { rowIndex ->
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                for (columnIndex in 0 until 5) {
+                    val index = rowIndex * 5 + columnIndex
+                    if (index < textList.size) {
+                        OutlinedButton(
+                            onClick = {},
+                            modifier = Modifier
+                                .weight(1f)
+                                //.aspectRatio(1f),
+                                .height(50.dp)
+                                .padding(4.dp)
+                                    ,
+                            border = BorderStroke(1.dp, Color.Gray),
+                            shape = MaterialTheme.shapes.small,
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color.Black
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = textList[index],
+                                    style = MaterialTheme.typography.labelSmall,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .padding(2.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 
 @Composable
 fun DayButton(
@@ -626,7 +691,7 @@ private fun animateCircleColor(isSelected: Boolean): Color {
 @Preview(showBackground = true)
 @Composable
 fun CourtPreview(){
-    CalendarScreen()
+    TextGrid(listOf("10:00","11:00","12:00","13:00","14:00","15:00","16:00"))
 }
 
 
