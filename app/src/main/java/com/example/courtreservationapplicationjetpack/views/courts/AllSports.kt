@@ -582,13 +582,13 @@ fun TextGrid(textList: List<String>) {
                                 .weight(1f)
                                 .height(50.dp)
                                 .padding(4.dp)
+                                .clip(
+                                    if (isSelected) MaterialTheme.shapes.small else MaterialTheme.shapes.small
+                                )
                                 .background(if (isSelected) Color.Black else Color.Transparent)
                                 .border(
                                     BorderStroke(1.dp, if (isSelected) Color.Black else Color.Gray),
                                     shape = MaterialTheme.shapes.small
-                                )
-                                .clip(
-                                    if (isSelected) MaterialTheme.shapes.small else MaterialTheme.shapes.medium
                                 )
                                 .clickable { selectedButtonIndex.value = index },
                             contentAlignment = Alignment.Center
