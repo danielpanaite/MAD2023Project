@@ -78,7 +78,7 @@ object AppViewModelProvider {
         }
 
         initializer {
-            AchievementsViewModel(courtApplication().container.sportRepository)
+            AchievementsViewModel(courtApplication().container.sportRepository, courtApplication().container.achievementsRepository)
         }
 
 
