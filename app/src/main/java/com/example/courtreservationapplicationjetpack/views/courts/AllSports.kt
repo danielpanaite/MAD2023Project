@@ -563,9 +563,11 @@ fun CalendarScreen() {
         TextGrid(listOf("10:00","11:00","12:00","13:00","14:00","15:00","16:00"))
     }
 }
+
 @Composable
 fun TextGrid(textList: List<String>) {
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
+    val selectedButtonIndex = remember { mutableStateOf(-1) }
 
     Column {
         repeat(rows) { rowIndex ->
@@ -573,32 +575,33 @@ fun TextGrid(textList: List<String>) {
                 for (columnIndex in 0 until 5) {
                     val index = rowIndex * 5 + columnIndex
                     if (index < textList.size) {
-                        OutlinedButton(
-                            onClick = {},
+                        val isSelected = index == selectedButtonIndex.value
+
+                        Box(
                             modifier = Modifier
                                 .weight(1f)
-                                //.aspectRatio(1f),
                                 .height(50.dp)
                                 .padding(4.dp)
-                                    ,
-                            border = BorderStroke(1.dp, Color.Gray),
-                            shape = MaterialTheme.shapes.small,
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color.Black
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = textList[index],
-                                    style = MaterialTheme.typography.labelSmall,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
+                                .background(if (isSelected) Color.Black else Color.Transparent)
+                                .border(
+                                    BorderStroke(1.dp, if (isSelected) Color.Black else Color.Gray),
+                                    shape = MaterialTheme.shapes.small
                                 )
-                            }
+                                .clip(
+                                    if (isSelected) MaterialTheme.shapes.small else MaterialTheme.shapes.medium
+                                )
+                                .clickable { selectedButtonIndex.value = index },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = textList[index],
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) Color.White else Color.Black
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                            )
                         }
                     } else {
                         Spacer(
@@ -613,6 +616,7 @@ fun TextGrid(textList: List<String>) {
         }
     }
 }
+
 
 
 
