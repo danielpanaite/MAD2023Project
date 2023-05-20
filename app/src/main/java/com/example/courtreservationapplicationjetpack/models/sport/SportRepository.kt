@@ -22,5 +22,8 @@ interface SportRepository {
 
     suspend fun deleteSportByName(sportName: String, userId: Int)
 
+    suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?)
+
+
 
 }

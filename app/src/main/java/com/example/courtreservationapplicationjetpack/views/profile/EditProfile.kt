@@ -225,12 +225,6 @@ fun ProfileInputForm(
         }
     }
 
-Log.d("imageUri in ProfileInputForm", "${userDetails.imageUri}")
-    Log.d("imageUri in ProfileInputForm in uri form", "${Uri.parse(userDetails.imageUri)}")
-
-    Log.d("photoUri", "$photoUri")
-    Log.d("chosenPhotoUri", "$chosenPhoto")
-
     val chosenPhotUriState = rememberUpdatedState(chosenPhoto)
 
     if (chosenPhotUriState.value != chosenPhoto) {

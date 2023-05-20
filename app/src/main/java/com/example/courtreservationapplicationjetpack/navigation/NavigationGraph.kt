@@ -16,12 +16,16 @@ import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailab
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.views.MainScreen
 import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
+import com.example.courtreservationapplicationjetpack.views.profile.Achievements
+import com.example.courtreservationapplicationjetpack.views.profile.AchievementsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
 import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.NewAchievements
+import com.example.courtreservationapplicationjetpack.views.profile.NewAchievementsDestination
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
@@ -86,7 +90,9 @@ fun NavigationGraph(
                 navigateToEditProfileDestination = { navController.navigate("${EditProfileDestination.route}/${it}") },
                 navigateBack = { navController.navigateUp() },
                 navigateToSportPreferencesDestination = {navController.navigate(SportPreferencesDestination.route)},
-            )
+                navigateToAchievementsDestination = {navController.navigate(AchievementsDestination.route)},
+
+                )
 
         }
 
@@ -172,6 +178,27 @@ fun NavigationGraph(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
-    }
 
+        composable(
+            route = AchievementsDestination.route
+
+        ){
+            Achievements(
+                navController = navController,
+                navigateToNewAchievementsDestination = {navController.navigate(NewAchievementsDestination.route)},
+
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = NewAchievementsDestination.route
+
+        ){
+            NewAchievements(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+    }
 }

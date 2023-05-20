@@ -46,6 +46,7 @@ interface SportDao {
     @Query("DELETE FROM sport WHERE idUser = :userId AND sportName = :sportName")
     suspend fun deleteSportByName(sportName: String, userId: Int)
 
-
+    @Query("UPDATE sport SET achievements = :achievements WHERE sportName = :sportName AND idUser = :idUser")
+    suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?)
 
 }

@@ -100,6 +100,8 @@ fun Profile(
     modifier: Modifier = Modifier,
     navigateToEditProfileDestination: (Int) -> Unit,
     navigateToSportPreferencesDestination: () -> Unit,
+    navigateToAchievementsDestination: () -> Unit,
+
     navController: NavController,
     navigateBack: () -> Unit,
     viewModel: ProfileViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -136,7 +138,8 @@ fun Profile(
             navController = rememberNavController(),
             profileUiState = uiState.value,
             navigateToEditProfileDestination = navigateToEditProfileDestination,
-                    navigateToSportPreferencesDestination =navigateToSportPreferencesDestination
+                    navigateToSportPreferencesDestination =navigateToSportPreferencesDestination,
+            navigateToAchievementsDestination = navigateToAchievementsDestination
 
         )
     }
@@ -150,7 +153,8 @@ fun ProfileBody(
     navController: NavController,
     profileUiState: ProfileUiState,
     navigateToEditProfileDestination: (Int) -> Unit,
-    navigateToSportPreferencesDestination: () -> Unit
+    navigateToSportPreferencesDestination: () -> Unit,
+    navigateToAchievementsDestination: () -> Unit,
 
 ){
     /*
@@ -183,7 +187,9 @@ fun ProfileBody(
             item{
                 OptionsItemStyle(
                     profileUiState = profileUiState,
-                    navigateToSportPreferencesDestination = navigateToSportPreferencesDestination
+                    navigateToSportPreferencesDestination = navigateToSportPreferencesDestination,
+                            navigateToAchievementsDestination = navigateToAchievementsDestination
+
                 )
             }
             /*
@@ -207,10 +213,6 @@ private fun UserDetails(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        Log.d("imageUri in User Details", "${profileUiState.userDetails.imageUri}")
-        Log.d("imageUri in User Details in Uri form", "${Uri.parse(profileUiState.userDetails.imageUri)}")
-
 
         // User's image
         Image(
@@ -292,6 +294,8 @@ private fun UserDetails(
 @Composable
 private fun OptionsItemStyle(
     navigateToSportPreferencesDestination: () -> Unit,
+    navigateToAchievementsDestination: () -> Unit,
+
     profileUiState: ProfileUiState
 ) {
     Row(
@@ -371,12 +375,11 @@ private fun OptionsItemStyle(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            /*
-        .clickable(enabled = true) {
-            Toast
-                .makeText(item.title, Toast.LENGTH_SHORT)
-                .show()
-        }*/
+
+            .clickable(
+                onClick = {
+                    navigateToAchievementsDestination()
+                })
             .padding(all = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -174,6 +176,8 @@ fun SportsBody(
 
     }
 }
+
+
 @Composable
 private fun SportsList(
     sportsList: List<String>,
@@ -186,11 +190,11 @@ private fun SportsList(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(items = sportsList, key = { it }) { sport ->
-            val isChecked = remember {
+        itemsIndexed(items = sportsList.toList(), key = { index, _ -> index }) { index, sport ->
+            val isChecked = rememberSaveable {
                 mutableStateOf(initialLevels.containsKey(sport))
             }
-            val selectedLevel = remember {
+            val selectedLevel = rememberSaveable {
                 mutableStateOf(initialLevels[sport] ?: "")
             }
 
@@ -246,7 +250,6 @@ private fun SportsList(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

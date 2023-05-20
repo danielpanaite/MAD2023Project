@@ -22,6 +22,9 @@ class OfflineSportRepository (private val sportDao: SportDao) :
 
    override suspend fun deleteSportByName(sportName: String, userId: Int) = sportDao.deleteSportByName(sportName, userId)
 
+   override suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?) = sportDao.updateSportAchievements(sportName, idUser, achievements)
+
+
 
 
 }

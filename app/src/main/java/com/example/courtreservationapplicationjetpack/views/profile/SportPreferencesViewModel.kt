@@ -2,6 +2,8 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.util.Log
+import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
@@ -99,6 +101,7 @@ class SportPreferencesViewModel(
         }
     }
 
+   
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
