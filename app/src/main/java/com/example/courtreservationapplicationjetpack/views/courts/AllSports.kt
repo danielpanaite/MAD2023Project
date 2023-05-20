@@ -453,7 +453,7 @@ fun Ciao() {
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = lazyListState
     ) {
@@ -494,11 +494,12 @@ fun Ciao() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .offset(y = (-90).dp)
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         shape = MaterialTheme.shapes.large.copy(
-                            topStart = CornerSize(10.dp),
-                            topEnd = CornerSize(10.dp)
+                            topStart = CornerSize(20.dp),
+                            topEnd = CornerSize(20.dp)
                         )
                     )
             ) {
@@ -723,8 +724,8 @@ fun CalendarScreen() {
         TextGrid(listOf("10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"))
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .padding(16.dp)
+                .padding(horizontal = 0.dp, vertical = 8.dp)
+                //.padding(8.dp)
         ) {
             var pickerValue by remember { mutableStateOf(1) }
 
@@ -751,53 +752,6 @@ fun CalendarScreen() {
         }
 
 
-    }
-}
-
-@Composable
-fun PeoplePicker(
-    selectedValue: Int,
-    onValueSelected: (Int) -> Unit
-) {
-    val numbers = (1..5).toList()
-
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-            .wrapContentSize(Alignment.Center)
-    ) {
-        Text(
-            text = "Select number of people:",
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            numbers.forEach { number ->
-                val isSelected = number == selectedValue
-                val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                val background = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent
-
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(48.dp)
-                        .clickable { onValueSelected(number) }
-                        .background(background, CircleShape)
-                        .clip(CircleShape)
-                ) {
-                    Text(
-                        text = number.toString(),
-                        style = MaterialTheme.typography.labelMedium.copy(color = color),
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
-        }
     }
 }
 
