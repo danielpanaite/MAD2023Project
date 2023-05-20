@@ -140,15 +140,15 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-    Ciao()
-    //PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel)
+    //Ciao()
+    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navigateToCourtsAvailable = navigateToCourtsAvailable)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel) {
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navigateToCourtsAvailable: (String) -> Unit) {
     val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
@@ -297,6 +297,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     modifier = Modifier
                                         .shadow(10.dp, RoundedCornerShape(0.dp))
                                         .fillMaxSize()
+                                        .clickable{navigateToCourtsAvailable("${it.id}")}
                                         .height(100.dp),
                                     sport = it.sport
                                 )
@@ -348,7 +349,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     }
 
 
-                                    HourButtons(hours = slots)
+                                    HourButtons(hours = slots, navigateToCourtsAvailable = {navigateToCourtsAvailable(pickedSport)})
 
                                 }
                             }
@@ -364,7 +365,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HourButton(hour: String) {
+fun HourButton(hour: String, navigateToCourtsAvailable: (String) -> Unit) {
     Box(
         modifier = Modifier
             .clickable {}
@@ -391,13 +392,13 @@ fun HourButton(hour: String) {
 
 
 @Composable
-fun HourButtons(hours: List<String>) {
+fun HourButtons(hours: List<String>, navigateToCourtsAvailable: (String) -> Unit) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(hours.size) { index ->
-            HourButton(hour = hours[index])
+            HourButton(hour = hours[index], navigateToCourtsAvailable = navigateToCourtsAvailable)
         }
     }
 }
@@ -437,459 +438,14 @@ fun CoilImage(modifier: Modifier = Modifier, sport: String) {
     }
 }
 
-//--------------------------------------------------------------------------------
-@Composable
-fun Ciao() {
-    val lazyListState = rememberLazyListState()
-    val firstItemTranslationY by remember {
-        derivedStateOf {
-            when {
-                lazyListState.layoutInfo.visibleItemsInfo.isNotEmpty() &&
-                        lazyListState.firstVisibleItemIndex == 0 ->
-                    lazyListState.firstVisibleItemScrollOffset * .7f
-                else -> 0f
-            }
-        }
-    }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        state = lazyListState
-    ) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .background(Color.Red)
-                        .align(Alignment.TopCenter)
-                )
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
-                        .crossfade(true)
-                        .build(),
-                    placeholder = painterResource(R.drawable.placeholder),
-                    contentDescription = "Court Image",
-                    contentScale = ContentScale.Crop,
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.0001f to Color.Transparent,
-                                1f to Color.Black
-                            )
-                        )
-                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                )
-            }
-        }
-
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = (-90).dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = MaterialTheme.shapes.large.copy(
-                            topStart = CornerSize(20.dp),
-                            topEnd = CornerSize(20.dp)
-                        )
-                    )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(3f)) {
-                            Text(
-                                text = "Centro Sportivo Robilant",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Piazza Generale, Torino",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.Gray,
-                                textAlign = TextAlign.Start
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .align(Alignment.CenterVertically)
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.ic_calcio5),
-                                contentDescription = "Sport icon",
-                                colorFilter = ColorFilter.tint(Color.Black),
-                                modifier = Modifier
-                                    .size(29.dp)
-                                    .align(Alignment.Center)
-                            )
-                        }
-                    }
-
-                    Divider(
-                        color = Color.LightGray,
-                        thickness = 1.dp,
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .height(1.dp)
-                            .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
-                    )
-
-                    CalendarScreen()
-                }
-            }
-        }
-
-        item {
-            Button(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp)
-            ) {
-                Text(text = "Save")
-            }
-        }
-
-        item {
-            OutlinedButton(
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp)
-            ) {
-                Text(text = "Delete")
-            }
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    Box(modifier = Modifier.fillMaxSize()) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(200.dp)
-//                .background(Color.Red)
-//                .align(Alignment.TopCenter)
-//        )
-//        AsyncImage(
-//            model = ImageRequest.Builder(LocalContext.current)
-//                .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
-//                .crossfade(true)
-//                .build(),
-//            placeholder = painterResource(R.drawable.placeholder),
-//            contentDescription = "Court Image",
-//            contentScale = ContentScale.Crop,
-//        )
-//        Box(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .background(
-//                    brush = Brush.verticalGradient(
-//                        0f to Color.Transparent,
-//                        0.0001f to Color.Transparent,
-//                        1f to Color.Black
-//                    )
-//                )
-//                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-//        )
-//
-//        //QUESTA
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .fillMaxHeight()
-//                .offset(y = (185).dp)
-//                .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large)
-//        ) {
-//            Column {
-//                Box {
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        modifier = Modifier.padding(16.dp)
-//                    ) {
-//                        Column(modifier = Modifier.weight(3f)) {
-//                            Text(
-//                                text = "Centro Sportivo Robilant",
-//                                style = MaterialTheme.typography.headlineSmall,
-//                                fontWeight = FontWeight.Bold
-//                            )
-//                            Text(
-//                                text = "Piazza Generale, Torino",
-//                                style = MaterialTheme.typography.labelSmall,
-//                                color = Color.Gray,
-//                                textAlign = TextAlign.Start
-//                            )
-//                        }
-//                        Box(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .align(Alignment.CenterVertically)
-//                        ) {
-//                            Image(
-//                                painter = painterResource(R.drawable.ic_calcio5),
-//                                contentDescription = "Sport icon",
-//                                colorFilter = ColorFilter.tint(Color.Black),
-//                                modifier = Modifier
-//                                    .size(29.dp)
-//                                    .align(Alignment.Center)
-//                            )
-//                        }
-//                    }
-//                }
-//
-//                Divider(
-//                    color = Color.LightGray,
-//                    thickness = 1.dp,
-//                    modifier = Modifier
-//                        .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-//                        .height(1.dp)
-//                        .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
-//                )
-//                CalendarScreen()
-//
-//            }
-//        }
-//    }
-}
-@Composable
-fun CalendarScreen() {
-    val scrollState = rememberScrollState()
-    val startDate = LocalDate.now()
-    val selectedDate = remember { mutableStateOf(LocalDate.now()) }
-
-    Column {
-        Row(
-            modifier = Modifier
-                .horizontalScroll(scrollState)
-                .padding(horizontal = 0.dp, vertical = 8.dp)
-        ) {
-            val daysToShow = 100
-            repeat(daysToShow) { index ->
-                val currentDate = startDate.plusDays(index.toLong())
-                val dayOfWeek =
-                    currentDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                val dayOfMonth = currentDate.dayOfMonth
-                val month = currentDate.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-
-                DayButton(
-                    dayOfWeek = dayOfWeek,
-                    dayOfMonth = dayOfMonth,
-                    month = month,
-                    isSelected = selectedDate.value == currentDate,
-                    onDaySelected = { selectedDate.value = currentDate }
-                )
-            }
-        }
-        Row(
-            modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = "Timeslot disponibili per il giorno ${
-                    selectedDate.value.format(
-                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                    )
-                }",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray
-            )
-        }
-
-        TextGrid(listOf("10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"))
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 0.dp, vertical = 8.dp)
-                //.padding(8.dp)
-        ) {
-            var pickerValue by remember { mutableStateOf(1) }
-
-            Text(
-                text = "Numero di persone coinvolte: $pickerValue",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
-                modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-            )
-
-            NumberPicker(
-                modifier = Modifier
-                    .width(120.dp)
-                    .align(Alignment.CenterVertically),
-                value = pickerValue,
-                range = 0..10,
-                onValueChange = {
-                    pickerValue = it
-                },
-                dividersColor = Color.Black.copy(alpha = 0.7f),
-            )
-        }
-
-
-    }
-}
-
-
-@Composable
-fun TextGrid(textList: List<String>) {
-    val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
-    val selectedButtonIndex = remember { mutableStateOf(-1) }
-
-    Column {
-        repeat(rows) { rowIndex ->
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 0.dp)) {
-                for (columnIndex in 0 until 5) {
-                    val index = rowIndex * 5 + columnIndex
-                    if (index < textList.size) {
-                        val isSelected = index == selectedButtonIndex.value
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(50.dp)
-                                .padding(4.dp)
-                                .clip(
-                                    if (isSelected) MaterialTheme.shapes.small else MaterialTheme.shapes.small
-                                )
-                                .background(if (isSelected) Color.Black else Color.Transparent)
-                                .border(
-                                    BorderStroke(1.dp, if (isSelected) Color.Black else Color.Gray),
-                                    shape = MaterialTheme.shapes.small
-                                )
-                                .clickable { selectedButtonIndex.value = index },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = textList[index],
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isSelected) Color.White else Color.Black
-                                ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                            )
-                        }
-                    } else {
-                        Spacer(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(2.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-
-
-
-@Composable
-fun DayButton(
-    dayOfWeek: String,
-    dayOfMonth: Int,
-    month: String,
-    isSelected: Boolean,
-    onDaySelected: () -> Unit
-) {
-    val textColor = animateTextColor(isSelected)
-    val circleColor = animateCircleColor(isSelected)
-
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 2.dp)
-            .height(90.dp)
-            .width(50.dp)
-            .background(Color.Transparent, RoundedCornerShape(8.dp))
-            .clickable(onClick = onDaySelected),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = dayOfWeek.uppercase(Locale.getDefault()),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = circleColor
-        )
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(if (isSelected) Color.Black else Color.Transparent, shape = CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = dayOfMonth.toString(),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = textColor
-            )
-        }
-        Text(
-            text = month,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = circleColor
-        )
-    }
-}
-@Composable
-private fun animateTextColor(isSelected: Boolean): Color {
-    return animateColorAsState(
-        targetValue = if (isSelected) Color.White else Color.Gray,
-        animationSpec = tween(durationMillis = 200) // Specify the desired duration
-    ).value
-}
-
-@Composable
-private fun animateCircleColor(isSelected: Boolean): Color {
-    return animateColorAsState(
-        targetValue = if (isSelected) Color.Black else Color.Gray,
-        animationSpec = tween(durationMillis = 200) // Specify the desired duration
-    ).value
-}
-
-
-
-
-//--------------------------------------------------------------------------------
 
 
 
 @Preview(showBackground = true)
 @Composable
 fun CourtPreview(){
-    Ciao()
+
 }
 
 
