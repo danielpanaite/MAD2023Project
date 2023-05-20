@@ -5,11 +5,17 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +31,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -39,6 +48,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +78,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +98,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 object AllSportsDestination : NavigationDestination {
     override val route  = "all_sports"
@@ -457,39 +470,155 @@ fun Ciao(){
                 .offset(y = (185).dp)
                 .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Column(modifier = Modifier.weight(3f)) {
-                    Text(
-                        text = "Centro Sportivo Robilant",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Piazza Generale, Torino",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Start
-                    )
+            Column {
+                Box {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(3f)) {
+                            Text(
+                                text = "Centro Sportivo Robilant",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Piazza Generale, Torino",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .align(Alignment.CenterVertically)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.ic_calcio5),
+                                contentDescription = "Sport icon",
+                                colorFilter = ColorFilter.tint(Color.Black),
+                                modifier = Modifier
+                                    .size(29.dp)
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    }
                 }
-                Box(modifier = Modifier.weight(1f).align(Alignment.CenterVertically)) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_calcio5),
-                        contentDescription = "Sport icon",
-                        colorFilter = ColorFilter.tint(Color.Black),
-                        modifier = Modifier.size(29.dp).align(Alignment.Center)
-                    )
-                }
+
+                Divider(
+                    color = Color.LightGray,
+                    thickness = 1.dp,
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                        .height(1.dp)
+                        .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
+                )
+                CalendarScreen()
+            }
+
+        }
+    }
+}
+@Composable
+fun CalendarScreen() {
+    val scrollState = rememberScrollState()
+    val startDate = LocalDate.now()
+    val selectedDate = remember { mutableStateOf(LocalDate.now()) }
+
+    Column {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(scrollState)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            val daysToShow = 100
+            repeat(daysToShow) { index ->
+                val currentDate = startDate.plusDays(index.toLong())
+                val dayOfWeek = currentDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                val dayOfMonth = currentDate.dayOfMonth
+                val month = currentDate.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+
+                DayButton(
+                    dayOfWeek = dayOfWeek,
+                    dayOfMonth = dayOfMonth,
+                    month = month,
+                    isSelected = selectedDate.value == currentDate,
+                    onDaySelected = { selectedDate.value = currentDate }
+                )
             }
         }
     }
-
-
-
 }
+
+@Composable
+fun DayButton(
+    dayOfWeek: String,
+    dayOfMonth: Int,
+    month: String,
+    isSelected: Boolean,
+    onDaySelected: () -> Unit
+) {
+    val textColor = animateTextColor(isSelected)
+    val circleColor = animateCircleColor(isSelected)
+
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 2.dp)
+            .height(90.dp)
+            .width(50.dp)
+            .background(Color.Transparent, RoundedCornerShape(8.dp))
+            .clickable(onClick = onDaySelected),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = dayOfWeek.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = circleColor
+        )
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(if (isSelected) Color.Black else Color.Transparent, shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = dayOfMonth.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+        }
+        Text(
+            text = month,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = circleColor
+        )
+    }
+}
+@Composable
+private fun animateTextColor(isSelected: Boolean): Color {
+    return animateColorAsState(
+        targetValue = if (isSelected) Color.White else Color.Gray,
+        animationSpec = tween(durationMillis = 200) // Specify the desired duration
+    ).value
+}
+
+@Composable
+private fun animateCircleColor(isSelected: Boolean): Color {
+    return animateColorAsState(
+        targetValue = if (isSelected) Color.Black else Color.Gray,
+        animationSpec = tween(durationMillis = 200) // Specify the desired duration
+    ).value
+}
+
+
+
+
 //--------------------------------------------------------------------------------
 
 
@@ -497,7 +626,7 @@ fun Ciao(){
 @Preview(showBackground = true)
 @Composable
 fun CourtPreview(){
-    Ciao()
+    CalendarScreen()
 }
 
 
