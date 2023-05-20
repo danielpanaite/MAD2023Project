@@ -82,6 +82,8 @@ fun NewAchievements(
     onNavigateUp: () -> Unit,
     viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val achievementsUi by viewModel.achievementsUi.collectAsState()
+
     val favoritesSportsUi by viewModel.favoritesSportsUi.collectAsState()
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = false) },
@@ -108,7 +110,8 @@ fun NewAchievements(
                 NewAchievementsBody(
                     sportsList = favoritesSportsUi.sportsList,
                     modifier = modifier,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    achievementsUi = achievementsUi
                 )
             }
         }
@@ -120,17 +123,16 @@ fun NewAchievements(
 fun NewAchievementsBody(
     sportsList: List<Sport>,
     modifier: Modifier = Modifier,
-    viewModel: AchievementsViewModel
+    viewModel: AchievementsViewModel,
+    achievementsUi: AchievementsUi
 ) {
 
     val coroutineScope = rememberCoroutineScope()
 
-
+Log.d("achivements", "$achievementsUi")
     var isMenuExpanded by remember { mutableStateOf(false) }
 
-    Log.d("sportList", "$sportsList")
     val sportNameList = sportsList.map{it.sportName}
-    Log.d("sportlistname", "${sportNameList}")
 
     var selectedSport by remember { mutableStateOf("") }
 
@@ -145,7 +147,7 @@ fun NewAchievementsBody(
     }
 
     val selectedDate = remember { mutableStateOf<LocalDate?>(null) }
-    val savedData = "$selectedSport,$date,$certificateName,$additionalInfo"
+    val savedData = "$selectedSport;$date;$certificateName;$additionalInfo|"
 
     var showDatePicker by remember {mutableStateOf(false)}
     val dateFormat = SimpleDateFormat("dd/MM/yyyy")

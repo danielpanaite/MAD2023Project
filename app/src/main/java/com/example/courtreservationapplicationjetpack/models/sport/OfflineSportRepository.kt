@@ -24,6 +24,7 @@ class OfflineSportRepository (private val sportDao: SportDao) :
 
    override suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?) = sportDao.updateSportAchievements(sportName, idUser, achievements)
 
+    override fun getAchievements(idUser: Int): Flow<List<String>> = sportDao.getAchievements(idUser)
 
 
 

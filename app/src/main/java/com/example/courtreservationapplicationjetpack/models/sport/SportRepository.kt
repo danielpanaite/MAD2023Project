@@ -24,6 +24,6 @@ interface SportRepository {
 
     suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?)
 
-
+    fun getAchievements(idUser: Int): Flow<List<String>>
 
 }

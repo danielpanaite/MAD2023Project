@@ -49,4 +49,8 @@ interface SportDao {
     @Query("UPDATE sport SET achievements = :achievements WHERE sportName = :sportName AND idUser = :idUser")
     suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?)
 
+
+    @Query("SELECT achievements FROM sport WHERE idUser = :idUser")
+    fun getAchievements(idUser: Int) : Flow<List<String>>
+
 }

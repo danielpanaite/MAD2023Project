@@ -31,10 +31,23 @@ class AchievementsViewModel(
                 initialValue = FavoritesSportsUi()
             )
 
+    val achievementsUi: StateFlow<AchievementsUi> =
+        sportRepository.getAchievements(1)
+            .filterNotNull()
+            .map { AchievementsUi(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = AchievementsUi()
+
+            )
+
     suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String) {
         sportRepository.updateSportAchievements(sportName, idUser, achievements)
 
     }
+
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
@@ -42,3 +55,5 @@ class AchievementsViewModel(
 }
 
 data class  FavoritesSportsUi(val sportsList: List<Sport> = listOf())
+
+data class  AchievementsUi(val achievementsList: List<String> = listOf())

@@ -2,11 +2,18 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -45,14 +52,14 @@ fun Achievements(
 
     viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val favoritesSportsUi by viewModel.favoritesSportsUi.collectAsState()
+    val achievementsUi by viewModel.achievementsUi.collectAsState()
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = false) },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         Box(modifier = modifier.padding(innerPadding)){
             AchievementsBody(
-                sportsList = favoritesSportsUi.sportsList,
+                achievementList = achievementsUi.achievementsList,
                 modifier = modifier.padding(innerPadding),
                 viewModel = viewModel
             )
@@ -70,16 +77,42 @@ fun Achievements(
 
 @Composable
 fun AchievementsBody(
-    sportsList: List<Sport>,
+    achievementList: List<String>,
     modifier: Modifier = Modifier,
     viewModel: AchievementsViewModel
 ) {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(top = 60.dp)){
-        Text("prova")
+    Box(modifier = modifier) {
+        LazyColumn(
+
+        ) {
+            items(achievementList) { achievement ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
+                    // elevation = 4.dp
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+
+                        val achievementValues = achievement?.split("|")?.filter{it.isNotEmpty()}
+                            ?.map{
+                                val fields = it.split(";")
+                                if (fields != null) {
+                                    Text(text = "Sport: ${fields[0]}")
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(text = "Title: ${fields[2]}")
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(text = "Date: ${fields[1]}")
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(text = "Description: ${fields[3]}")
+                                }
+
+                            }
+
+
+                    }
+                }
+            }
+        }
     }
-
-    Log.d("sportList", "$sportsList")
-
 }
