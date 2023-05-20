@@ -1,7 +1,9 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Place
@@ -68,6 +72,7 @@ fun NewAchievements(
     navController: NavController,
     modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
+    navigateToAchievementsDestination: () -> Unit,
     viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     viewModelSports : AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
@@ -80,7 +85,8 @@ fun NewAchievements(
 
 
     Scaffold(
-        topBar = { CourtTopAppBar(canNavigateBack = false) },
+        topBar = { CourtTopAppBar(canNavigateBack = true,
+            navigateUp = onNavigateUp) },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         Box(
@@ -104,7 +110,8 @@ fun NewAchievements(
                 NewAchievementsBody(
                     sportsList = sportsUiState.sportsList,
                     modifier = modifier,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    navigateToAchievementsDestination  =navigateToAchievementsDestination
                 )
             }
         }
@@ -116,7 +123,8 @@ fun NewAchievements(
 fun NewAchievementsBody(
     sportsList: List<String>,
     modifier: Modifier = Modifier,
-    viewModel: AchievementsViewModel
+    viewModel: AchievementsViewModel,
+    navigateToAchievementsDestination: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -185,8 +193,10 @@ fun NewAchievementsBody(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .height(56.dp)
-                .background(Color.White, RoundedCornerShape(30.dp))
-                .onFocusChanged { focusState ->
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(90.dp)
+                )                .onFocusChanged { focusState ->
                     if (focusState.isFocused) {
                         showDatePicker = true
                     }
@@ -227,6 +237,7 @@ fun NewAchievementsBody(
                 coroutineScope.launch {
                     viewModel.addAchievement(selectedSport, 1, date, certificateName, additionalInfo)
                 }
+                navigateToAchievementsDestination()
                 //salva i dati qui
             }, modifier = Modifier
                 .fillMaxWidth()

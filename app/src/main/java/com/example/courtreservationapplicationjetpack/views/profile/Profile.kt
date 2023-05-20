@@ -112,8 +112,7 @@ fun Profile(
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            CourtTopAppBar(canNavigateBack = true,
-                navigateUp = navigateBack)
+            CourtTopAppBar(canNavigateBack = false)
         },
         /*
         floatingActionButton = {

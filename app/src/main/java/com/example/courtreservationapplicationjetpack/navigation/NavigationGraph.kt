@@ -80,7 +80,8 @@ fun NavigationGraph(
             EditProfile(
                 navController = navController,
                 navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
             )
         }
         composable(
@@ -197,8 +198,12 @@ fun NavigationGraph(
         ){
             NewAchievements(
                 navController = navController,
-                onNavigateUp = { navController.navigateUp() }
-            )
+                onNavigateUp = { navController.navigateUp() },
+                navigateToAchievementsDestination = {navController.navigate(AchievementsDestination.route)},
+
+
+
+                )
         }
     }
 }

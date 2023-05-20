@@ -84,7 +84,8 @@ fun SportPreferences(
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
     Scaffold(
-        topBar = { CourtTopAppBar(canNavigateBack = false) },
+        topBar = { CourtTopAppBar(canNavigateBack = true,
+            navigateUp = onNavigateUp) },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         SportsBody(

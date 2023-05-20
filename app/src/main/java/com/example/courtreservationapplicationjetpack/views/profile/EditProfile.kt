@@ -123,6 +123,7 @@ fun EditProfile(
     navController: NavController,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
+    navigateToProfileDestination: () ->Unit,
     viewModel: EditProfileViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -141,6 +142,7 @@ fun EditProfile(
         ProfileEntryBody(
             profileUiState = viewModel.profileUiState,
             onProfileValueChange = viewModel::updateUiState,
+            navigateToProfileDestination = navigateToProfileDestination,
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.updateProfile()
@@ -157,8 +159,10 @@ fun ProfileEntryBody(
     profileUiState: ProfileUiState,
     onProfileValueChange: (UserDetails) -> Unit,
     onSaveClick: () -> Unit,
-    modifier: Modifier = Modifier
-){
+    modifier: Modifier = Modifier,
+    navigateToProfileDestination: () ->Unit,
+
+    ){
 
     LazyColumn (
         modifier = modifier
@@ -176,6 +180,8 @@ fun ProfileEntryBody(
                 //val updatedDetails = profileUiState.userDetails.copy(imageUri = profileUiState.userDetails.imageUri)
                 // Call the onSaveClick callback
                 onSaveClick()
+                navigateToProfileDestination()
+
             },
                 enabled = profileUiState.isEntryValid,
                 modifier = Modifier.fillMaxWidth())
