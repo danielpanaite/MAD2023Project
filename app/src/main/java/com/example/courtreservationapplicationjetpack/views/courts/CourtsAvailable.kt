@@ -75,6 +75,7 @@ import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -99,18 +100,21 @@ fun CourtsAvailable(
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
 
-    viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
 
 ) {
-    val allSportsUiState by viewModel.allSportsUiState.collectAsState()
+    val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
     Scaffold(
         topBar = {
             //CourtTopAppBar(canNavigateBack = false)
         },
         //bottomBar = { BottomBar(navController = navController as NavHostController) }
         bottomBar = {
-            Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {},
                     modifier = Modifier
@@ -206,7 +210,17 @@ private fun CourtItem(
 
 //--------------------------------------------------------------------------------
 @Composable
-fun Ciao(courtID: String, viewModel: AllSportsViewModel) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel) {
+    val courtState = remember { mutableStateOf<Court?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getCourt(courtID.toInt()).collect { courtValue ->
+            courtState.value = courtValue
+        }
+    }
+
+    val court = courtState.value
+
     val lazyListState = rememberLazyListState()
     val firstItemTranslationY by remember {
         derivedStateOf {
@@ -282,12 +296,12 @@ fun Ciao(courtID: String, viewModel: AllSportsViewModel) {
                     ) {
                         Column(modifier = Modifier.weight(3f)) {
                             Text(
-                                text = "Centro Sportivo Robilant",
+                                text = "${court?.name}",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Piazza Generale, Torino",
+                                text = "${court?.address}}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Start

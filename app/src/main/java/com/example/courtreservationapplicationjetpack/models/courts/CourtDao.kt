@@ -23,6 +23,9 @@ interface CourtDao {
     //prendi tutti i campi di quello sport
     @Query("SELECT * from court WHERE sport = :sport")
     fun getCourtsSport(sport: String): Flow<List<Court>>
+
+    @Query("SELECT * from court WHERE id = :id")
+    fun getCourt(id: Int): Flow<Court>
     /*
     @Query("DELETE FROM court_table")
     suspend fun  deleteAll()
