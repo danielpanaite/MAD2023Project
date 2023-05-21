@@ -84,9 +84,8 @@ object CourtsAvailableDestination : NavigationDestination {
     override val route  = "my_courts"
     override val titleRes = "My Courts"
     override val icon = Icons.Default.Star
-    const val sportArg = "sportArg"
-    val routeWithArgs = "$route/{$sportArg}"
-
+    private const val courtID = "courtID"
+    val routeWithArgs = "$route/{$courtID}"
 }
 
 
@@ -95,16 +94,16 @@ object CourtsAvailableDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun CourtsAvailable(
-
+    courtID: String,
     navController: NavController,
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
 
-    viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
 
 ) {
-    val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
+    val allSportsUiState by viewModel.allSportsUiState.collectAsState()
     Scaffold(
         topBar = {
             //CourtTopAppBar(canNavigateBack = false)
@@ -126,7 +125,7 @@ fun CourtsAvailable(
 
     ) {
         _ ->
-        Ciao()
+        Ciao(courtID = courtID, viewModel = viewModel)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -207,7 +206,7 @@ private fun CourtItem(
 
 //--------------------------------------------------------------------------------
 @Composable
-fun Ciao() {
+fun Ciao(courtID: String, viewModel: AllSportsViewModel) {
     val lazyListState = rememberLazyListState()
     val firstItemTranslationY by remember {
         derivedStateOf {

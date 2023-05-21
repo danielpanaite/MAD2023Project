@@ -124,7 +124,6 @@ object AllSportsDestination : NavigationDestination {
 fun AllSports(
     navController: NavController,
     modifier: Modifier = Modifier,
-    navigateToCourtsAvailable: (String) -> Unit,
     //cercare di riprendere uesta stringa per prendere tutti i campi di quello sport
     onNavigateUp: () -> Unit,
 
@@ -141,14 +140,14 @@ fun AllSports(
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
     //Ciao()
-    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navigateToCourtsAvailable = navigateToCourtsAvailable)
+    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navController = navController)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navigateToCourtsAvailable: (String) -> Unit) {
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController) {
     val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
@@ -297,7 +296,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     modifier = Modifier
                                         .shadow(10.dp, RoundedCornerShape(0.dp))
                                         .fillMaxSize()
-                                        .clickable{navigateToCourtsAvailable("${it.id}")}
+                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}") }
                                         .height(100.dp),
                                     sport = it.sport
                                 )
@@ -349,7 +348,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     }
 
 
-                                    HourButtons(hours = slots, navigateToCourtsAvailable = {navigateToCourtsAvailable(pickedSport)})
+                                    HourButtons(hours = slots, navigateToCourtsAvailable = { TODO() })
 
                                 }
                             }

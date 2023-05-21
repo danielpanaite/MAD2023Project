@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.navigation
 
 
+import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -132,17 +133,19 @@ fun NavigationGraph(
         ){
             AllSports(
                 navController = navController,
-                navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
+//                navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
         composable(
             route = CourtsAvailableDestination.routeWithArgs,
-            arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {
+            arguments = listOf(navArgument("courtID") {
                 type = NavType.StringType
             })
         ){
+            Log.d("Args", it.arguments?.getString("courtID").toString())
             CourtsAvailable(
+                courtID = it.arguments?.getString("courtID").toString(),
                 navController = navController,
                 navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
             )
