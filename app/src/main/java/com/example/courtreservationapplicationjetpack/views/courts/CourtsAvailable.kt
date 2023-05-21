@@ -252,9 +252,16 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel) {
                         .background(Color.Red)
                         .align(Alignment.TopCenter)
                 )
+                val imageUrl = when (court?.sport) {
+                    "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
+                    "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+                    "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                    else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
+                }
                 AsyncImage(
+                    modifier = Modifier.fillMaxWidth(),
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                        .data(imageUrl)
                         .crossfade(true)
                         .build(),
                     placeholder = painterResource(R.drawable.placeholder),
