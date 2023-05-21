@@ -49,7 +49,6 @@ fun MyReservations(
         MyReservationsBody(
             reservationList = myReservationsUiState.reservationList,
             courtList = reservationCourtsState.courtList,
-            //navController = rememberNavController(),
             modifier = modifier.padding(innerPadding),
             onReservationClick = navigateToEditReservation,
         )
@@ -62,7 +61,6 @@ fun MyReservationsBody(
     modifier: Modifier = Modifier,
     reservationList: List<Reservation>,
     courtList: List<Court>,
-    //navController: NavController = rememberNavController(),
     onReservationClick: (Int) -> Unit,
     ){
     Column(
@@ -71,13 +69,6 @@ fun MyReservationsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         if (reservationList.isEmpty() && courtList.isEmpty()) {
-//            Card(modifier = Modifier.fillMaxWidth().padding(8.dp)){
-//                Text(
-//                    text = stringResource(R.string.no_reservations_description),
-//                    style = MaterialTheme.typography.headlineMedium,
-//                    modifier = Modifier.padding(16.dp)
-//                )
-//            }
             MonthCalendar(
                 reservations = emptyList(),
                 courts = emptyList(),

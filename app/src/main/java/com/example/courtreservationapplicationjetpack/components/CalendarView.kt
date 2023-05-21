@@ -297,27 +297,24 @@ private fun LazyItemScope.ReservationInformation(
             }
         }
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
-            Box(
+            Column(
                 modifier = Modifier
                     .background(color = itemBackgroundColor)
-                    .weight(1f)
                     .fillMaxHeight(),
             ) {
-                Column {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = court.name,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Black,
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = court.sport,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
+                Text(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    text = court.name,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = court.address,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         }
     }

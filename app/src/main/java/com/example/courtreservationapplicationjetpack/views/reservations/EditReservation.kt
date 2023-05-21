@@ -34,7 +34,6 @@ object EditReservationDestination : NavigationDestination {
 @Composable
 fun EditReservation(
     navController: NavController,
-    navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EditReservationViewModel = viewModel(factory = AppViewModelProvider.Factory)

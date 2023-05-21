@@ -125,7 +125,6 @@ fun NavigationGraph(
         ){
             EditReservation(
                 navController = navController,
-                navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
@@ -195,7 +194,6 @@ fun NavigationGraph(
         ){
             CourtReservation(
                 navController = navController,
-                navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
 
             )

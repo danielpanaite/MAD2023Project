@@ -72,7 +72,6 @@ object CourtReservation : NavigationDestination {
 @Composable
 fun CourtReservation(
     modifier: Modifier = Modifier,
-    navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     canNavigateBack: Boolean = true,
     navController: NavController,
@@ -132,8 +131,6 @@ fun ReservationEntryBody(
             }
         }
     }
-    println("AAAAAAAAAAAAAAA" + courtUiState)
-    println("BBBBBBBBBBBBBBB" + reservationsUiState)
     LazyColumn (
         modifier = modifier
             .fillMaxWidth(),
@@ -216,17 +213,22 @@ fun ReservationInputForm(
             .fillMaxSize()
             .offset(y = (-16).dp)
     ){
-        OutlinedTextField(
-            value = reservationDetails.date ,
-            onValueChange = {onValueChange(reservationDetails.copy(date = it))},
-            label = {Text(text = "Date")},
+        Text(
+            text = "Reservation date",
+            style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            singleLine = true,
+                .padding(top = 16.dp, start = 16.dp),
+        )
+        Text(
+            text = reservationDetails.date,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 4.dp),
         )
         OutlinedTextField(
-            value =reservationDetails.slot ,
+            value = reservationDetails.slot ,
             onValueChange = {onValueChange(reservationDetails.copy(slot = it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             label = {Text(text = "Time slot")},
@@ -236,7 +238,7 @@ fun ReservationInputForm(
             singleLine = true
         )
         OutlinedTextField(
-            value = reservationDetails.additions ,
+            value = reservationDetails.additions,
             onValueChange = {onValueChange(reservationDetails.copy(additions = it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             label = {Text(text = "Notes")},
