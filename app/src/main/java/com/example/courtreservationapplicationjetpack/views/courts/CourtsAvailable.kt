@@ -110,6 +110,19 @@ fun CourtsAvailable(
             //CourtTopAppBar(canNavigateBack = false)
         },
         //bottomBar = { BottomBar(navController = navController as NavHostController) }
+        bottomBar = {
+            Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp)
+                ) {
+                    Text(text = "Save")
+                }
+            }
+
+        }
 
     ) {
         _ ->
@@ -308,17 +321,6 @@ fun Ciao() {
 
                     CalendarScreen()
                 }
-            }
-        }
-
-        item {
-            Button(
-                onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp)
-            ) {
-                Text(text = "Save")
             }
         }
     }
