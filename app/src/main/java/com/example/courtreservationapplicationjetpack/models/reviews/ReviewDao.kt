@@ -11,11 +11,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ReviewDao {
 
-    @Query("SELECT * from review WHERE user = :user")
+    @Query("SELECT * from review WHERE user = :user ORDER BY id ASC")
     fun getAllUserReviews(user: Int): Flow<List<Review>>
 
     @Query("SELECT * from review WHERE user = :user AND court = :court")
     fun getReviewByUserAndCourt(user: Int, court: Int): Flow<Review>
+
+    @Query("SELECT * from review WHERE court = :court")
+    fun getAllCourtReviews(court: Int): Flow<List<Review>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(review: Review)

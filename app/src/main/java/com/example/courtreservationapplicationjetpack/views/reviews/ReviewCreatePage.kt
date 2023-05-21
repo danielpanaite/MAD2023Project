@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -106,62 +107,66 @@ fun CreateForm(
     val rating = remember {
         mutableStateOf(0)
     }
-    Card(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ){
-        if(reviewUiState.review.id == null && court != null){
-            reviewUiState.review.user = 1
-            reviewUiState.review.court = court.id
-            reviewUiState.review.date = LocalDate.now().format(reservationFormatter)
-        }else{
-            println(reviewUiState.review)
-            rating.value = reviewUiState.review.rating
-        }
-        Column(modifier = Modifier.fillMaxSize()){
-            OutlinedTextField(
-                value = reviewUiState.review.review ,
-                onValueChange = {onReviewValueChange(reviewUiState.review.copy(review = it))},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                label = {Text(text = "Review")},
-                modifier = Modifier
-                    .fillMaxWidth(),
-                singleLine = false
-            )
-            RatingBar(
-                value = rating.value.toFloat(),
-                config = RatingBarConfig()
-                    .style(RatingBarStyle.HighLighted)
-                    .size(32.dp)
-                    .activeColor(MaterialTheme.colorScheme.primary),
-                onValueChange = {
-                    rating.value = it.toInt()
-                },
-                onRatingChanged = {
-                    onReviewValueChange(reviewUiState.review.copy(rating = it.toInt()))
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 16.dp, bottom = 16.dp)
-            )
-            Button(onClick = onSaveClick,
-                enabled = reviewUiState.isEntryValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp))
-            {
-                Text(text = "Submit")
-            }
-            if(reviewUiState.review.id != null) {
-                OutlinedButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp)
-                )
-                {
-                    Text(text = "Delete")
+    LazyColumn(modifier = Modifier.fillMaxSize()){
+        item{
+            Card(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ){
+                if(reviewUiState.review.id == null && court != null){
+                    reviewUiState.review.user = 1
+                    reviewUiState.review.court = court.id
+                    reviewUiState.review.date = LocalDate.now().format(reservationFormatter)
+                }else{
+                    println(reviewUiState.review)
+                    rating.value = reviewUiState.review.rating
+                }
+                Column(modifier = Modifier.fillMaxSize()){
+                    OutlinedTextField(
+                        value = reviewUiState.review.review ,
+                        onValueChange = {onReviewValueChange(reviewUiState.review.copy(review = it))},
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        label = {Text(text = "Review")},
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        singleLine = false
+                    )
+                    RatingBar(
+                        value = rating.value.toFloat(),
+                        config = RatingBarConfig()
+                            .style(RatingBarStyle.HighLighted)
+                            .size(32.dp)
+                            .activeColor(MaterialTheme.colorScheme.primary),
+                        onValueChange = {
+                            rating.value = it.toInt()
+                        },
+                        onRatingChanged = {
+                            onReviewValueChange(reviewUiState.review.copy(rating = it.toInt()))
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 16.dp, bottom = 16.dp)
+                    )
+                    Button(onClick = onSaveClick,
+                        enabled = reviewUiState.isEntryValid,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp))
+                    {
+                        Text(text = "Submit")
+                    }
+                    if(reviewUiState.review.id != null) {
+                        OutlinedButton(
+                            onClick = onDeleteClick,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp)
+                        )
+                        {
+                            Text(text = "Delete")
+                        }
+                    }
                 }
             }
         }

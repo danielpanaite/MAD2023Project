@@ -28,6 +28,8 @@ import com.example.courtreservationapplicationjetpack.views.profile.SportPrefere
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservations
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPage
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePage
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPage
@@ -156,6 +158,18 @@ fun NavigationGraph(
             })
         ){
             ReviewCreatePage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = CourtReviewPageDestination.routeWithArgs,
+            arguments = listOf(navArgument(CourtReviewPageDestination.courtIdArg) {
+                type = NavType.IntType
+            })
+        ){
+            CourtReviewPage(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() }
             )

@@ -8,6 +8,8 @@ interface ReviewRepository {
 
     fun getReviewByUserAndCourt(user: Int, court: Int): Flow<Review>
 
+    fun getAllCourtReviews(court: Int): Flow<List<Review>>
+
     suspend fun insert(review: Review)
 
     suspend fun update(review: Review)

@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack.views.reviews
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,7 @@ import com.example.courtreservationapplicationjetpack.models.reservations.Reserv
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.ui.theme.Orange200
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
@@ -120,11 +123,16 @@ fun ReviewList(
     reviewList: List<Review>,
     onReviewClick: (Court) -> Unit,
 ){
-    LazyColumn(modifier = Modifier.fillMaxSize()){
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
+    ){
         items(courtList.size){ci ->
             Card(modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                .padding(start = 16.dp, end = 16.dp),
+                elevation = CardDefaults.cardElevation( 8.dp )
             ){
                 Surface(color = Color.White){
                     Row(modifier = Modifier
@@ -188,31 +196,23 @@ fun ReviewList(
                         Column(modifier = Modifier
                             .padding(end = 16.dp)
                         ){
-                            Text(
-                                text = "My review:",
-                                textAlign = TextAlign.Center,
+                            RatingBar(
+                                value = reviewList.filter { it.court == courtList[ci].id }[0].rating.toFloat(),
+                                config = RatingBarConfig()
+                                    .style(RatingBarStyle.HighLighted)
+                                    .size(16.dp)
+                                    .activeColor(Orange200),
+                                onValueChange = {},
+                                onRatingChanged = {},
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp),
-                                color = Color.Gray
+                                    .align(Alignment.Start)
+                                    .padding(16.dp)
                             )
                             Text(
                                 text = reviewList.filter { it.court == courtList[ci].id }[0].review,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
-                            )
-                            RatingBar(
-                                value = reviewList.filter { it.court == courtList[ci].id }[0].rating.toFloat(),
-                                config = RatingBarConfig()
-                                    .style(RatingBarStyle.HighLighted)
-                                    .size(10.dp)
-                                    .activeColor(Color.Gray),
-                                onValueChange = {},
-                                onRatingChanged = {},
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(start = 16.dp, bottom = 16.dp)
+                                    .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
                             )
                         }
                     }

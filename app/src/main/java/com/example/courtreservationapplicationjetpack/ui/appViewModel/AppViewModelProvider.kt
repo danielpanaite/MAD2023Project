@@ -16,6 +16,7 @@ import com.example.courtreservationapplicationjetpack.views.profile.SportPrefere
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewViewModel
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreateViewModel
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 
@@ -87,9 +88,17 @@ object AppViewModelProvider {
         }
 
         initializer {
-            ReviewCreateViewModel(this.createSavedStateHandle(),
+            ReviewCreateViewModel(
+                this.createSavedStateHandle(),
                 courtApplication().container.reviewRepository,
                 courtApplication().container.courtRepository
+            )
+        }
+
+        initializer {
+            CourtReviewViewModel(
+                this.createSavedStateHandle(),
+                courtApplication().container.reviewRepository
             )
         }
 
