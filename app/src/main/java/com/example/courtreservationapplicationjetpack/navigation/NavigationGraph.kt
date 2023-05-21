@@ -28,7 +28,10 @@ import com.example.courtreservationapplicationjetpack.views.profile.SportPrefere
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservations
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
-
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePage
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPage
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPageDestination
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +52,8 @@ fun NavigationGraph(
             MainScreen(
                 navController = navController,
                 //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
-                navigateToAllSports = {navController.navigate(AllSportsDestination.route)}
+                navigateToAllSports = {navController.navigate(AllSportsDestination.route)},
+                navigateToReviews = {navController.navigate(ReviewMainPageDestination.route)}
             )
         }
 
@@ -93,8 +97,6 @@ fun NavigationGraph(
 
         composable(
             route = MyReservationsDestination.route
-
-
         ){
             MyReservations(
                 navController = navController,
@@ -125,6 +127,7 @@ fun NavigationGraph(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
+        //All courts list
         composable(
             route = AllSportsDestination.route
 
@@ -135,6 +138,29 @@ fun NavigationGraph(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
+        //Review main page
+        composable(
+            route = ReviewMainPageDestination.route
+        ){
+            ReviewMainPage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() },
+                navigateToCreateReview = { navController.navigate("${ReviewCreatePageDestination.route}/$it") }
+            )
+        }
+
+        composable(
+            route = ReviewCreatePageDestination.routeWithArgs,
+            arguments = listOf(navArgument(ReviewCreatePageDestination.courtIdArg) {
+                type = NavType.IntType
+            })
+        ){
+            ReviewCreatePage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        
         composable(
             route = CourtsAvailableDestination.routeWithArgs,
             arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {

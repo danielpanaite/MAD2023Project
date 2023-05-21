@@ -16,6 +16,8 @@ import com.example.courtreservationapplicationjetpack.views.profile.SportPrefere
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreateViewModel
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire Court app
@@ -78,6 +80,18 @@ object AppViewModelProvider {
             SportPreferencesViewModel(courtApplication().container.courtRepository)
         }
 
+        initializer {
+            ReviewViewModel(
+                courtApplication().container.reviewRepository
+            )
+        }
+
+        initializer {
+            ReviewCreateViewModel(this.createSavedStateHandle(),
+                courtApplication().container.reviewRepository,
+                courtApplication().container.courtRepository
+            )
+        }
 
 
     }
