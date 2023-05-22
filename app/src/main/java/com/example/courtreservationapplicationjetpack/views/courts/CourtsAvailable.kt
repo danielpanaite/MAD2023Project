@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.views.courts
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,20 +17,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.example.courtreservationapplicationjetpack.models.courts.Court
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 
 object CourtsAvailableDestination : NavigationDestination {
     override val route  = "my_courts"
@@ -50,7 +47,6 @@ fun CourtsAvailable(
 
     navController: NavController,
     modifier: Modifier = Modifier,
-    navigateToCourtReservation: (Int) -> Unit,
 
     viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
@@ -67,8 +63,7 @@ fun CourtsAvailable(
             innerPadding ->
         CourtsBody(
             courtList = courtsAvailableUiState.courtsAvailableList,
-            modifier = modifier.padding(innerPadding),
-            onCourtClick = navigateToCourtReservation,
+            modifier = modifier.padding(innerPadding)
         )
     }
 
@@ -78,9 +73,7 @@ fun CourtsAvailable(
 fun CourtsBody(
     courtList: List<Court>,
     modifier: Modifier = Modifier,
-    onCourtClick: (Int) -> Unit,
-
-    ){
+){
 
     Column(
         modifier = modifier
@@ -97,8 +90,7 @@ fun CourtsBody(
             )
         } else {
             CourtList(
-                courtList = courtList,
-                onCourtClick = { onCourtClick(it.id) }
+                courtList = courtList
             )
         }
     }
@@ -107,15 +99,13 @@ fun CourtsBody(
 @Composable
 private fun CourtList(
     courtList: List<Court>,
-    modifier: Modifier = Modifier,
-    onCourtClick: (Court) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(items = courtList, //key = { it.id }
         ) { court ->
             CourtItem(court = court,
                 //navigateToDetailsReservation = navigateToDetailsReservation
-                onCourtClick = onCourtClick
             )
             Divider()
         }
@@ -127,14 +117,9 @@ private fun CourtList(
 private fun CourtItem(
     court: Court,
     modifier: Modifier = Modifier,
-    onCourtClick: (Court) -> Unit,
-
     ) {
     Row(modifier = modifier
         .fillMaxWidth()
-        .clickable {
-            onCourtClick(court)
-        }
         .padding(vertical = 16.dp)
     ) {
         Text(text = court.name,  modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)

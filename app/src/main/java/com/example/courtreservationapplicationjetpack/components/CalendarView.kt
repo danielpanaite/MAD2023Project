@@ -29,7 +29,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,12 +91,9 @@ fun MonthCalendar(
     var selection by remember { mutableStateOf<CalendarDay?>(null) }
     val daysOfWeek = remember { daysOfWeek() }
     val colors: List<Int> = listOf(R.color.blue_200, R.color.orange_200, R.color.green_200, R.color.red_200, R.color.cyan_200, R.color.yellow_200)
-    val reservationsInSelectedDate = remember {
-        derivedStateOf {
-            val date = selection?.date
-            if (date == null) emptyList() else reservationList[date].orEmpty()
-        }
-    }
+    val date = selection?.date
+    val reservationsInSelectedDate =
+        if (date == null) emptyList() else reservationList[date].orEmpty()
     //main column that contains the whole page
     Column( modifier = Modifier
         .fillMaxSize()
@@ -169,7 +165,7 @@ fun MonthCalendar(
                             )
                         }
                     }else {
-                        items(items = reservationsInSelectedDate.value) { reservation ->
+                        items(items = reservationsInSelectedDate) { reservation ->
                             ReservationInformation(reservation, courts.find { it.id == reservation.courtId }!!, onReservationClick, colors)
                         }
                     }

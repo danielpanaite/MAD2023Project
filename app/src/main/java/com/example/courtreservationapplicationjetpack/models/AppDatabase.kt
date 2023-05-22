@@ -10,10 +10,10 @@ import com.example.courtreservationapplicationjetpack.models.reservations.Reserv
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationDao
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.models.reviews.ReviewDao
+import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import com.example.courtreservationapplicationjetpack.models.sport.SportDao
 import com.example.courtreservationapplicationjetpack.models.user.User
 import com.example.courtreservationapplicationjetpack.models.user.UserDao
-import com.example.courtreservationapplicationjetpack.models.sport.Sport
 
 
 /**
@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     // Setting this option in your app's database builder means that Room
                     // permanently deletes all data from the tables in your database when it
                     // attempts to perform a migration with no defined migration path.
-                    .fallbackToDestructiveMigration()
+                    //.fallbackToDestructiveMigration()
                     .createFromAsset("database/fields.db")
                     .build()
                     .also { Instance = it }

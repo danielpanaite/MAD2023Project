@@ -9,24 +9,23 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.courtreservationapplicationjetpack.views.courts.AllSports
-import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
-import com.example.courtreservationapplicationjetpack.views.courts.CourtReservation
-import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailable
-import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.views.MainScreen
 import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
-import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
-import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
-import com.example.courtreservationapplicationjetpack.views.profile.Profile
+import com.example.courtreservationapplicationjetpack.views.courts.AllSports
+import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
+import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailable
+import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
+import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
+import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservations
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPage
 import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPageDestination
@@ -182,20 +181,6 @@ fun NavigationGraph(
         ){
             CourtsAvailable(
                 navController = navController,
-                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
-            )
-        }
-
-        composable(
-            route = CourtReservation.routeWithArgs,
-            arguments = listOf(navArgument(CourtReservation.courtArg) {
-                type = NavType.IntType
-            })
-        ){
-            CourtReservation(
-                navController = navController,
-                onNavigateUp = { navController.navigateUp() }
-
             )
         }
 

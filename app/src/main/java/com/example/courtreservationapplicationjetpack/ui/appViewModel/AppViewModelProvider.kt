@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
-import com.example.courtreservationapplicationjetpack.views.courts.CourtReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
@@ -67,14 +66,6 @@ object AppViewModelProvider {
         // Initializer for CourtAvailableViewModel
         initializer {
             CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository)
-        }
-
-        // Initializer for CourtReservationViewModel
-        initializer {
-            CourtReservationViewModel(
-                this.createSavedStateHandle(),
-                courtApplication().container.reservationRepository,
-                courtApplication().container.courtRepository)
         }
 
         initializer {

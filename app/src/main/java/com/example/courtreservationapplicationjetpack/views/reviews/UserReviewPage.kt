@@ -219,7 +219,6 @@ fun ReviewList(
                                     onValueChange = {},
                                     onRatingChanged = {},
                                     modifier = Modifier.fillMaxWidth().weight(3f)
-
                                 )
                                 Text(
                                     text = LocalDate.parse(reviewList.filter { it.court == courtList[ci].id }[0].date, reservationFormatter).format(toReservationFormatter),
