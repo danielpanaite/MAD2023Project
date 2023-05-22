@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -50,6 +51,8 @@ import com.example.courtreservationapplicationjetpack.views.reservations.MyReser
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object ReviewMainPageDestination : NavigationDestination {
     override val route = "review_main_page"
@@ -67,11 +70,14 @@ fun ReviewMainPage(
     viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
+    val reservationFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
     val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
     val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
     val reviewUiState by reviewViewModel.myReviewsUiState.collectAsState()
 
-    viewModel.setCourts(myReservationsUiState.reservationList.map { it.courtId })
+    viewModel.setCourts(myReservationsUiState.reservationList.filter{ LocalDate.parse(it.date, reservationFormatter).isBefore(LocalDate.now()) }.map { it.courtId })
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Write your review") },
@@ -123,6 +129,10 @@ fun ReviewList(
     reviewList: List<Review>,
     onReviewClick: (Court) -> Unit,
 ){
+    val reservationFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val toReservationFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy")
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -196,18 +206,28 @@ fun ReviewList(
                         Column(modifier = Modifier
                             .padding(end = 16.dp)
                         ){
-                            RatingBar(
-                                value = reviewList.filter { it.court == courtList[ci].id }[0].rating.toFloat(),
-                                config = RatingBarConfig()
-                                    .style(RatingBarStyle.HighLighted)
-                                    .size(16.dp)
-                                    .activeColor(Orange200),
-                                onValueChange = {},
-                                onRatingChanged = {},
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(16.dp)
-                            )
+                            Row(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                            ){
+                                RatingBar(
+                                    value = reviewList.filter { it.court == courtList[ci].id }[0].rating.toFloat(),
+                                    config = RatingBarConfig()
+                                        .style(RatingBarStyle.HighLighted)
+                                        .size(18.dp)
+                                        .activeColor(Orange200),
+                                    onValueChange = {},
+                                    onRatingChanged = {},
+                                    modifier = Modifier.fillMaxWidth().weight(3f)
+
+                                )
+                                Text(
+                                    text = LocalDate.parse(reviewList.filter { it.court == courtList[ci].id }[0].date, reservationFormatter).format(toReservationFormatter),
+                                    modifier = Modifier.fillMaxWidth().weight(1f).offset(y = (-1).dp),
+                                    fontWeight = FontWeight.ExtraLight,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                             Text(
                                 text = reviewList.filter { it.court == courtList[ci].id }[0].review,
                                 modifier = Modifier
