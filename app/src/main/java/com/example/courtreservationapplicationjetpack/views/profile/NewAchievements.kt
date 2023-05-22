@@ -4,15 +4,20 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +26,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -31,6 +37,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,8 +47,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -128,118 +137,166 @@ fun NewAchievementsBody(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    Log.d("sports", "$sportsList")
     var isMenuExpanded by remember { mutableStateOf(false) }
     var selectedSport by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var certificateName by remember { mutableStateOf("") }
     var additionalInfo by remember { mutableStateOf("") }
     val selectedDate = remember { mutableStateOf<LocalDate?>(null) }
-    //val savedData = "$selectedSport;$date;$certificateName;$additionalInfo|"
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormat = SimpleDateFormat("dd/MM/yyyy")
 
     Column(modifier.padding(top = 5.dp)) {
-        Box(modifier = Modifier.wrapContentSize()) {
-            OutlinedButton(
-                onClick = { isMenuExpanded = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = selectedSport,
-                    fontWeight = FontWeight.Bold
-                )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 2.dp)
-                )
-            }
-            DropdownMenu(
-                expanded = isMenuExpanded,
-                onDismissRequest = { isMenuExpanded = false },
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
-            ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier
+                .height(56.dp)
+                .padding(bottom = 16.dp)) {
+                OutlinedButton(
+                    onClick = { isMenuExpanded = true },
+                    modifier = modifier
+                ) {
+                    if (selectedSport.isEmpty()) {
+                        Text(
+                            text = "Choose the sport",
+                            color = Color.Gray
+                        )
+                    } else {
+                        Text(
+                            text = selectedSport,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 2.dp)
+                    )
+                }
+                DropdownMenu(
+                    expanded = isMenuExpanded,
+                    onDismissRequest = { isMenuExpanded = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
 
-
-                sportsList.forEach { sport ->
-                    Log.d("sport", "$sport")
-                    DropdownMenuItem(
-                        modifier = Modifier,
-                        text = { Text(sport, color = Color.Black) },
-
-                        onClick = {
-                            selectedSport = sport
-                            //onSportChange(selectedSport)
-                            isMenuExpanded = false
-                        })
+                    sportsList.forEach { sport ->
+                        Log.d("sport", "$sport")
+                        DropdownMenuItem(
+                            modifier = Modifier,
+                            text = { Text(sport, color = Color.Black) },
+                            onClick = {
+                                selectedSport = sport
+                                isMenuExpanded = false
+                            }
+                        )
+                    }
                 }
             }
+            Box() {
+                OutlinedButton(onClick = { showDatePicker =true }) {
+                    if (date.isEmpty()) {
+                        Text(
+                            text = "Insert Date",
+                            color = Color.Gray
+                        )
+                    } else {
+                        Text(
+                            text = date,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 2.dp)
+                    )
+                }
+
+            }
+
         }
 
-        OutlinedTextField(
-            value = date,
-            onValueChange = {
-                if (!showDatePicker) {
-                    date = it
-                }
-            },
-            label = { Text("Data") },
-            readOnly = true,
+
+        /*
+
+        Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .height(56.dp)
-                .background(
-                    color = Color.White,
-                    shape = RoundedCornerShape(90.dp)
-                )                .onFocusChanged { focusState ->
-                    if (focusState.isFocused) {
-                        showDatePicker = true
+                .height(60.dp)
+                .background(Color.White),
+            onClick = {showDatePicker = true}
+        ) {
+            OutlinedTextField(
+                value = date,
+                onValueChange = {
+                    if (!showDatePicker) {
+                        date = it
                     }
-                }
-        )
+                },
+                label = { Text("Data") },
+                shape = RoundedCornerShape(50.dp),
+                readOnly = true,
+                singleLine = true,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        */
+
+
         if (showDatePicker) {
-            DateTimeDialog(state = rememberUseCaseState(visible = true),
+            DateTimeDialog(
+                state = rememberUseCaseState(visible = true),
                 selection = DateTimeSelection.Date { newDate ->
                     selectedDate.value = newDate
                     val localDate = newDate.toEpochDay()
                     date = dateFormat.format(localDate)
                     showDatePicker = false
-                })
+                }
+            )
         }
 
         OutlinedTextField(
             value = certificateName,
             onValueChange = { certificateName = it },
             label = { Text("Nome del certificato") },
+            shape = RoundedCornerShape(50.dp),
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .height(56.dp)
-                .background(Color.White, RoundedCornerShape(30.dp))
+                .height(60.dp)
+                .background(Color.White)
         )
         OutlinedTextField(
             value = additionalInfo,
             onValueChange = { additionalInfo = it },
             label = { Text("Informazioni aggiuntive") },
+            shape = RoundedCornerShape(50.dp),
+
+            singleLine = false,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .height(56.dp)
-                .background(Color.White, RoundedCornerShape(30.dp))
+                .background(Color.White)
+
+
         )
         Button(
             onClick = {
                 coroutineScope.launch {
-                    viewModel.addAchievement(selectedSport, 1, date, certificateName, additionalInfo)
+                    viewModel.addAchievement(
+                        selectedSport,
+                        1,
+                        date,
+                        certificateName,
+                        additionalInfo
+                    )
                 }
                 navigateToAchievementsDestination()
                 //salva i dati qui
-            }, modifier = Modifier
+            },
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
                 .height(56.dp)

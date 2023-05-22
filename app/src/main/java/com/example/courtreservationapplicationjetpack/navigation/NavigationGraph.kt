@@ -176,7 +176,9 @@ fun NavigationGraph(
             SportPreferences(
                 navController = navController,
                 //navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
+
             )
         }
 

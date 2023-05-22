@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -85,9 +86,11 @@ fun SportPreferences(
     navController: NavController,
     modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
+    navigateToProfileDestination: () ->Unit,
     viewModel: SportPreferencesViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
+
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true,
             navigateUp = onNavigateUp) },
@@ -96,7 +99,10 @@ fun SportPreferences(
         SportsBody(
             sportsList = allSportsUiState.sportsList,
             modifier = modifier.padding(innerPadding),
-            viewModel = viewModel
+            viewModel = viewModel,
+            navigateToProfileDestination = navigateToProfileDestination
+
+
         )
     }
 }
@@ -105,8 +111,10 @@ fun SportPreferences(
 fun SportsBody(
     sportsList: List<String>,
     modifier: Modifier = Modifier,
-    viewModel: SportPreferencesViewModel
-){
+    viewModel: SportPreferencesViewModel,
+    navigateToProfileDestination: () ->Unit,
+
+    ){
     val selectedSportsWithLevels by viewModel.sportPreferencesUiState.collectAsState()
 
     var selectedSports by remember { mutableStateOf(emptySet<String>()) }
@@ -117,6 +125,7 @@ fun SportsBody(
     selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
 
 
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -142,8 +151,9 @@ fun SportsBody(
                             val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
                             viewModel.deleteSports(1, uncheckedSports)
 
+                            Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
 
-
+                            navigateToProfileDestination()
 
                         }
                     },

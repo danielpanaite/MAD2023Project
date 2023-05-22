@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -38,6 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -83,15 +87,22 @@ fun Achievements(
 
             )
 
-            FloatingActionButton(onClick = { navigateToNewAchievementsDestination() },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(20.dp)
-                .background(color = Color.Magenta)
+            FloatingActionButton(
+                onClick = { navigateToNewAchievementsDestination() },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp),
+                containerColor = MaterialTheme.colors.primary, // Set the background color to primary color
+                contentColor = MaterialTheme.colors.onPrimary, // Set the content color to match the onPrimary color
+                shape = CircleShape // Set the shape to CircleShape for a round button
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add", modifier = Modifier.background(color = Color.Magenta))
-
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = "Add",
+                    modifier = Modifier.background(color = MaterialTheme.colors.primary)
+                )
             }
+
         }
 
     }
@@ -106,19 +117,28 @@ fun AchievementsBody(
     val coroutineScope = rememberCoroutineScope()
 
     if (achievementList.isNullOrEmpty()) {
-        Box(modifier = modifier.fillMaxSize()) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .verticalScroll(rememberScrollState())
+        ) {
             Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-
-                modifier = Modifier.fillMaxSize().padding(5.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
                     text = "You don't have any achievements saved, click on the add button to insert a new one",
-                    style = MaterialTheme.typography.h5
+
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+
                 )
             }
         }
+
+
     } else {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
@@ -136,7 +156,6 @@ fun AchievementsBody(
         }
     }
 }
-
 @Composable
 fun AchievementsItem(
     achievement: Achievements,
@@ -147,11 +166,14 @@ fun AchievementsItem(
             .fillMaxWidth()
             .padding(vertical = 8.dp),
     ) {
-        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                .fillMaxWidth()
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Text(
                     text = "Sport: ${achievement.sportName}",
                     style = MaterialTheme.typography.subtitle2
@@ -161,6 +183,22 @@ fun AchievementsItem(
                     text = "Date: ${achievement.date}",
                     style = MaterialTheme.typography.subtitle2
                 )
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.Red
+                        )
+                    }
+                }
             }
             Text(
                 text = "Title: ${achievement.idUser}",
@@ -172,21 +210,7 @@ fun AchievementsItem(
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colors.primary
-                    )
-                }
-            }
         }
     }
 }
+
