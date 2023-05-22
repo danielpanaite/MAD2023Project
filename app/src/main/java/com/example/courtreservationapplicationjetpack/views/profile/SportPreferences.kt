@@ -45,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -120,29 +121,15 @@ fun SportsBody(
     ) {
         Button(onClick = {
             coroutineScope.launch {
-                Log.d("SportsBody", "sportsWithLevels: $sportsWithLevels")
-
                 val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
                     Sport(1,  sportName, masteryLevel, null)
                     viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
                 }
-
-
                 val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
-
-                Log.d("Unchecked sports", "$uncheckedSports")
-
-                Log.d("sportList", "$sportsList")
-
-                Log.d("selectedSports", "$selectedSports")
-
-
                 viewModel.deleteSports(1, uncheckedSports)
-                //viewModel.insertOrUpdateSportsWithLevels(sports)
-
-                //navigateToMyReservations()
             }
-        }) {
+        }, modifier = Modifier.wrapContentSize().align(CenterHorizontally)
+        ) {
             Text(text = "Save", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
         }
         Text(
@@ -154,13 +141,10 @@ fun SportsBody(
         Log.d("sportList with levels", "$sportsWithLevels")
 
         SportsList(
-            viewModel =viewModel,
+            viewModel = viewModel,
             sportsList = sportsList,
             onSportCheckedChange = { sport, isChecked, masteryLevel ->
                 if (isChecked) {
-                    Log.d("asteryLevel passato a sportList", "$masteryLevel")
-
-                    println("masteryLevel passato a sportList $masteryLevel")
                     selectedSports += sport
                     sportsWithLevels[sport] = masteryLevel // Update mastery level for the selected sport in the map
                 } else {
@@ -169,9 +153,7 @@ fun SportsBody(
                 }
             },
             selectedSportsWithLevels = selectedSportsWithLevels,
-            initialLevels = selectedSportsWithLevels.sportsList.associateBy({it.sportName}, {it.masteryLevel?:""})
-
-
+            initialLevels = selectedSportsWithLevels.sportsList.associateBy({it.sportName}, {it.masteryLevel ?: ""})
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -196,7 +178,7 @@ private fun SportsList(
                 mutableStateOf(initialLevels.containsKey(sport))
             }
             val selectedLevel = rememberSaveable {
-                mutableStateOf(initialLevels[sport] ?: "")
+                mutableStateOf(initialLevels[sport] ?: "Beginner")
             }
 
             // Check if the sport exists in the user's preference
