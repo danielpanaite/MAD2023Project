@@ -593,10 +593,6 @@ fun AdditionsInput(onAdditionsChanged: (String) -> Unit) {
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                 unfocusedIndicatorColor = Color.Gray
             ),
-//            shape = RoundedCornerShape(
-//                topStart = CornerSize(8.dp),
-//                topEnd = CornerSize(8.dp)
-//            )
         )
     }
 }
