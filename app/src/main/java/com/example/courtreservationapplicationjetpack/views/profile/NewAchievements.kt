@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -156,6 +157,10 @@ fun NewAchievementsBody(
     val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     var date by remember { mutableStateOf<LocalDate?>(null) }
 
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var message by remember {
+        mutableStateOf("")
+    }
 
 
     Column(modifier.padding(top = 5.dp)) {
@@ -237,34 +242,6 @@ fun NewAchievementsBody(
 
         }
 
-
-        /*
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .height(60.dp)
-                .background(Color.White),
-            onClick = {showDatePicker = true}
-        ) {
-            OutlinedTextField(
-                value = date,
-                onValueChange = {
-                    if (!showDatePicker) {
-                        date = it
-                    }
-                },
-                label = { Text("Data") },
-                shape = RoundedCornerShape(50.dp),
-                readOnly = true,
-                singleLine = true,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        */
-
-
         if (showDatePicker) {
             DateTimeDialog(
                 state = rememberUseCaseState(visible = showDatePicker),
@@ -303,16 +280,32 @@ fun NewAchievementsBody(
         )
         Button(
             onClick = {
-                coroutineScope.launch {
-                    viewModel.addAchievement(
-                        selectedSport,
-                        1,
-                        date.toString(),
-                        certificateName,
-                        additionalInfo
-                    )
+
+                if(selectedSport!="" && date.toString()!="" && certificateName!=""){
+                    coroutineScope.launch {
+                        viewModel.addAchievement(
+                            selectedSport,
+                            1,
+                            date.toString(),
+                            certificateName,
+                            additionalInfo
+                        )
+                    }
+                    navigateToAchievementsDestination()
+                }else{
+                    if(selectedSport==""){
+                        message = "Select a sport"
+                        showErrorDialog = true
+                    }else if(date.toString() =="" || date == null){
+                        message = "Select a date"
+                        showErrorDialog = true
+                    }else if(certificateName == ""){
+                        message = "Insert a correct certificate name"
+                        showErrorDialog = true
+                    }
+
                 }
-                navigateToAchievementsDestination()
+
                 //salva i dati qui
             },
             modifier = Modifier
@@ -322,6 +315,18 @@ fun NewAchievementsBody(
                 .background(Color.White, RoundedCornerShape(16.dp))
         ) {
             Text(text = "Salva")
+        }
+        if (showErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showErrorDialog = false },
+                title = { Text(text = "Errore") },
+                text = { Text(text = message) },
+                confirmButton = {
+                    Button(onClick = { showErrorDialog = false }) {
+                        Text(text = "Ok")
+                    }
+                }
+            )
         }
     }
 }
