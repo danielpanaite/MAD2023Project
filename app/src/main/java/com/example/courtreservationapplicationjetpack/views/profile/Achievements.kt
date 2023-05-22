@@ -27,6 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -37,7 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -129,11 +134,12 @@ fun AchievementsBody(
                 Text(
                     text = "You don't have any achievements saved, click on the add button to insert a new one",
 
-                    fontWeight = FontWeight.Bold,
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
 
                 )
+
             }
         }
 
@@ -160,6 +166,11 @@ fun AchievementsItem(
     achievement: Achievements,
     onDeleteClick: () -> Unit
 ) {
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) }
+
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,7 +199,9 @@ fun AchievementsItem(
                     contentAlignment = Alignment.TopEnd
                 ) {
                     IconButton(
-                        onClick = onDeleteClick,
+                        onClick = {
+                            showDialog.value = true
+                        },
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
@@ -198,6 +211,30 @@ fun AchievementsItem(
                         )
                     }
                 }
+            }
+            if (showDialog.value) {
+                AlertDialog(
+                    onDismissRequest = { showDialog.value = false },
+                    title = { Text("Delete Achievement") },
+                    text = { Text("Are you sure you want to delete this achievement?") },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showDialog.value = false
+                                onDeleteClick()
+                            }
+                        ) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = { showDialog.value = false }
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
             }
             Text(
                 text = "Title: ${achievement.title}",

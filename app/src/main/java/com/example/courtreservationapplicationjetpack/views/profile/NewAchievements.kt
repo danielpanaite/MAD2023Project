@@ -118,11 +118,11 @@ fun NewAchievements(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(text = "Insert your achievement",
-                    fontWeight = FontWeight.Bold,
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
 
-                        )
+                )
                 Spacer(modifier = Modifier.height(20.dp))
                 NewAchievementsBody(
                     sportsList = sportsUiState.sportsList,
@@ -164,7 +164,7 @@ fun NewAchievementsBody(
 
 
     Column(modifier.padding(top = 5.dp)) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 11.dp)) {
 
             Box(
                 modifier = Modifier
@@ -217,7 +217,11 @@ fun NewAchievementsBody(
                     .weight(0.5f)
             ) {
                 OutlinedButton(
-                    onClick = { showDatePicker = true },
+                    onClick = {
+                        if (!showDatePicker) {
+                            showDatePicker = true
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (date == null) {
@@ -237,8 +241,8 @@ fun NewAchievementsBody(
                         modifier = Modifier.padding(start = 2.dp)
                     )
                 }
-
             }
+
 
         }
 
@@ -262,6 +266,8 @@ fun NewAchievementsBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
+                .padding(top = 5.dp)
+
                 .height(60.dp)
                 .background(Color.White)
         )
@@ -274,6 +280,8 @@ fun NewAchievementsBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
+                .padding(top = 5.dp)
+
                 .background(Color.White)
 
 
@@ -310,7 +318,9 @@ fun NewAchievementsBody(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .padding(bottom = 16.dp)
+                .padding(top = 16.dp)
+
                 .height(56.dp)
                 .background(Color.White, RoundedCornerShape(16.dp))
         ) {
