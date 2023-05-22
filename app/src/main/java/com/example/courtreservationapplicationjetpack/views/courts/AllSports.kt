@@ -172,9 +172,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             boundary = dateRange
         ),
         selection = CalendarSelection.Date { date ->
-            println(date)
             setPickedDate(date)
-
         }
     )
 
@@ -339,16 +337,20 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         )
                                     )}
 
-                                    LaunchedEffect(pickedDate) {
-                                        val slotFlow = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id)
-                                        slotFlow.collectLatest { list ->
-                                            setSlots(slots - list.toSet())
-                                            println("${it.name} $list")
-                                        }
-                                    }
 
+                                    val reservatedSlot = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
+                                        initial = emptyList<String>()
+                                    )
 
-                                    HourButtons(hours = slots, navigateToCourtsAvailable = { TODO() })
+//                                    LaunchedEffect(pickedDate, pickedSport) {
+//                                        val slotFlow = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id)
+//                                        slotFlow.collect { list ->
+//                                            setSlots(slots - list.toSet())
+//                                            println("${it.name} $list")
+//
+//                                        }
+//                                    }
+                                    HourButtons(reservatedSlot = reservatedSlot.value, navigateToCourtsAvailable = { TODO() }, pickedSport = pickedSport)
 
                                 }
                             }
@@ -391,7 +393,16 @@ fun HourButton(hour: String, navigateToCourtsAvailable: (String) -> Unit) {
 
 
 @Composable
-fun HourButtons(hours: List<String>, navigateToCourtsAvailable: (String) -> Unit) {
+fun HourButtons(reservatedSlot: List<String>, navigateToCourtsAvailable: (String) -> Unit, pickedSport: String) {
+    val hours = listOf(
+        "8:00",
+        "9:00",
+        "10:00",
+        "11:00",
+        "12:00",
+        "13:00",
+        "14:00"
+    ) - reservatedSlot.toSet()
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
