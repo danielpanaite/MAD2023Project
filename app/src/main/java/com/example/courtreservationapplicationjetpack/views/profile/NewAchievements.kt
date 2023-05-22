@@ -161,6 +161,10 @@ fun NewAchievementsBody(
     var message by remember {
         mutableStateOf("")
     }
+    fun closeSelection(){
+        showDatePicker = false
+
+    }
 
 
     Column(modifier.padding(top = 5.dp)) {
@@ -248,12 +252,12 @@ fun NewAchievementsBody(
 
         if (showDatePicker) {
             DateTimeDialog(
-                state = rememberUseCaseState(visible = showDatePicker),
+                state = rememberUseCaseState(visible = true, onCloseRequest = { closeSelection() }),
                 selection = DateTimeSelection.Date { newDate ->
                     selectedDate.value = newDate
                     date = LocalDate.from(newDate)
                     showDatePicker = false
-                }
+                },
             )
         }
 
