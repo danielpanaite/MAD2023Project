@@ -3,19 +3,12 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import OptionSample3
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,23 +16,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.DateRange
@@ -51,13 +36,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -68,7 +49,6 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -78,21 +58,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -101,13 +76,8 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
 
 object AllSportsDestination : NavigationDestination {
     override val route  = "all_sports"
@@ -139,7 +109,6 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-    //Ciao()
     PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navController = navController)
     }
 }
@@ -149,6 +118,7 @@ fun AllSports(
 @Composable
 fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController) {
     val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
+    var formattedDate:String = ""
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
     val now = LocalDate.now() // ottiene la data odierna
@@ -173,8 +143,14 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
         ),
         selection = CalendarSelection.Date { date ->
             setPickedDate(date)
+            formattedDate = date.toString()
         }
     )
+
+    LaunchedEffect(pickedDate) {
+        formattedDate = pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        println("Picked Date: $formattedDate")
+    }
 
     Column() {
         Row() {
@@ -282,7 +258,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             val viewModel2 = viewModel<AllSportsViewModel>()
             val isLoading by viewModel2.isLoading.collectAsState()
             val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
-
             SwipeRefresh(
                 state = swipeRefreshState,
                 onRefresh = viewModel2::loadStuff,)
@@ -301,7 +276,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                 )
                                 Text(
                                     text = it.name,
-                                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
+                                    style = MaterialTheme.typography.titleMedium.copy(
                                         color = Color.White
                                     ),
                                     fontWeight = FontWeight.ExtraBold,
@@ -318,39 +293,21 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     .padding(0.dp)
                             ) {
                                 Column {
-                                    println(pickedDate)
+
                                     Text(
-                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate}",
+                                        text = "Orari disponibili per il giorno selezionato: $formattedDate",
                                         fontSize = 14.sp,
                                         color = Color.Gray,
-                                        modifier = Modifier.padding(16.dp)
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                            .clickable { println("EEEEEEEEEEEEEEEEEEEEEEE"+ formattedDate) }
                                     )
-                                    val (slots, setSlots) = remember { mutableStateOf(
-                                        listOf(
-                                            "8:00",
-                                            "9:00",
-                                            "10:00",
-                                            "11:00",
-                                            "12:00",
-                                            "13:00",
-                                            "14:00"
-                                        )
-                                    )}
 
-
-                                    val reservatedSlot = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
+                                    val slotRiservato = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
                                         initial = emptyList<String>()
                                     )
-
-//                                    LaunchedEffect(pickedDate, pickedSport) {
-//                                        val slotFlow = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id)
-//                                        slotFlow.collect { list ->
-//                                            setSlots(slots - list.toSet())
-//                                            println("${it.name} $list")
-//
-//                                        }
-//                                    }
-                                    HourButtons(reservatedSlot = reservatedSlot.value, navigateToCourtsAvailable = { TODO() }, pickedSport = pickedSport)
+                                    
+                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, pickedSport = pickedSport)
 
                                 }
                             }
