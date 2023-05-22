@@ -60,41 +60,41 @@ object AchievementsDestination : NavigationDestination {
     override val icon = Icons.Default.Place
 
 }
-
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Achievements(
     navController: NavController,
+    navigateBackAction: () -> Unit,
     modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
-    navigateToNewAchievementsDestination: () -> Unit,
+    navigateToProfileDestination: () -> Unit,
 
+    navigateToNewAchievementsDestination: () -> Unit,
     viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val achievementsUi by viewModel.achievements.collectAsState()
+
     Scaffold(
-        topBar = { CourtTopAppBar(canNavigateBack = true,
-            navigateUp = onNavigateUp) },
+        topBar = { CourtTopAppBar(canNavigateBack = true,  navigateUp = navigateToProfileDestination) },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
-        Box(modifier = modifier
-            .fillMaxSize()
-            .padding(innerPadding)){
+        Column(modifier.fillMaxSize().padding(innerPadding)) {
             AchievementsBody(
                 achievementList = achievementsUi.achievementsList,
                 viewModel = viewModel,
-                modifier = Modifier.padding(top = 5.dp),
-
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 5.dp)
             )
 
             FloatingActionButton(
                 onClick = { navigateToNewAchievementsDestination() },
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp),
-                containerColor = MaterialTheme.colors.primary, // Set the background color to primary color
-                contentColor = MaterialTheme.colors.onPrimary, // Set the content color to match the onPrimary color
-                shape = CircleShape // Set the shape to CircleShape for a round button
+                    .padding(20.dp)
+                    .align(Alignment.End),
+                containerColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary,
+                shape = CircleShape
             ) {
                 Icon(
                     Icons.Filled.Add,
@@ -102,11 +102,10 @@ fun Achievements(
                     modifier = Modifier.background(color = MaterialTheme.colors.primary)
                 )
             }
-
         }
-
     }
 }
+
 
 @Composable
 fun AchievementsBody(

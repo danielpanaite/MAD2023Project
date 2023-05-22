@@ -205,6 +205,8 @@ fun NewAchievementsBody(
                     }
                 }
             }
+            Spacer(modifier = Modifier.width(8.dp)) // Spazio tra i bottoni
+
             Box(
                 modifier = Modifier
                     .weight(0.5f)
@@ -291,7 +293,6 @@ fun NewAchievementsBody(
             onValueChange = { additionalInfo = it },
             label = { Text("Informazioni aggiuntive") },
             shape = RoundedCornerShape(50.dp),
-
             singleLine = false,
             modifier = Modifier
                 .fillMaxWidth()

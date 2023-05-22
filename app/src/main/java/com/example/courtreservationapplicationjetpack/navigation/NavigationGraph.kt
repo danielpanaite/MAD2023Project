@@ -190,7 +190,11 @@ fun NavigationGraph(
                 navController = navController,
                 navigateToNewAchievementsDestination = {navController.navigate(NewAchievementsDestination.route)},
 
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                navigateBackAction = { navController.popBackStack() },
+                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
+
+
             )
         }
 
