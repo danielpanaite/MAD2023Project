@@ -309,7 +309,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         initial = emptyList<String>()
                                     )
                                     
-                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, pickedSport = pickedSport)
+                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id.toString(), date = pickedDate.value)
 
                                 }
                             }
@@ -326,10 +326,10 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HourButton(hour: String,navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
+fun HourButton(hour: String,navController: NavController, navigateToCourtsAvailable: (String) -> Unit, courtID: String, date: LocalDate) {
     Box(
         modifier = Modifier
-            .clickable {navController.navigate("${CourtsAvailableDestination.route}/${0}/${LocalDate.now()}?hourOptArg=$hour") }
+            .clickable {navController.navigate("${CourtsAvailableDestination.route}/${courtID}/${date.toString()}?hourOptArg=$hour") }
             .padding(2.dp)
             .width(60.dp)
             .shadow(7.dp, shape = RoundedCornerShape(8.dp))
@@ -353,7 +353,7 @@ fun HourButton(hour: String,navController: NavController, navigateToCourtsAvaila
 
 
 @Composable
-fun HourButtons(reservatedSlot: List<String>,navController: NavController, navigateToCourtsAvailable: (String) -> Unit, pickedSport: String) {
+fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>,navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
     val hours = listOf(
         "8:00",
         "9:00",
@@ -368,7 +368,7 @@ fun HourButtons(reservatedSlot: List<String>,navController: NavController, navig
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(hours.size) { index ->
-            HourButton(hour = hours[index],navController, navigateToCourtsAvailable = navigateToCourtsAvailable)
+            HourButton(hour = hours[index],navController, navigateToCourtsAvailable = navigateToCourtsAvailable, courtID = courtID, date = date)
         }
     }
 }
