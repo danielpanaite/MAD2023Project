@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CourtReservationApplicationJetpack</string>
     <string name="back_button">Back</string>
-    <string name="no_reservations_description">No reservations in the database</string>
+    <string name="no_reservations_description">No future reservations made</string>
     <string name="attention">Attention</string>
 
     <string name="delete">Delete</string>

@@ -13,10 +13,12 @@ val Pink40 = Color(0xFF7D5260)
 val Orange80 = Color(0xCCFF793A)
 val OrangeSecondary80 = Color(0xCCFF5200)
 val OrangeTertiary80 = Color(0xCC8A2C00)
+val Orange200 = Color(0xFFFFAB91)
 
 val GreyBG = Color(0xFFEAEAEA)
 val DarkBG = Color(0xFF2B2B2B)
 
 //Calendar
 val GreyItemBG = Color(0xFFDFDFDF)
+val GreyReservationBG = Color(0xFFEEEEEE)
 val GreyItemInactive = Color(0xFF808080)

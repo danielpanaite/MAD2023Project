@@ -1,15 +1,15 @@
 package com.example.courtreservationapplicationjetpack.views.reservations
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 
 /**
@@ -47,12 +47,16 @@ class EditReservationViewModel(
     }
 
     /**
-     * Updates the [reservationUiState] with the value provided in the argument. This method also triggers
+     * Updates the reservationUiState with the value provided in the argument. This method also triggers
      * a validation for input values.
      */
     fun updateUiState(reservationDetails: ReservationDetails) {
         reservationsUiState =
             ReservationsUiState(reservationDetails = reservationDetails, isEntryValid = validateInput(reservationDetails))
+    }
+
+    suspend fun deleteReservation() {
+        reservationRepository.deleteReservation(reservationsUiState.reservationDetails.toReservation())
     }
 
     private fun validateInput(uiState: ReservationDetails = reservationsUiState.reservationDetails): Boolean {

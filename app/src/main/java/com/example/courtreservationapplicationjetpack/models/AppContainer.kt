@@ -7,6 +7,8 @@ import com.example.courtreservationapplicationjetpack.models.courts.CourtReposit
 import com.example.courtreservationapplicationjetpack.models.courts.OfflineCourtRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.OfflineReservationRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
+import com.example.courtreservationapplicationjetpack.models.reviews.OfflineReviewRepository
+import com.example.courtreservationapplicationjetpack.models.reviews.ReviewRepository
 import com.example.courtreservationapplicationjetpack.models.sport.OfflineSportRepository
 import com.example.courtreservationapplicationjetpack.models.sport.SportRepository
 import com.example.courtreservationapplicationjetpack.models.user.OfflineUserRepository
@@ -23,6 +25,8 @@ interface AppContainer {
     val userRepository: UserRepository
 
     val sportRepository: SportRepository
+
+    val reviewRepository: ReviewRepository
 
     val achievementsRepository: AchievementsRepository
 }
@@ -47,6 +51,10 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val sportRepository: SportRepository by lazy {
         OfflineSportRepository(AppDatabase.getDatabase(context).sportDao())
+    }
+
+    override val reviewRepository: ReviewRepository by lazy {
+        OfflineReviewRepository(AppDatabase.getDatabase(context).reviewDao())
     }
 
     override val achievementsRepository: AchievementsRepository by lazy {

@@ -3,31 +3,24 @@ package com.example.courtreservationapplicationjetpack.views.reservations
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,7 +31,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.views.courts.ReservationInputForm
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
@@ -50,8 +42,6 @@ object ReservationDetailsDestination : NavigationDestination {
     val routeWithArgs = "$route/{$reservationIdArg}"
     override val titleRes = "Reservation Details"
     override val icon = Icons.Default.Star
-
-
 }
 
 @ExperimentalMaterial3Api
@@ -70,19 +60,7 @@ fun ReservationDetails(
     Scaffold(
         topBar = {
             CourtTopAppBar(canNavigateBack = true,
-                navigateUp = navigateBack)
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navigateToEditReservation(uiState.value.reservationDetails.id!!) },
-                modifier = Modifier.navigationBarsPadding()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "edit",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+                navigateUp = navigateBack, text = "Reservation Details")
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
 
@@ -110,11 +88,10 @@ fun ReservationDetails(
 
 @Composable
 private fun ReservationDetailsBody(
+    modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
-
     reservationDetailsUiState: ReservationDetailsUiState,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -123,13 +100,13 @@ private fun ReservationDetailsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
-        ReservationInputForm(reservationDetails = reservationDetailsUiState.reservationDetails, enabled = false)
+        //ReservationInputForm(reservationDetails = reservationDetailsUiState.reservationDetails)
 
         OutlinedButton(
             onClick = { deleteConfirmationRequired = true },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("delete")
+            Text("Delete")
         }
         if (deleteConfirmationRequired) {
             DeleteConfirmationDialog(
@@ -151,8 +128,8 @@ private fun DeleteConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = { /* Do nothing */ },
-        title = { Text("attention") },
-        text = { Text("you want to delete?") },
+        title = { Text("Warning") },
+        text = { Text("Do you want to delete your reservation?") },
         modifier = modifier.padding(16.dp),
         dismissButton = {
             TextButton(onClick = onDeleteCancel) {

@@ -10,9 +10,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.courtreservationapplicationjetpack.views.MainScreen
+import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.views.courts.AllSports
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
-import com.example.courtreservationapplicationjetpack.views.courts.CourtReservation
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailable
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
 import com.example.courtreservationapplicationjetpack.views.MainScreen
@@ -25,15 +26,24 @@ import com.example.courtreservationapplicationjetpack.views.reservations.EditRes
 import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.NewAchievements
 import com.example.courtreservationapplicationjetpack.views.profile.NewAchievementsDestination
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
+import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
+import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservations
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
-
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPage
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPageDestination
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePage
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPage
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPageDestination
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +64,8 @@ fun NavigationGraph(
             MainScreen(
                 navController = navController,
                 //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
-                navigateToAllSports = {navController.navigate(AllSportsDestination.route)}
+                navigateToAllSports = {navController.navigate(AllSportsDestination.route)},
+                navigateToReviews = {navController.navigate(ReviewMainPageDestination.route)}
             )
         }
 
@@ -101,13 +112,10 @@ fun NavigationGraph(
 
         composable(
             route = MyReservationsDestination.route
-
-
         ){
             MyReservations(
                 navController = navController,
-                navigateToReservationDetailsDestination = { navController.navigate("${ReservationDetailsDestination.route}/${it}") }
-
+                navigateToEditReservation = { navController.navigate("${EditReservationDestination.route}/$it") },
             )
         }
         composable(
@@ -130,7 +138,6 @@ fun NavigationGraph(
         ){
             EditReservation(
                 navController = navController,
-                navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
@@ -178,20 +185,39 @@ fun NavigationGraph(
             )
         }
 
-
-
-
         composable(
-            route = CourtReservation.routeWithArgs,
-            arguments = listOf(navArgument(CourtReservation.courtArg) {
+            route = ReviewCreatePageDestination.routeWithArgs,
+            arguments = listOf(navArgument(ReviewCreatePageDestination.courtIdArg) {
                 type = NavType.IntType
             })
         ){
-            CourtReservation(
+            ReviewCreatePage(
                 navController = navController,
-                navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
+            )
+        }
 
+
+        composable(
+            route = CourtReviewPageDestination.routeWithArgs,
+            arguments = listOf(navArgument(CourtReviewPageDestination.courtIdArg) {
+                type = NavType.IntType
+            })
+        ){
+            CourtReviewPage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = CourtsAvailableDestination.routeWithArgs,
+            arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {
+                type = NavType.StringType
+            })
+        ){
+            CourtsAvailable(
+                navController = navController,
             )
         }
 

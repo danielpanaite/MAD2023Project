@@ -9,6 +9,9 @@ import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtDao
 import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationDao
+import com.example.courtreservationapplicationjetpack.models.reviews.Review
+import com.example.courtreservationapplicationjetpack.models.reviews.ReviewDao
+import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import com.example.courtreservationapplicationjetpack.models.sport.SportDao
 import com.example.courtreservationapplicationjetpack.models.user.User
 import com.example.courtreservationapplicationjetpack.models.user.UserDao
@@ -20,7 +23,7 @@ import com.example.courtreservationapplicationjetpack.models.achievements.Achiev
  * Database class is the database class that provides the app with instances
  * of the DAOs associated with that database
  */
-@Database(entities = [Reservation::class, Court::class, User::class, Sport::class, Achievements::class], version = 2, exportSchema = false)
+@Database(entities = [Reservation::class, Court::class, User::class, Sport::class, Review::class, Achievements::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun reservationsDao(): ReservationDao
     abstract fun courtDao(): CourtDao
@@ -30,6 +33,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun sportDao(): SportDao
 
     abstract fun achievementsDao(): AchievementsDao
+
+    abstract fun reviewDao(): ReviewDao
 
     companion object {
         @Volatile

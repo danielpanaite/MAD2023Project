@@ -14,6 +14,11 @@ interface CourtRepository {
     fun getAllCourts(): Flow<List<Court>>
 
     /**
+     * Retrieve all courts with provided id
+     */
+    fun getCourtsWithId(courts: List<Int>): Flow<List<Court>>
+
+    /**
      * Retrieve the sports from the given data source .
      */
     fun getSports(): Flow<List<String>>

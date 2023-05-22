@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
-import androidx.compose.material3.Divider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,7 +29,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +37,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -48,7 +45,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.courtreservationapplicationjetpack.R
+import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
+import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.ui.theme.GreyItemInactive
 import com.kizitonwose.calendar.compose.CalendarLayoutInfo
 import com.kizitonwose.calendar.compose.CalendarState
@@ -78,25 +77,23 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 @Composable
 fun MonthCalendar(
     reservations: List<Reservation>,
-    modifier: Modifier = Modifier,
+    courts: List<Court>,
     onReservationClick: (Reservation) -> Unit,
-    //navigateToDetailsReservation: () -> Unit,
 ) {
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val reservationList = reservations.groupBy { LocalDate.parse(it.date, reservationFormatter) }
+    val reservationList = reservations
+        .filter { LocalDate.parse(it.date, reservationFormatter) > LocalDate.now() }
+        .groupBy { LocalDate.parse(it.date, reservationFormatter) }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(500) }
     val endMonth = remember { currentMonth.plusMonths(500) }
     var selection by remember { mutableStateOf<CalendarDay?>(null) }
     val daysOfWeek = remember { daysOfWeek() }
-    val colors: List<Color> = listOf(Color.Red, Color.Blue, Color.Magenta, Color.Cyan, Color.Green, Color.Yellow)
-    val reservationsInSelectedDate = remember {
-        derivedStateOf {
-            val date = selection?.date
-            if (date == null) emptyList() else reservationList[date].orEmpty()
-        }
-    }
+    val colors: List<Int> = listOf(R.color.blue_200, R.color.orange_200, R.color.green_200, R.color.red_200, R.color.cyan_200, R.color.yellow_200)
+    val date = selection?.date
+    val reservationsInSelectedDate =
+        if (date == null) emptyList() else reservationList[date].orEmpty()
     //main column that contains the whole page
     Column( modifier = Modifier
         .fillMaxSize()
@@ -116,7 +113,7 @@ fun MonthCalendar(
 
         // Draw dark content on light background.
         CompositionLocalProvider(LocalContentColor provides lightColorScheme().onSurface) {
-            Surface(shadowElevation = 7.dp) {
+            Surface(shadowElevation = 12.dp) {
                 SimpleCalendarTitle(
                     modifier = Modifier
                         .background(toolbarColor)
@@ -125,15 +122,12 @@ fun MonthCalendar(
                 )
             }
             HorizontalCalendar(
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(12.dp),
                 state = state,
                 dayContent = { day ->
                     CompositionLocalProvider(LocalRippleTheme provides Example3RippleTheme) {
-//                        val colors = if (day.position == DayPosition.MonthDate) {
-//                            flights[day.date].orEmpty().map { colorResource(it.color) }
-//                        } else {
-//                            emptyList()
-//                        }
                         val events = if(reservationList[day.date] != null){
                             reservationList[day.date]!!.count()
                         } else {
@@ -142,8 +136,7 @@ fun MonthCalendar(
                         Day(
                             day = day,
                             isSelected = selection == day,
-                            events = events,
-                            colors = colors
+                            events = events
                         ) { clicked ->
                             selection = clicked
                         }
@@ -156,10 +149,26 @@ fun MonthCalendar(
                     )
                 },
             )
-            Divider(color = pageBackgroundColor)
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(items = reservationsInSelectedDate.value) { reservation ->
-                    FlightInformation(reservation, onReservationClick)
+            Surface(modifier = Modifier.fillMaxSize().padding(top = 8.dp), shadowElevation = 12.dp){
+                //Bottom reservation details
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    if(reservations.isEmpty()){
+                        item {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                text = "No reservations",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onSecondary,
+                            )
+                        }
+                    }else {
+                        items(items = reservationsInSelectedDate) { reservation ->
+                            ReservationInformation(reservation, courts.find { it.id == reservation.courtId }!!, onReservationClick, colors)
+                        }
+                    }
                 }
             }
         }
@@ -171,7 +180,6 @@ private fun Day( //small day cell in calendar
     day: CalendarDay,
     isSelected: Boolean = false,
     events: Int,
-    colors: List<Color>,
     onClick: (CalendarDay) -> Unit = {},
 ) {
     Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
@@ -209,13 +217,12 @@ private fun Day( //small day cell in calendar
                     .padding(bottom = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                //for (event in colors.subList(0, min(colors.size, 3))) {
                 for(e in 0 until events){
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(5.dp)
-                            .background(colors[1]),
+                            .background(MaterialTheme.colorScheme.primary),
                     )
                 }
             }
@@ -243,14 +250,17 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun LazyItemScope.FlightInformation(
+private fun LazyItemScope.ReservationInformation(
     reservation: Reservation,
-    onReservationClick: (Reservation) -> Unit
+    court: Court,
+    onReservationClick: (Reservation) -> Unit,
+    colors: List<Int>
 ) {
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
             .height(IntrinsicSize.Max)
+            .padding(top = 8.dp, start = 4.dp, end = 4.dp)
             .clickable {
                 onReservationClick(reservation)
             }
@@ -258,53 +268,52 @@ private fun LazyItemScope.FlightInformation(
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
             Box(
                 modifier = Modifier
-                    .background(color = colorResource(R.color.teal_700))
+                    .background(color = colorResource(colors[reservation.id!! % colors.size]))
                     .fillParentMaxWidth(1 / 7f)
                     .aspectRatio(1f)
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally){
+                    val sportIcon = SportDrawables.getDrawable(court.sport)
                     Text(
                         modifier = Modifier.padding(bottom = 4.dp),
                         text = reservation.slot,
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onTertiary
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSecondary
                     )
-                    Image(
-                        painter = painterResource(R.drawable.baseline_sports_tennis_24),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(Color.White)
-                    )
+                    if(sportIcon != null){
+                        Image(
+                            painter = painterResource(sportIcon),
+                            contentDescription = null
+                        )
+                    }
                 }
             }
         }
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
-            Box(
+            Column(
                 modifier = Modifier
                     .background(color = itemBackgroundColor)
-                    .weight(1f)
                     .fillMaxHeight(),
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                ){
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = reservation.date,
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                    )
-                }
-                //AirportInformation(flight.departure, isDeparture = true)
+                Text(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    text = court.name,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = court.address,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         }
     }
-    Divider(color = pageBackgroundColor, thickness = 2.dp)
 }
 
 @Composable

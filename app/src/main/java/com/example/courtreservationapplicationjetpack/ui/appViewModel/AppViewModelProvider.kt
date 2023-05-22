@@ -8,16 +8,17 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
-import com.example.courtreservationapplicationjetpack.views.courts.CourtReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesViewModel
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
-
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewViewModel
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreateViewModel
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire Court app
@@ -55,7 +56,7 @@ object AppViewModelProvider {
 
         // Initializer for  MyReservationViewModel
         initializer {
-            MyReservationsViewModel(courtApplication().container.reservationRepository)
+            MyReservationsViewModel(courtApplication().container.reservationRepository, courtApplication().container.courtRepository)
         }
 
         // Initializer for AllSportsViewModel
@@ -68,11 +69,6 @@ object AppViewModelProvider {
             CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository)
         }
 
-        // Initializer for CourtReservationViewModel
-        initializer {
-            CourtReservationViewModel(courtApplication().container.reservationRepository)
-        }
-
         initializer {
             SportPreferencesViewModel(courtApplication().container.courtRepository, courtApplication().container.sportRepository)
         }
@@ -81,6 +77,26 @@ object AppViewModelProvider {
             AchievementsViewModel(courtApplication().container.sportRepository, courtApplication().container.achievementsRepository)
         }
 
+        initializer {
+            ReviewViewModel(
+                courtApplication().container.reviewRepository
+            )
+        }
+
+        initializer {
+            ReviewCreateViewModel(
+                this.createSavedStateHandle(),
+                courtApplication().container.reviewRepository,
+                courtApplication().container.courtRepository
+            )
+        }
+
+        initializer {
+            CourtReviewViewModel(
+                this.createSavedStateHandle(),
+                courtApplication().container.reviewRepository
+            )
+        }
 
 
     }
