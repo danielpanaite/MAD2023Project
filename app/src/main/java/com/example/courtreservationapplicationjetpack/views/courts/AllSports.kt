@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,7 +54,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
@@ -59,6 +65,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -277,11 +284,16 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         .height(100.dp),
                                     sport = it.sport
                                 )
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(16.dp)
+                                ) {
+                                    RatingBar(5, onRatingChanged = { /* Aggiungi la logica per gestire il cambio di rating */ })
+                                }
                                 Text(
                                     text = it.name,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        color = Color.White
-                                    ),
+                                    style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 26.sp,
                                     textAlign = TextAlign.Start,
@@ -290,6 +302,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         .padding(16.dp)
                                 )
                             }
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -297,7 +310,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             ) {
                                 Column {
                                     Text(
-                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.value}",
+                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
                                         fontSize = 14.sp,
                                         color = Color.Gray,
                                         modifier = Modifier
@@ -322,6 +335,40 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
         }
     }
 }
+@Composable
+fun RatingBar(maxRating: Int = 5, onRatingChanged: (Int) -> Unit) {
+    var rating by remember { mutableStateOf(0) }
+    var touchPosition by remember { mutableStateOf(0f) }
+
+    Row(Modifier.pointerInput(Unit) {
+        detectTapGestures { tapOffset ->
+            touchPosition = tapOffset.x
+            val starWidth = this@pointerInput.size.width / maxRating
+            val newRating = kotlin.math.ceil(touchPosition / starWidth).toInt()
+            rating = newRating
+            onRatingChanged(newRating)
+        }
+    }) {
+        repeat(maxRating) { index ->
+            val starColor = if (index < rating) Color.Yellow else Color.Gray
+            Image(
+                //painter = painterResource(id = R.drawable.ic_star),
+                imageVector = Icons.Filled.Star,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { rating = index + 1; onRatingChanged(index + 1) }
+                    .let { if (index < rating) it.alpha(1f) else it.alpha(0.5f) },
+                colorFilter = ColorFilter.tint(starColor)
+            )
+        }
+    }
+}
+
+
+
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)

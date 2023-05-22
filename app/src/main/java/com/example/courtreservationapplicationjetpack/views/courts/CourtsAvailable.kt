@@ -241,9 +241,10 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .clip(
-                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-            ),
+//            .clip(
+//                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+//            ),
+                ,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = lazyListState
     ) {
@@ -282,7 +283,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                                 1f to Color.Black
                             )
                         )
-                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                        //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 )
             }
         }
