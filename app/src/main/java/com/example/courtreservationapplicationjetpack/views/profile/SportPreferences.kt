@@ -29,12 +29,14 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -49,6 +51,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,6 +66,7 @@ import com.example.courtreservationapplicationjetpack.navigation.NavigationDesti
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
 import androidx.compose.ui.text.input.ImeAction
+import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import kotlinx.coroutines.launch
 
@@ -119,27 +123,36 @@ fun SportsBody(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Button(onClick = {
-            coroutineScope.launch {
-                val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
-                    Sport(1,  sportName, masteryLevel, null)
-                    viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
-                }
-                val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
-                viewModel.deleteSports(1, uncheckedSports)
-            }
-        }, modifier = Modifier.wrapContentSize().align(CenterHorizontally)
-        ) {
-            Text(text = "Save", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-        }
-        Text(
-            text = "Select your preferred sports",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Log.d("sportsList in SportsBody", "$sportsList")
-        Log.d("sportList with levels", "$sportsWithLevels")
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Select your preferred sports",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(3f).align(Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
+                                Sport(1, sportName, masteryLevel, null)
+                                viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
+                            }
+                            val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
+                            viewModel.deleteSports(1, uncheckedSports)
 
+
+
+
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Text(text = "Save", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
         SportsList(
             viewModel = viewModel,
             sportsList = sportsList,
@@ -242,8 +255,7 @@ private fun SportLevelInput(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val levels = listOf("Beginner", "Intermediate", "Advanced", "Expert")
-    var selectedLevel by remember { mutableStateOf(currentLevel) }
-
+    var selectedLevel by rememberSaveable { mutableStateOf(currentLevel.takeIf { it.isNotEmpty() } ?: "Beginner") }
     Box(modifier = Modifier.wrapContentSize()) {
         OutlinedButton(
             onClick = { expanded = true },
