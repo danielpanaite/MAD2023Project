@@ -201,7 +201,7 @@ fun AchievementsItem(
                 }
             }
             Text(
-                text = "Title: ${achievement.idUser}",
+                text = "Title: ${achievement.title}",
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.padding(vertical = 8.dp)
             )

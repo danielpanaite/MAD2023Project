@@ -9,13 +9,16 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -68,12 +71,16 @@ import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 
 object NewAchievementsDestination : NavigationDestination {
     override val route  = "new_chievements"
     override val titleRes = "new Achievements"
     override val icon = Icons.Default.Place
 }
+
+
 
 @ExperimentalMaterial3Api
 @Composable
@@ -139,21 +146,28 @@ fun NewAchievementsBody(
 
     var isMenuExpanded by remember { mutableStateOf(false) }
     var selectedSport by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
+    //var date by remember { mutableStateOf("") }
     var certificateName by remember { mutableStateOf("") }
     var additionalInfo by remember { mutableStateOf("") }
     val selectedDate = remember { mutableStateOf<LocalDate?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormat = SimpleDateFormat("dd/MM/yyyy")
 
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    var date by remember { mutableStateOf<LocalDate?>(null) }
+
+
+
     Column(modifier.padding(top = 5.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier
-                .height(56.dp)
-                .padding(bottom = 16.dp)) {
+
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+            ) {
                 OutlinedButton(
                     onClick = { isMenuExpanded = true },
-                    modifier = modifier
+                    modifier = modifier.fillMaxWidth()
                 ) {
                     if (selectedSport.isEmpty()) {
                         Text(
@@ -176,13 +190,12 @@ fun NewAchievementsBody(
                     expanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     modifier = Modifier
-                        .fillMaxWidth()
                 ) {
 
                     sportsList.forEach { sport ->
                         Log.d("sport", "$sport")
                         DropdownMenuItem(
-                            modifier = Modifier,
+                            modifier = Modifier.fillMaxWidth(),
                             text = { Text(sport, color = Color.Black) },
                             onClick = {
                                 selectedSport = sport
@@ -192,16 +205,22 @@ fun NewAchievementsBody(
                     }
                 }
             }
-            Box() {
-                OutlinedButton(onClick = { showDatePicker =true }) {
-                    if (date.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+            ) {
+                OutlinedButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (date == null) {
                         Text(
                             text = "Insert Date",
                             color = Color.Gray
                         )
                     } else {
                         Text(
-                            text = date,
+                            text = dateFormatter.format(date!!),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -246,11 +265,10 @@ fun NewAchievementsBody(
 
         if (showDatePicker) {
             DateTimeDialog(
-                state = rememberUseCaseState(visible = true),
+                state = rememberUseCaseState(visible = showDatePicker),
                 selection = DateTimeSelection.Date { newDate ->
                     selectedDate.value = newDate
-                    val localDate = newDate.toEpochDay()
-                    date = dateFormat.format(localDate)
+                    date = LocalDate.from(newDate)
                     showDatePicker = false
                 }
             )
@@ -288,7 +306,7 @@ fun NewAchievementsBody(
                     viewModel.addAchievement(
                         selectedSport,
                         1,
-                        date,
+                        date.toString(),
                         certificateName,
                         additionalInfo
                     )
