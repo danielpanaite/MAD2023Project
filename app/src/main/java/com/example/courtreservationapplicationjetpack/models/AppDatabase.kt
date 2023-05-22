@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.courtreservationapplicationjetpack.models.achievements.Achievements
 import com.example.courtreservationapplicationjetpack.models.achievements.AchievementsDao
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtDao
@@ -15,8 +16,6 @@ import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import com.example.courtreservationapplicationjetpack.models.sport.SportDao
 import com.example.courtreservationapplicationjetpack.models.user.User
 import com.example.courtreservationapplicationjetpack.models.user.UserDao
-import com.example.courtreservationapplicationjetpack.models.sport.Sport
-import com.example.courtreservationapplicationjetpack.models.achievements.Achievements
 
 
 /**

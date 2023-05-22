@@ -16,19 +16,13 @@ import com.example.courtreservationapplicationjetpack.views.courts.AllSports
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailable
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
-import com.example.courtreservationapplicationjetpack.views.MainScreen
-import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.views.profile.Achievements
 import com.example.courtreservationapplicationjetpack.views.profile.AchievementsDestination
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
-import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
-import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
-import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileDestination
-import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.NewAchievements
 import com.example.courtreservationapplicationjetpack.views.profile.NewAchievementsDestination
+import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
@@ -153,6 +147,40 @@ fun NavigationGraph(
         }
 
         composable(
+            route = ReviewCreatePageDestination.routeWithArgs,
+            arguments = listOf(navArgument(ReviewCreatePageDestination.courtIdArg) {
+                type = NavType.IntType
+            })
+        ){
+            ReviewCreatePage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = ReviewMainPageDestination.route
+        ){
+            ReviewMainPage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() },
+                navigateToCreateReview = { navController.navigate("${ReviewCreatePageDestination.route}/$it") }
+            )
+        }
+
+        composable(
+            route = CourtReviewPageDestination.routeWithArgs,
+            arguments = listOf(navArgument(CourtReviewPageDestination.courtIdArg) {
+                type = NavType.IntType
+            })
+        ){
+            CourtReviewPage(
+                navController = navController,
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        composable(
             route = CourtsAvailableDestination.routeWithArgs,
             arguments = listOf(
                 navArgument("courtID") {
@@ -181,43 +209,7 @@ fun NavigationGraph(
                 pickedDate = dateArg,
                 hourOptArg = hourOptArg,
                 navController = navController,
-                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}") }
-            )
-        }
-
-        composable(
-            route = ReviewCreatePageDestination.routeWithArgs,
-            arguments = listOf(navArgument(ReviewCreatePageDestination.courtIdArg) {
-                type = NavType.IntType
-            })
-        ){
-            ReviewCreatePage(
-                navController = navController,
-                onNavigateUp = { navController.navigateUp() }
-            )
-        }
-
-
-        composable(
-            route = CourtReviewPageDestination.routeWithArgs,
-            arguments = listOf(navArgument(CourtReviewPageDestination.courtIdArg) {
-                type = NavType.IntType
-            })
-        ){
-            CourtReviewPage(
-                navController = navController,
-                onNavigateUp = { navController.navigateUp() }
-            )
-        }
-
-        composable(
-            route = CourtsAvailableDestination.routeWithArgs,
-            arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {
-                type = NavType.StringType
-            })
-        ){
-            CourtsAvailable(
-                navController = navController,
+                navigateToCourtReservation = { navController.navigate("${route}/${it}") }
             )
         }
 
