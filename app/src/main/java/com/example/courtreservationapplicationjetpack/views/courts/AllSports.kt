@@ -2,15 +2,14 @@ package com.example.courtreservationapplicationjetpack.views.courts
 
 import OptionSample3
 import android.annotation.SuppressLint
-import android.media.Image
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,13 +25,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,36 +37,41 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material3.Surface
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -82,7 +84,9 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object AllSportsDestination : NavigationDestination {
     override val route  = "all_sports"
@@ -99,7 +103,6 @@ object AllSportsDestination : NavigationDestination {
 fun AllSports(
     navController: NavController,
     modifier: Modifier = Modifier,
-    navigateToCourtsAvailable: (String) -> Unit,
     //cercare di riprendere uesta stringa per prendere tutti i campi di quello sport
     onNavigateUp: () -> Unit,
 
@@ -107,13 +110,7 @@ fun AllSports(
     courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
-    val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
-    // Imposta lo sport su "tennis"
-    courtsViewModel.setSport("tennis")
-
-    // Stampa il risultato della query per lo sport "tennis"
-    println(courtsAvailableUiState.courtsAvailableList)
 
     Scaffold(
         topBar = {
@@ -121,43 +118,42 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-        PrenotaCampo(sportsList = allSportsUiState.sportsList)
+    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navController = navController)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>) {
-    val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController) {
+    var pickedDate = remember { mutableStateOf(LocalDate.now()) }
+
+    val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
-    val disabledDates = remember {
-        val today = LocalDate.now()
-        val startDate = LocalDate.of(1980, 1, 1)
-        generateSequence(today.minusDays(1)) { it.minusDays(1) }
-            .takeWhile { it >= startDate }
-            .toMutableList()
-    }
     val now = LocalDate.now() // ottiene la data odierna
     val future = now.plusYears(5) // aggiunge 5 anni alla data odierna
 
     val dateRange = now..future //creo closedRange per boundary
     val optionState = rememberUseCaseState()
+    val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
-    OptionSample3(sportList = sportsList, optionState = optionState){
-        Log.d("Test", "SportPressed")
-    }
+    OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
+    // Imposta lo sport su pickedSport
+    courtsViewModel.setSport(pickedSport)
+
+
     CalendarDialog(
         state = calendarState,
         config = CalendarConfig(
             monthSelection = true,
             yearSelection = true,
             style = CalendarStyle.MONTH,
-            disabledDates = disabledDates,
             boundary = dateRange
         ),
-        selection = CalendarSelection.Date { date ->
-            setPickedDate(date)
+        selection = CalendarSelection.Date(
+            selectedDate = pickedDate.value
+        ) { date ->
+            pickedDate.value = date
         }
     )
 
@@ -169,13 +165,15 @@ fun PrenotaCampo(sportsList: List<String>) {
                     Text(
                         text = "Prenotazioni",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 },
                 backgroundColor = Color.White,
                 elevation = 150.dp
             )
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -209,7 +207,7 @@ fun PrenotaCampo(sportsList: List<String>) {
                                 modifier = Modifier.size(24.dp)
                             )
                             Text(
-                                text = "Calcio a 5",
+                                text = pickedSport,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Start,
@@ -273,68 +271,113 @@ fun PrenotaCampo(sportsList: List<String>) {
                 state = swipeRefreshState,
                 onRefresh = viewModel2::loadStuff,)
             {
-                LazyColumn(content = {
-                    items(10){_ ->
-                        Box(modifier = Modifier.aspectRatio(1.5f)) {
-                            CoilImage(
-                                modifier = Modifier
-                                    .shadow(10.dp, RoundedCornerShape(0.dp))
-                                    .fillMaxSize()
-                                    .height(100.dp))
-                            Text(
-                                text = "Campo da calcio - Torino",
-                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
-                                    color = Color.White
-                                ),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 26.sp,
-                                textAlign = TextAlign.Start,
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(16.dp)
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(0.dp)
-                        ) {
-                            Column {
-                                Text(
-                                    text = "433m - Torino (cittá metropolitana di Torino)",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray,
-                                    modifier = Modifier.padding(16.dp)
+                LazyColumn {
+                    items(courtsAvailableUiState.courtsAvailableList.size) { _ ->
+
+                        courtsAvailableUiState.courtsAvailableList.forEach {
+                            Box(modifier = Modifier.aspectRatio(1.5f)) {
+                                CoilImage(
+                                    modifier = Modifier
+                                        .shadow(10.dp, RoundedCornerShape(0.dp))
+                                        .fillMaxSize()
+                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate.value}") }
+                                        .height(100.dp),
+                                    sport = it.sport
                                 )
-                                val hours = listOf("8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00")
-                                HourButtons(hours = hours)
                                 Box(
                                     modifier = Modifier
-                                        .size(16.dp)
-                                        .background(Color.White)
-                                        .shadow(10.dp, shape = RoundedCornerShape(8.dp))
-                                ) {}
+                                        .align(Alignment.TopEnd)
+                                        .padding(16.dp)
+                                ) {
+                                    RatingBar(5, onRatingChanged = { /* Aggiungi la logica per gestire il cambio di rating */ })
+                                }
+                                Text(
+                                    text = it.name,
+                                    style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 26.sp,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(16.dp)
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(0.dp)
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray,
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                    )
 
 
+                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
+                                        initial = emptyList<String>()
+                                    )
+                                    
+                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id.toString(), date = pickedDate.value)
+
+                                }
                             }
                         }
-
                     }
-                })
+                }
             }
 
 
         }
     }
 }
+@Composable
+fun RatingBar(maxRating: Int = 5, onRatingChanged: (Int) -> Unit) {
+    var rating by remember { mutableStateOf(0) }
+    var touchPosition by remember { mutableStateOf(0f) }
+
+    Row(Modifier.pointerInput(Unit) {
+        detectTapGestures { tapOffset ->
+            touchPosition = tapOffset.x
+            val starWidth = this@pointerInput.size.width / maxRating
+            val newRating = kotlin.math.ceil(touchPosition / starWidth).toInt()
+            rating = newRating
+            onRatingChanged(newRating)
+        }
+    }) {
+        repeat(maxRating) { index ->
+            val starColor = if (index < rating) Color(0xFFE0A800) else Color.Gray
+            Image(
+                //painter = painterResource(id = R.drawable.ic_star),
+                imageVector = Icons.Filled.Star,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(28.dp)
+                    .clickable { rating = index + 1; onRatingChanged(index + 1) }
+                    .let { if (index < rating) it.alpha(1f) else it.alpha(0.5f) },
+                colorFilter = ColorFilter.tint(starColor)
+            )
+        }
+    }
+}
+
+
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HourButton(hour: String) {
+fun HourButton(hour: String,navController: NavController, navigateToCourtsAvailable: (String) -> Unit, courtID: String, date: LocalDate) {
     Box(
         modifier = Modifier
-            .clickable {}
-            .padding(2.dp)
+            .clickable {navController.navigate("${CourtsAvailableDestination.route}/${courtID}/${date.toString()}?hourOptArg=$hour") }
+            .padding(bottom = 8.dp)
             .width(60.dp)
             .shadow(7.dp, shape = RoundedCornerShape(8.dp))
             .background(
@@ -357,24 +400,39 @@ fun HourButton(hour: String) {
 
 
 @Composable
-fun HourButtons(hours: List<String>) {
+fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>,navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
+    val hours = listOf(
+        "8:00",
+        "9:00",
+        "10:00",
+        "11:00",
+        "12:00",
+        "13:00",
+        "14:00"
+    ) - reservatedSlot.toSet()
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(hours.size) { index ->
-            HourButton(hour = hours[index])
+            HourButton(hour = hours[index],navController, navigateToCourtsAvailable = navigateToCourtsAvailable, courtID = courtID, date = date)
         }
     }
 }
 
 @Composable
-fun CoilImage(modifier: Modifier = Modifier){
-    Box(modifier = modifier
-    ){
+fun CoilImage(modifier: Modifier = Modifier, sport: String) {
+    val imageUrl = when (sport) {
+        "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
+        "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+        "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
+    }
+
+    Box(modifier = modifier) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                .data(imageUrl)
                 .crossfade(true)
                 .build(),
             placeholder = painterResource(R.drawable.placeholder),
@@ -396,4 +454,15 @@ fun CoilImage(modifier: Modifier = Modifier){
         )
     }
 }
+
+
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun CourtPreview(){
+
+}
+
 

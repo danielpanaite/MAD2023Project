@@ -23,5 +23,7 @@ interface CourtRepository {
      */
     fun getCourtsSport(sport: String):  Flow<List<Court>>
 
+    fun getCourt(id: Int): Flow<Court>
+
 
 }

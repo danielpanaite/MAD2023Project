@@ -39,6 +39,8 @@ class CourtsAvailableViewModel(
         this.sport.value = sport
     }
 
+    fun getCourt(id: Int) = courtRepository.getCourt(id)
+
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }

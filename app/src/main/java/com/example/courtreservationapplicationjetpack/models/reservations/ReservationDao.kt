@@ -51,4 +51,7 @@ interface ReservationDao {
 
     @Delete
     suspend fun delete(reservation: Reservation)
+
+    @Query("SELECT slot FROM reservation WHERE date =:date AND courtId = :courtId")
+    fun getSlot(date: String, courtId: Int): Flow<List<String>>
 }

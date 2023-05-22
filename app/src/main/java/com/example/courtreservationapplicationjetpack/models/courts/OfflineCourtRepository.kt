@@ -11,6 +11,6 @@ class OfflineCourtRepository(private val courtDao: CourtDao) :
 
     override  fun getCourtsSport(sport: String) = courtDao.getCourtsSport(sport)
 
-
+    override fun getCourt(id: Int): Flow<Court> = courtDao.getCourt(id)
 }
 

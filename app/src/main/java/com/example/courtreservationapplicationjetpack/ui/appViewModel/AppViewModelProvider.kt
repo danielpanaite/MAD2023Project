@@ -59,7 +59,7 @@ object AppViewModelProvider {
 
         // Initializer for AllSportsViewModel
         initializer {
-            AllSportsViewModel(courtApplication().container.courtRepository)
+            AllSportsViewModel(courtApplication().container.courtRepository, courtApplication().container.reservationRepository)
         }
 
         // Initializer for CourtAvailableViewModel

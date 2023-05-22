@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.navigation
 
 
+import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -132,21 +133,46 @@ fun NavigationGraph(
         ){
             AllSports(
                 navController = navController,
-                navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
+//                navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
+
         composable(
             route = CourtsAvailableDestination.routeWithArgs,
-            arguments = listOf(navArgument(CourtsAvailableDestination.sportArg) {
-                type = NavType.StringType
-            })
-        ){
+            arguments = listOf(
+                navArgument("courtID") {
+                    type = NavType.StringType
+                },
+                navArgument("dateArg") {
+                    type = NavType.StringType
+                },
+                navArgument("hourOptArg") {
+                    type = NavType.StringType
+                    defaultValue = null // Valore predefinito per l'argomento opzionale
+                    nullable = true // L'argomento è opzionale
+                }
+            )
+        ) { backStackEntry ->
+            val courtID = backStackEntry.arguments?.getString("courtID").orEmpty()
+            val dateArg = backStackEntry.arguments?.getString("dateArg").orEmpty()
+            val hourOptArg = backStackEntry.arguments?.getString("hourOptArg") ?: ""
+
+            Log.d("CourtID", courtID)
+            Log.d("Date", dateArg)
+            Log.d("HourOptArg", hourOptArg)
+
             CourtsAvailable(
+                courtID = courtID,
+                pickedDate = dateArg,
+                hourOptArg = hourOptArg,
                 navController = navController,
-                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
+                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}") }
             )
         }
+
+
+
 
         composable(
             route = CourtReservation.routeWithArgs,
