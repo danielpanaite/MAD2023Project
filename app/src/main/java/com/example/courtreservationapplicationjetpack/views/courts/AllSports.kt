@@ -49,6 +49,7 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -76,6 +77,7 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -117,8 +119,8 @@ fun AllSports(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController) {
-    val (pickedDate, setPickedDate) = remember { mutableStateOf(LocalDate.now()) }
-    var formattedDate:String = ""
+    var pickedDate = remember { mutableStateOf(LocalDate.now()) }
+
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
     val calendarState = rememberUseCaseState()
     val now = LocalDate.now() // ottiene la data odierna
@@ -141,16 +143,13 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             style = CalendarStyle.MONTH,
             boundary = dateRange
         ),
-        selection = CalendarSelection.Date { date ->
-            setPickedDate(date)
-            formattedDate = date.toString()
+        selection = CalendarSelection.Date(
+            selectedDate = pickedDate.value
+        ) { date ->
+            pickedDate.value = date
         }
     )
 
-    LaunchedEffect(pickedDate) {
-        formattedDate = pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-        println("Picked Date: $formattedDate")
-    }
 
     Column() {
         Row() {
@@ -159,13 +158,16 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                     Text(
                         text = "Prenotazioni",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { println(pickedDate.toString()) }
                     )
                 },
                 backgroundColor = Color.White,
                 elevation = 150.dp
             )
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -258,12 +260,14 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             val viewModel2 = viewModel<AllSportsViewModel>()
             val isLoading by viewModel2.isLoading.collectAsState()
             val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
+
             SwipeRefresh(
                 state = swipeRefreshState,
                 onRefresh = viewModel2::loadStuff,)
             {
                 LazyColumn {
                     items(courtsAvailableUiState.courtsAvailableList.size) { _ ->
+
                         courtsAvailableUiState.courtsAvailableList.forEach {
                             Box(modifier = Modifier.aspectRatio(1.5f)) {
                                 CoilImage(
@@ -293,17 +297,17 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     .padding(0.dp)
                             ) {
                                 Column {
-
                                     Text(
-                                        text = "Orari disponibili per il giorno selezionato: $formattedDate",
+                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.value}",
                                         fontSize = 14.sp,
                                         color = Color.Gray,
                                         modifier = Modifier
                                             .padding(16.dp)
-                                            .clickable { println("EEEEEEEEEEEEEEEEEEEEEEE"+ formattedDate) }
+                                            .clickable { println("EEEEEEEEEEEEEEEEEEEEEEE" + pickedDate) }
                                     )
 
-                                    val slotRiservato = viewModel.getSlot(pickedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
+
+                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
                                         initial = emptyList<String>()
                                     )
                                     
@@ -320,6 +324,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
