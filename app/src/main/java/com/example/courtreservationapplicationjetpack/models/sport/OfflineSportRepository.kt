@@ -14,6 +14,18 @@ class OfflineSportRepository (private val sportDao: SportDao) :
 
     override fun getSportByName(sportName: String, idUser: Int): Flow<Sport> = sportDao.getSportByName(sportName, idUser)
 
-    override suspend fun updateSport(sport: Sport) = sportDao.updateSport(sport)
+    override suspend fun updateSport(sport: List<Sport>) = sportDao.updateSport(sport)
+
+    override suspend fun insertOrUpdateSports(sports: List<Sport>) = sportDao.insertOrUpdateSports(sports)
+
+    override suspend fun deleteSport(sports: List<Sport>) = sportDao.deleteSport(sports)
+
+   override suspend fun deleteSportByName(sportName: String, userId: Int) = sportDao.deleteSportByName(sportName, userId)
+
+   override suspend fun updateSportAchievements(sportName: String, idUser: Int, achievements: String?) = sportDao.updateSportAchievements(sportName, idUser, achievements)
+
+    override fun getAchievements(idUser: Int): Flow<List<String>> = sportDao.getAchievements(idUser)
+
+
 
 }

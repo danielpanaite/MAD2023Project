@@ -1,6 +1,8 @@
 package com.example.courtreservationapplicationjetpack.models
 
 import android.content.Context
+import com.example.courtreservationapplicationjetpack.models.achievements.AchievementsRepository
+import com.example.courtreservationapplicationjetpack.models.achievements.OfflineAchievementRepository
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
 import com.example.courtreservationapplicationjetpack.models.courts.OfflineCourtRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.OfflineReservationRepository
@@ -21,6 +23,8 @@ interface AppContainer {
     val userRepository: UserRepository
 
     val sportRepository: SportRepository
+
+    val achievementsRepository: AchievementsRepository
 }
 
 /**
@@ -43,6 +47,10 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val sportRepository: SportRepository by lazy {
         OfflineSportRepository(AppDatabase.getDatabase(context).sportDao())
+    }
+
+    override val achievementsRepository: AchievementsRepository by lazy {
+        OfflineAchievementRepository(AppDatabase.getDatabase(context).achievementsDao())
     }
 }
 
