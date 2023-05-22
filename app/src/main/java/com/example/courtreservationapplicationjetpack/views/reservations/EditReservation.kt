@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -29,10 +28,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -54,7 +54,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -108,7 +107,7 @@ fun EditReservation(
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Reservation details") },
         bottomBar = {
-            Row(modifier = Modifier
+            Column(modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
             ){
@@ -122,8 +121,6 @@ fun EditReservation(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .padding(end = 8.dp)
                 ) {
                     Text(text = "Save")
                 }
@@ -131,9 +128,7 @@ fun EditReservation(
                     onClick = { deleteConfirmationRequired = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .padding(start = 8.dp))
-                {
+                ){
                     Text(text = "Delete")
                 }
             }
@@ -275,6 +270,7 @@ fun EditReservationForm(
         }
     }
 }
+
 @Composable
 fun CalendarScreen(
     courtUiState: ReservationCourtsState,
@@ -332,16 +328,34 @@ fun CalendarScreen(
                 )
             }
         }
-        OutlinedTextField(
-            value = reservationsUiState.reservationDetails.additions,
-            onValueChange = {onReservationValueChange(reservationsUiState.reservationDetails.copy(additions = it))},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            label = {Text(text = "Notes")},
-            modifier = Modifier
-                .fillMaxWidth(),
-            singleLine = false,
-            shape = MaterialTheme.shapes.small
-        )
+        Column(modifier = Modifier.padding(top = 0.dp)) {
+            Text(
+                text = "Notes",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 0.dp)
+            )
+
+            TextField(
+                value = reservationsUiState.reservationDetails.additions,
+                onValueChange = { onReservationValueChange(reservationsUiState.reservationDetails.copy(additions = it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 0.dp, vertical = 8.dp)
+                    .background(MaterialTheme.colorScheme.surface),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                placeholder = { Text(text = "Additional notes here") },
+                maxLines = 3,
+                singleLine = false,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = Color.Gray,
+                ),
+            )
+        }
     }
 }
 
