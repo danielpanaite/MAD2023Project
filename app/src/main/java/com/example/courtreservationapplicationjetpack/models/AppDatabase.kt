@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     // Setting this option in your app's database builder means that Room
                     // permanently deletes all data from the tables in your database when it
                     // attempts to perform a migration with no defined migration path.
-                    //.fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration()
                     .createFromAsset("database/fields.db")
                     .build()
                     .also { Instance = it }

@@ -16,6 +16,7 @@ import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.views.courts.Ciao
 import com.example.courtreservationapplicationjetpack.views.courts.ReservationEntryBody
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,9 +46,8 @@ fun EditReservation(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Reservation details") },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-
             innerPadding ->
-        ReservationEntryBody(
+        Ciao(
             reservationsUiState = viewModel.reservationsUiState,
             onReservationValueChange = viewModel::updateUiState,
             onSaveClick = {

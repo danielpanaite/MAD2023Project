@@ -126,6 +126,8 @@
         implementation 'androidx.compose.material:material:1.0.0'
 
         implementation 'com.github.a914-gowtham:compose-ratingbar:1.2.5'
+
+        implementation 'com.chargemap.compose:numberpicker:1.0.3'
     }
 
 //Escludo la libreria kotlin-stdlib-jdk8 per utilizzare il calendario [DUPLICATO]

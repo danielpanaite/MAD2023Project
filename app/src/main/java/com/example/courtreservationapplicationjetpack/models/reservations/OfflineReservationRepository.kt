@@ -9,6 +9,8 @@ class OfflineReservationRepository(private val reservationDao: ReservationDao) :
 
     override fun getReservationStream(id: Int): Flow<Reservation?> = reservationDao.getReservation(id)
 
+    override fun getCourtReservations(court: Int, date: String): Flow<List<Reservation>> = reservationDao.getCourtReservations(court, date)
+
     override suspend fun insertReservation(reservation: Reservation) = reservationDao.insert(reservation)
 
     override suspend fun deleteReservation(reservation: Reservation) = reservationDao.delete(reservation)

@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * View Model to retrieve all reservations in the Room database.
@@ -21,7 +23,11 @@ import kotlinx.coroutines.flow.stateIn
 class MyReservationsViewModel(reservationRepository: ReservationRepository, courtRepository: CourtRepository) : ViewModel() {
 
     private val courts: MutableStateFlow<List<Int>?> = MutableStateFlow(null)
+    private val court: MutableStateFlow<Int?> = MutableStateFlow(null)
+    private val date: MutableStateFlow<String?> = MutableStateFlow(null)
 
+    val dateFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy")
     /**
      * Holds my reservations ui state. The list of reservations are retrieved from [ReservationRepository] and mapped to
      * [ReservationsUiState]
@@ -42,8 +48,25 @@ class MyReservationsViewModel(reservationRepository: ReservationRepository, cour
                 initialValue = ReservationCourtsState()
             )
 
+    val courtReservationsState: StateFlow<CourtReservationsState> =
+        court.filterNotNull().flatMapLatest { c -> reservationRepository.getCourtReservations(c, date.value.toString()) }.map { CourtReservationsState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = CourtReservationsState()
+            )
+
+
     fun setCourts(courts: List<Int>) {
         this.courts.value = courts
+    }
+
+    fun setCourt(court: Int) {
+        this.court.value = court
+    }
+
+    fun setDate(date: String){
+        this.date.value = date
     }
 
     companion object {
@@ -57,3 +80,5 @@ class MyReservationsViewModel(reservationRepository: ReservationRepository, cour
 data class MyReservationsUiState(val reservationList: List<Reservation> = listOf())
 
 data class ReservationCourtsState(val courtList: List<Court> = listOf())
+
+data class CourtReservationsState(val reservationList: List<Reservation> = listOf())

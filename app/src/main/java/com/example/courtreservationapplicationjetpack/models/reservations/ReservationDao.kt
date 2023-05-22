@@ -36,6 +36,9 @@ interface ReservationDao {
     @Query("SELECT * from reservation WHERE id = :id")
     fun getReservation(id: Int): Flow<Reservation>
 
+    @Query("SELECT * from reservation WHERE courtId = :court AND date = :date")
+    fun getCourtReservations(court: Int, date: String): Flow<List<Reservation>>
+
     /**
      * mark the function with the suspend keyword to let it run on a separate thread.
      * Room doesn't allow database access on the main thread

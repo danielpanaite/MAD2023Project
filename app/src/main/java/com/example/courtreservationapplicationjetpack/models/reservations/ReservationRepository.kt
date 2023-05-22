@@ -18,6 +18,8 @@ interface ReservationRepository {
      */
     fun getReservationStream(id: Int): Flow<Reservation?>
 
+    fun getCourtReservations(court: Int, date: String): Flow<List<Reservation>>
+
     /**
      * Insert reservation in the data source
      */
