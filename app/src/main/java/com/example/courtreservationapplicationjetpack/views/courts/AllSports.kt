@@ -172,10 +172,11 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             boundary = dateRange
         ),
         selection = CalendarSelection.Date { date ->
+            println(date)
             setPickedDate(date)
+
         }
     )
-
 
     Column() {
         Row() {
@@ -296,7 +297,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     modifier = Modifier
                                         .shadow(10.dp, RoundedCornerShape(0.dp))
                                         .fillMaxSize()
-                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}") }
+                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate}") }
                                         .height(100.dp),
                                     sport = it.sport
                                 )
@@ -319,10 +320,9 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     .padding(0.dp)
                             ) {
                                 Column {
+                                    println(pickedDate)
                                     Text(
-                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.format(
-                                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                                        )}",
+                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate}",
                                         fontSize = 14.sp,
                                         color = Color.Gray,
                                         modifier = Modifier.padding(16.dp)

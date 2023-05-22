@@ -86,7 +86,8 @@ object CourtsAvailableDestination : NavigationDestination {
     override val titleRes = "My Courts"
     override val icon = Icons.Default.Star
     private const val courtID = "courtID"
-    val routeWithArgs = "$route/{$courtID}"
+    private const val dateArg = "dateArg"
+    val routeWithArgs = "$route/{$courtID}/{$dateArg}"
 }
 
 
@@ -96,6 +97,7 @@ object CourtsAvailableDestination : NavigationDestination {
 @Composable
 fun CourtsAvailable(
     courtID: String,
+    pickedDate: String,
     navController: NavController,
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
@@ -129,7 +131,7 @@ fun CourtsAvailable(
 
     ) {
         _ ->
-        Ciao(courtID = courtID, viewModel = viewModel)
+        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -210,7 +212,7 @@ private fun CourtItem(
 
 //--------------------------------------------------------------------------------
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String) {
     val courtState = remember { mutableStateOf<Court?>(null) }
 
     LaunchedEffect(Unit) {
@@ -339,17 +341,17 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel) {
                             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
                     )
 
-                    CalendarScreen()
+                    CalendarScreen(pickedDate)
                 }
             }
         }
     }
 }
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(pickedDate: String) {
     val scrollState = rememberScrollState()
     val startDate = LocalDate.now()
-    val selectedDate = remember { mutableStateOf(LocalDate.now()) }
+    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
 
     Column {
         Row(

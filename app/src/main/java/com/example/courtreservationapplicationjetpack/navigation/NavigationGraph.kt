@@ -141,11 +141,17 @@ fun NavigationGraph(
             route = CourtsAvailableDestination.routeWithArgs,
             arguments = listOf(navArgument("courtID") {
                 type = NavType.StringType
-            })
+            },
+                navArgument("dateArg") {
+                    type = NavType.StringType
+                })
+
         ){
-            Log.d("Args", it.arguments?.getString("courtID").toString())
+            Log.d("CourtID", it.arguments?.getString("courtID").toString())
+            Log.d("Date", it.arguments?.getString("dateArg").toString())
             CourtsAvailable(
                 courtID = it.arguments?.getString("courtID").toString(),
+                pickedDate = it.arguments?.getString("dateArg").toString(),
                 navController = navController,
                 navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
             )
