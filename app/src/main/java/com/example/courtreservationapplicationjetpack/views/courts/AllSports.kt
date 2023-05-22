@@ -350,13 +350,13 @@ fun RatingBar(maxRating: Int = 5, onRatingChanged: (Int) -> Unit) {
         }
     }) {
         repeat(maxRating) { index ->
-            val starColor = if (index < rating) Color.Yellow else Color.Gray
+            val starColor = if (index < rating) Color(0xFFE0A800) else Color.Gray
             Image(
                 //painter = painterResource(id = R.drawable.ic_star),
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(28.dp)
                     .clickable { rating = index + 1; onRatingChanged(index + 1) }
                     .let { if (index < rating) it.alpha(1f) else it.alpha(0.5f) },
                 colorFilter = ColorFilter.tint(starColor)
@@ -377,7 +377,7 @@ fun HourButton(hour: String,navController: NavController, navigateToCourtsAvaila
     Box(
         modifier = Modifier
             .clickable {navController.navigate("${CourtsAvailableDestination.route}/${courtID}/${date.toString()}?hourOptArg=$hour") }
-            .padding(2.dp)
+            .padding(bottom = 8.dp)
             .width(60.dp)
             .shadow(7.dp, shape = RoundedCornerShape(8.dp))
             .background(

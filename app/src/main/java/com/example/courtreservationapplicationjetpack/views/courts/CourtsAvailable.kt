@@ -28,16 +28,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.textButtonColors
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -66,6 +71,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -373,6 +379,11 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                             },
                             dividersColor = Color.Black.copy(alpha = 0.7f),
                         )
+
+
+                    }
+                    Row {
+                        AdditionsInput(onAdditionsChanged = {})
                     }
                 }
             }
@@ -436,7 +447,9 @@ fun TextGrid(hourOptArg: String, textList: List<String>) {
 
     Column {
         repeat(rows) { rowIndex ->
-            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 0.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 0.dp)) {
                 for (columnIndex in 0 until 5) {
                     val index = rowIndex * 5 + columnIndex
                     if (index < textList.size) {
@@ -551,3 +564,50 @@ private fun animateCircleColor(isSelected: Boolean): Color {
     ).value
 }
 //--------------------------------------------------------------------------------
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdditionsInput(onAdditionsChanged: (String) -> Unit) {
+    var additionsText by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.padding(top = 0.dp)) {
+        Text(
+            text = "Additions",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 0.dp)
+        )
+
+        TextField(
+            value = additionsText,
+            onValueChange = { text -> additionsText = text },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 0.dp, vertical = 8.dp)
+                .background(MaterialTheme.colorScheme.surface),
+            textStyle = MaterialTheme.typography.bodyMedium,
+            placeholder = { Text(text = "Enter additions here") },
+            maxLines = 3,
+            singleLine = false,
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = Color.Gray
+            ),
+//            shape = RoundedCornerShape(
+//                topStart = CornerSize(8.dp),
+//                topEnd = CornerSize(8.dp)
+//            )
+        )
+    }
+}
+
+
+
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun preview(){
+    AdditionsInput(onAdditionsChanged = {})
+}
