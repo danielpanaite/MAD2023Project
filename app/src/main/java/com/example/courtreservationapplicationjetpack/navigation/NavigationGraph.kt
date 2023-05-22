@@ -137,25 +137,42 @@ fun NavigationGraph(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
+
         composable(
             route = CourtsAvailableDestination.routeWithArgs,
-            arguments = listOf(navArgument("courtID") {
-                type = NavType.StringType
-            },
+            arguments = listOf(
+                navArgument("courtID") {
+                    type = NavType.StringType
+                },
                 navArgument("dateArg") {
                     type = NavType.StringType
-                })
+                },
+                navArgument("hourOptArg") {
+                    type = NavType.StringType
+                    defaultValue = null // Valore predefinito per l'argomento opzionale
+                    nullable = true // L'argomento è opzionale
+                }
+            )
+        ) { backStackEntry ->
+            val courtID = backStackEntry.arguments?.getString("courtID").orEmpty()
+            val dateArg = backStackEntry.arguments?.getString("dateArg").orEmpty()
+            val hourOptArg = backStackEntry.arguments?.getString("hourOptArg") ?: ""
 
-        ){
-            Log.d("CourtID", it.arguments?.getString("courtID").toString())
-            Log.d("Date", it.arguments?.getString("dateArg").toString())
+            Log.d("CourtID", courtID)
+            Log.d("Date", dateArg)
+            Log.d("HourOptArg", hourOptArg)
+
             CourtsAvailable(
-                courtID = it.arguments?.getString("courtID").toString(),
-                pickedDate = it.arguments?.getString("dateArg").toString(),
+                courtID = courtID,
+                pickedDate = dateArg,
+                hourOptArg = hourOptArg,
                 navController = navController,
-                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}" ) },
+                navigateToCourtReservation = { navController.navigate("${CourtReservation.route}/${it}") }
             )
         }
+
+
+
 
         composable(
             route = CourtReservation.routeWithArgs,

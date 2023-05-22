@@ -87,7 +87,8 @@ object CourtsAvailableDestination : NavigationDestination {
     override val icon = Icons.Default.Star
     private const val courtID = "courtID"
     private const val dateArg = "dateArg"
-    val routeWithArgs = "$route/{$courtID}/{$dateArg}"
+    private const val hourOptArg = "hourOptArg"
+    val routeWithArgs = "$route/{$courtID}/{$dateArg}?hourOptArg={$hourOptArg}"
 }
 
 
@@ -98,6 +99,7 @@ object CourtsAvailableDestination : NavigationDestination {
 fun CourtsAvailable(
     courtID: String,
     pickedDate: String,
+    hourOptArg: String,
     navController: NavController,
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
@@ -131,7 +133,7 @@ fun CourtsAvailable(
 
     ) {
         _ ->
-        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate)
+        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, hourOptArg = hourOptArg)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -212,7 +214,7 @@ private fun CourtItem(
 
 //--------------------------------------------------------------------------------
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, hourOptArg: String) {
     val courtState = remember { mutableStateOf<Court?>(null) }
 
     LaunchedEffect(Unit) {
@@ -342,6 +344,35 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                     )
 
                     CalendarScreen(pickedDate)
+                    TextGrid(hourOptArg,listOf("10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"))
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 0.dp, vertical = 8.dp)
+                        //.padding(8.dp)
+                    ) {
+                        var pickerValue by remember { mutableStateOf(1) }
+
+                        Text(
+                            text = "Numero di persone coinvolte: $pickerValue",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.Gray,
+                            modifier = Modifier
+                                .weight(1f)
+                                .align(Alignment.CenterVertically)
+                        )
+
+                        NumberPicker(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .align(Alignment.CenterVertically),
+                            value = pickerValue,
+                            range = 0..10,
+                            onValueChange = {
+                                pickerValue = it
+                            },
+                            dividersColor = Color.Black.copy(alpha = 0.7f),
+                        )
+                    }
                 }
             }
         }
@@ -390,49 +421,21 @@ fun CalendarScreen(pickedDate: String) {
             )
         }
 
-        TextGrid(listOf("10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"))
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 0.dp, vertical = 8.dp)
-            //.padding(8.dp)
-        ) {
-            var pickerValue by remember { mutableStateOf(1) }
 
-            Text(
-                text = "Numero di persone coinvolte: $pickerValue",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
-                modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-            )
-
-            NumberPicker(
-                modifier = Modifier
-                    .width(120.dp)
-                    .align(Alignment.CenterVertically),
-                value = pickerValue,
-                range = 0..10,
-                onValueChange = {
-                    pickerValue = it
-                },
-                dividersColor = Color.Black.copy(alpha = 0.7f),
-            )
-        }
     }
 }
 
 
 @Composable
-fun TextGrid(textList: List<String>) {
+fun TextGrid(hourOptArg: String, textList: List<String>) {
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
-    val selectedButtonIndex = remember { mutableStateOf(-1) }
+    val selectedButtonIndex = remember {
+        mutableStateOf(textList.indexOfFirst { it == hourOptArg })
+    }
 
     Column {
         repeat(rows) { rowIndex ->
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 0.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 0.dp)) {
                 for (columnIndex in 0 until 5) {
                     val index = rowIndex * 5 + columnIndex
                     if (index < textList.size) {
@@ -477,6 +480,7 @@ fun TextGrid(textList: List<String>) {
         }
     }
 }
+
 
 
 
