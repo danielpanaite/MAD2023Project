@@ -55,14 +55,14 @@ fun EditReservation(
                     viewModel.updateReservation()
                 }
                 toastUpdate.show()
-                navController.navigate(MyReservationsDestination.route)
+                navController.popBackStack()
             },
             onDeleteClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     viewModel.deleteReservation()
                 }
                 toastDelete.show()
-                navController.navigate(MyReservationsDestination.route)
+                navController.popBackStack()
             },
             modifier = modifier.padding(innerPadding),
         )

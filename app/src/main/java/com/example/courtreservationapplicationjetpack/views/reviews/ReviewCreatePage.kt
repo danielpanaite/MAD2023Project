@@ -59,7 +59,6 @@ fun ReviewCreatePage(
     viewModel: ReviewCreateViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val courtUiState by viewModel.courtUiState.collectAsState()
-
     val toastCreate = Toast.makeText(LocalContext.current, "Review sent!", Toast.LENGTH_SHORT)
     val toastDelete = Toast.makeText(LocalContext.current, "Review deleted!", Toast.LENGTH_SHORT)
     Scaffold(
@@ -77,7 +76,7 @@ fun ReviewCreatePage(
                     viewModel.createReview()
                 }
                 toastCreate.show()
-                navController.navigate(ReviewMainPageDestination.route)
+                navController.popBackStack()
             },
             onDeleteClick = {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -85,7 +84,7 @@ fun ReviewCreatePage(
                     viewModel.deleteReview()
                 }
                 toastDelete.show()
-                navController.navigate(ReviewMainPageDestination.route)
+                navController.popBackStack()
             },
             modifier = Modifier.padding(innerPadding)
         )
