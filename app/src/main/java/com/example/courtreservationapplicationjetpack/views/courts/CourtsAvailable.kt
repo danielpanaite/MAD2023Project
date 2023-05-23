@@ -59,6 +59,7 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -80,8 +81,10 @@ import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -115,6 +118,7 @@ fun CourtsAvailable(
 
 ) {
     val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             //CourtTopAppBar(canNavigateBack = false)
@@ -126,7 +130,12 @@ fun CourtsAvailable(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Button(
-                    onClick = {},
+                    onClick = {
+                              coroutineScope.launch {
+                                  viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), hourOptArg, "1", "1")
+                              }
+
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp)

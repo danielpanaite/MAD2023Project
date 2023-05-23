@@ -66,7 +66,7 @@ object AppViewModelProvider {
 
         // Initializer for CourtAvailableViewModel
         initializer {
-            CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository)
+            CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository, courtApplication().container.reservationRepository)
         }
 
         initializer {

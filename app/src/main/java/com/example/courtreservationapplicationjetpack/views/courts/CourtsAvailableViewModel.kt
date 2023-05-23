@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
+import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
+import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
+import com.example.courtreservationapplicationjetpack.views.reservations.toReservation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +21,8 @@ import kotlinx.coroutines.flow.stateIn
  */
 class CourtsAvailableViewModel(
     savedStateHandle: SavedStateHandle,
-    private val courtRepository: CourtRepository
+    private val courtRepository: CourtRepository,
+    private val reservationRepository: ReservationRepository
 ) : ViewModel() {
 
     private val sport: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -40,6 +44,11 @@ class CourtsAvailableViewModel(
     }
 
     fun getCourt(id: Int) = courtRepository.getCourt(id)
+
+    suspend fun addReservation(id: Int?, user: String, courtId: String, date: String, slot: String, additions: String, people: String){
+        val newReservation = ReservationDetails(id = id, user = user, courtId = courtId, date = date, slot = slot, additions = additions, people = people)
+        reservationRepository.addReservation(newReservation.toReservation())
+    }
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

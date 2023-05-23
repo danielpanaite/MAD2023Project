@@ -17,5 +17,6 @@ class OfflineReservationRepository(private val reservationDao: ReservationDao) :
 
     override suspend fun updateReservation(reservation: Reservation) = reservationDao.update(reservation)
     override fun getSlot(date: String, courtId: Int): Flow<List<String>> = reservationDao.getSlot(date, courtId)
+    override suspend fun addReservation(reservation: Reservation) = reservationDao.insert(reservation)
 }
 

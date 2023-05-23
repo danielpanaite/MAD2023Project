@@ -57,4 +57,9 @@ interface ReservationDao {
 
     @Query("SELECT slot FROM reservation WHERE date =:date AND courtId = :courtId")
     fun getSlot(date: String, courtId: Int): Flow<List<String>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addReservation(reservation: Reservation)
+
+
 }
