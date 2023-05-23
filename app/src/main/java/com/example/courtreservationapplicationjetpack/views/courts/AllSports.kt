@@ -39,6 +39,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -317,20 +318,27 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     .padding(0.dp)
                             ) {
                                 Column {
+                                    var isHoursListEmpy = remember {
+                                        mutableStateOf(false)
+                                    }
                                     Text(
-                                        text = "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
+                                        text = if (isHoursListEmpy.value) {
+                                            "Nessun orario disponibile per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+                                        } else {
+                                            "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+                                        },
                                         fontSize = 14.sp,
                                         color = Color.Gray,
-                                        modifier = Modifier
-                                            .padding(16.dp)
+                                        modifier = Modifier.padding(16.dp)
                                     )
+
 
 
                                     val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
                                         initial = emptyList<String>()
                                     )
                                     
-                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id.toString(), date = pickedDate.value)
+                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id.toString(), date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
 
                                 }
                             }
@@ -408,7 +416,7 @@ fun HourButton(hour: String,navController: NavController, navigateToCourtsAvaila
 
 
 @Composable
-fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
+fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, navController: NavController, navigateToCourtsAvailable: (String) -> Unit, isHoursListEmpy: MutableState<Boolean>) {
     val currentTime = LocalTime.now()
     val currentDate = LocalDate.now()
 
@@ -418,6 +426,8 @@ fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, 
             date > currentDate || (date == currentDate && hour >= currentTime)
         }
         .toSet() - reservatedSlot.toSet()
+
+    isHoursListEmpy.value = hours.isEmpty()
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),

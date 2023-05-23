@@ -385,6 +385,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                 }
             },
             dismissButton = {
+
                 Button(
                     onClick = {
                         navController.popBackStack()
