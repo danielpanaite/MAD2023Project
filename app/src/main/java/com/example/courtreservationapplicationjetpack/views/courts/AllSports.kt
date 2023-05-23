@@ -289,15 +289,15 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         .align(Alignment.TopEnd)
                                         .padding(16.dp)
                                 ) {
-                                    RatingBar(
-                                        value = userReviews.find { r -> r.court == it.id }?.rating?.toFloat() ?: 0.toFloat(),
-                                        config = RatingBarConfig()
-                                            .style(RatingBarStyle.HighLighted)
-                                            .size(18.dp)
-                                            .activeColor(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)),
-                                        onValueChange = {},
-                                        onRatingChanged = {}
-                                    )
+//                                    RatingBar(
+//                                        value = userReviews.find { r -> r.court == it.id }?.rating?.toFloat() ?: 0.toFloat(),
+//                                        config = RatingBarConfig()
+//                                            .style(RatingBarStyle.HighLighted)
+//                                            .size(18.dp)
+//                                            .activeColor(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)),
+//                                        onValueChange = {},
+//                                        onRatingChanged = {}
+//                                    )
                                 }
                                 Text(
                                     text = it.name,
