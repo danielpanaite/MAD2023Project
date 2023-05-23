@@ -247,7 +247,8 @@ fun CourtsAvailable(
                         Button(
                             onClick = {
                                 /* Azione da eseguire quando si fa clic sul pulsante "Close" */
-                                navController.popBackStack()
+                                isMissingSomething.value = false
+                                //navController.popBackStack()
                             },
                             modifier = Modifier
                                 .sizeIn(minWidth = 120.dp, minHeight = 48.dp)
