@@ -61,7 +61,6 @@ import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.flow.filterNotNull
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -82,11 +81,8 @@ fun MonthCalendar(
     onReservationClick: (Reservation) -> Unit,
 ) {
     val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    val shorttimeFormatter = DateTimeFormatter.ofPattern("H:mm")
     val reservationList = reservations
         .filter { LocalDate.parse(it.date, reservationFormatter) >= LocalDate.now() }
-        .filter{ LocalTime.parse(it.slot, timeFormatter) < LocalTime.now() }
         .groupBy { LocalDate.parse(it.date, reservationFormatter) }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(500) }
@@ -286,12 +282,10 @@ private fun LazyItemScope.ReservationInformation(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSecondary
                     )
-                    if(sportIcon != null){
-                        Image(
-                            painter = painterResource(sportIcon),
-                            contentDescription = null
-                        )
-                    }
+                    Image(
+                        painter = painterResource(sportIcon),
+                        contentDescription = null
+                    )
                 }
             }
         }

@@ -70,6 +70,9 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 
 object EditReservationDestination : NavigationDestination {
@@ -89,7 +92,10 @@ fun EditReservation(
 ){
     val toastUpdate = Toast.makeText(LocalContext.current, "Reservation updated!", Toast.LENGTH_SHORT)
     val toastDelete = Toast.makeText(LocalContext.current, "Reservation deleted!", Toast.LENGTH_SHORT)
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
+    val canEdit = remember { mutableStateOf(true) }
     if (deleteConfirmationRequired) {
         DeleteConfirmationDialog(
             onDeleteConfirm = {
@@ -111,6 +117,14 @@ fun EditReservation(
                 .fillMaxWidth()
                 .padding(16.dp)
             ){
+                if(viewModel.reservationsUiState.reservationDetails.slot != ""){
+                    if(
+                        LocalTime.parse(viewModel.reservationsUiState.reservationDetails.slot, timeFormatter) < LocalTime.now()
+                        && LocalDate.parse(viewModel.reservationsUiState.reservationDetails.date, reservationFormatter) <= LocalDate.now()
+                        ){
+                        canEdit.value = false
+                    }
+                }
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -119,10 +133,15 @@ fun EditReservation(
                         toastUpdate.show()
                         navController.popBackStack()
                     },
+                    enabled = canEdit.value,
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    Text(text = "Save")
+                    if(canEdit.value){
+                        Text(text = "Save")
+                    }else{
+                        Text(text = "Reservation already passed")
+                    }
                 }
                 OutlinedButton(
                     onClick = { deleteConfirmationRequired = true },
@@ -245,7 +264,7 @@ fun EditReservationForm(
                         ) {
                             if(courtUiState.courtList.isNotEmpty()) {
                                 Image(
-                                    painter = painterResource(SportDrawables.getDrawable(courtUiState.courtList[0].sport)!!),
+                                    painter = painterResource(SportDrawables.getDrawable(courtUiState.courtList[0].sport)),
                                     contentDescription = "Sport icon",
                                     colorFilter = ColorFilter.tint(Color.Black),
                                     modifier = Modifier
@@ -278,6 +297,8 @@ fun CalendarScreen(
     onReservationValueChange: (ReservationDetails) -> Unit,
     courtReservations: List<Reservation>
 ) {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     Column {
         Row(
             modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
@@ -288,10 +309,19 @@ fun CalendarScreen(
                 color = Color.Gray
             )
         }
+        var filteredHoursForToday = listOf<String>()
+        if(reservationsUiState.reservationDetails.date != ""){
+            val filteredHours = mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                .filter { !courtReservations.any{ r -> (r.slot == it) && (r.id != reservationsUiState.reservationDetails.id)} }
 
+            filteredHoursForToday = if (LocalDate.now() == LocalDate.parse(reservationsUiState.reservationDetails.date, dateFormatter)) {
+                filteredHours.filter { LocalTime.parse(it, timeFormatter) > LocalTime.now() }
+            } else {
+                filteredHours
+            }
+        }
         TextGrid(
-            mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
-                .filter { !courtReservations.any{ r -> (r.slot == it) && (r.id != reservationsUiState.reservationDetails.id)} },
+            filteredHoursForToday,
             reservationsUiState,
             onReservationValueChange)
         Row(
