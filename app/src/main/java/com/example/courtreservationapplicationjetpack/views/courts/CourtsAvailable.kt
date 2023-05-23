@@ -131,6 +131,7 @@ fun CourtsAvailable(
     allSportViewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
+    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
     val coroutineScope = rememberCoroutineScope()
     var pickedHour = remember { mutableStateOf(hourOptArg) }
     val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
@@ -150,7 +151,7 @@ fun CourtsAvailable(
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
+                            viewModel.addReservation(null, "1", courtID, selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
                             showDialog.value = true
                         }
 
@@ -167,7 +168,7 @@ fun CourtsAvailable(
 
     ) {
             _ ->
-        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel)
+        Ciao(courtID = courtID, viewModel = viewModel, selectedDate = selectedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -249,9 +250,9 @@ private fun CourtItem(
 //--------------------------------------------------------------------------------
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
     val courtState = remember { mutableStateOf<Court?>(null) }
-    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
+
     if(showDialog.value) {
         AlertDialog(
             onDismissRequest = { TODO() },
@@ -453,7 +454,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
 
                     val filteredHours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
                     Log.d("Oggi", LocalDate.now().toString())
-                    Log.d("pickedDate", selectedDate.value.toString())
+                    Log.d("SelectedDate", selectedDate.value.toString())
 
                     val filteredHoursForToday = if (LocalDate.now().toString() == selectedDate.value.toString()) {
                         filteredHours.filter { LocalTime.parse(it) > currentTime }
