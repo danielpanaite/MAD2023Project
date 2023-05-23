@@ -365,7 +365,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                     )
 
                     CalendarScreen(pickedDate)
-                    TextGrid(hourOptArg,listOf("10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"))
+                    TextGrid(hourOptArg,listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"))
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 0.dp, vertical = 8.dp)

@@ -401,15 +401,7 @@ fun HourButton(hour: String,navController: NavController, navigateToCourtsAvaila
 
 @Composable
 fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>,navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
-    val hours = listOf(
-        "8:00",
-        "9:00",
-        "10:00",
-        "11:00",
-        "12:00",
-        "13:00",
-        "14:00"
-    ) - reservatedSlot.toSet()
+    val hours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00") - reservatedSlot.toSet()
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
