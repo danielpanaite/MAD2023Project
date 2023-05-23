@@ -3,7 +3,6 @@ package com.example.courtreservationapplicationjetpack.views.profile
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,8 +53,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -149,7 +146,6 @@ fun ProfileEntryBody(
         item {
             Button(onClick = {
                  onSaveClick()
-                // mettere un toast se tutto è andato bene e i valori sono giusti
                 if(profileUiState.isEntryValid){navigateToProfileDestination()
                 }else{
                     showErrorDialog = true
@@ -217,13 +213,7 @@ fun ProfileInputForm(
     }
 
     val chosenPhotUriState = rememberUpdatedState(chosenPhoto)
-/*
-    if (chosenPhotUriState.value != chosenPhoto) {
-        Log.d("ma qui ci entri", "${chosenPhoto}")
-        onValueChange(userDetails.copy(imageUri = chosenPhoto.toString()))
-    }
 
- */
     val showMenu = remember { mutableStateOf(false) }
 
 
@@ -370,9 +360,7 @@ fun ProfileInputForm(
                 ),
                 shape = RoundedCornerShape(8.dp)
             )
-        //elevation = 4.dp
     ) {
-        // Aggiungi qui la composable per i campi dati del profilo, divisi in diversi TextField
         Column(
             modifier = Modifier
                 .padding(8.dp)

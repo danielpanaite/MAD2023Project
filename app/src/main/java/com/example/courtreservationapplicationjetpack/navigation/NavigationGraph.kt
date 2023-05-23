@@ -63,20 +63,6 @@ fun NavigationGraph(
             )
         }
 
-        /*
-        composable(
-            route = ReserveACourtDestination.route
-
-        ){
-            ReserveACourt(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() },
-                navController = navController
-            )
-        }
-
-         */
-
         composable(
             route = EditProfileDestination.routeWithArgs,
             arguments = listOf(navArgument(EditProfileDestination.profileIdArg) {
@@ -219,7 +205,6 @@ fun NavigationGraph(
         ){
             SportPreferences(
                 navController = navController,
-                //navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
                 onNavigateUp = { navController.navigateUp() },
                 navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
 

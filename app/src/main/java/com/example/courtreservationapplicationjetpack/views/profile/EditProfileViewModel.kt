@@ -6,13 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import com.example.courtreservationapplicationjetpack.models.user.UserRepository
-import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationsUiState
-import com.example.courtreservationapplicationjetpack.views.reservations.toReservation
-import com.example.courtreservationapplicationjetpack.views.reservations.toReservationsUiState
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

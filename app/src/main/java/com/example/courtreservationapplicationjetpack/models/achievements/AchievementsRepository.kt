@@ -1,8 +1,5 @@
 package com.example.courtreservationapplicationjetpack.models.achievements
-
-import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import kotlinx.coroutines.flow.Flow
-
 
 interface AchievementsRepository {
 

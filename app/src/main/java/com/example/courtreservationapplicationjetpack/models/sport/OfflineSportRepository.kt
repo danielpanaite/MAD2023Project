@@ -1,8 +1,5 @@
 package com.example.courtreservationapplicationjetpack.models.sport
 
-import com.example.courtreservationapplicationjetpack.models.user.User
-import com.example.courtreservationapplicationjetpack.models.user.UserDao
-import com.example.courtreservationapplicationjetpack.models.user.UserRepository
 import kotlinx.coroutines.flow.Flow
 
 class OfflineSportRepository (private val sportDao: SportDao) :

@@ -32,17 +32,6 @@ class AchievementsViewModel(
                 initialValue = Achievements2()
             )
 
-    /*
-    val achievementsUiState: StateFlow<AchievementsUiState> =
-
-    achievementRepository.getAchivementUser(1).map {
-        AchievementsUiState(achievementDetails = it.toAchievementsDetails()) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = AchievementsUiState()
-            )
-*/
     suspend fun addAchievement(sportName: String, idUser: Int, date: String, title: String, description:String){
 
         val newAchievement = AchievementDetails(
@@ -83,14 +72,6 @@ data class  Achievements2(val achievementsList: List<Achievements> = listOf())
  * Extension function to convert [Reservation] to [ReservationsUiState]
  */
 
-/*
-
-data class AchievementsUiState(
-    val achievementDetails: AchievementDetails = AchievementDetails(),
-    val isEntryValid: Boolean = false
-)
-
- */
 
 data class AchievementDetails(
     val id: Int?,
@@ -109,24 +90,6 @@ fun AchievementDetails.toAchievements(): Achievements = Achievements(
     title = title,
     description=description
 )
-
-/*
-fun Achievements.toAchievementsUiState(isEntryValid: Boolean = false): AchievementsUiState = AchievementsUiState(
-    achievementDetails = this.toAchievementsDetails(),
-    isEntryValid = isEntryValid
-)
-
-
-fun Achievements.toAchievementsDetails(): AchievementDetails = AchievementDetails(
-    id = id,
-    sportName = sportName,
-    idUser = idUser,
-    date = date,
-    title = title,
-    description=description
-)
-
-*/
 
 
 
