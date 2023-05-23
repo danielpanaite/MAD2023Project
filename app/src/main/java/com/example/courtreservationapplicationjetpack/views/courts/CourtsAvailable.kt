@@ -540,7 +540,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
                     )
 
-                    CalendarScreen(selectedDate)
+                    CalendarScreen(selectedDate, pickedHour)
 
                     val currentTime = LocalTime.now()
 
@@ -599,7 +599,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
     }
 }
 @Composable
-fun CalendarScreen(selectedDate: MutableState<LocalDate>) {
+fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>) {
     val scrollState = rememberScrollState()
     val startDate = LocalDate.now()
 
@@ -623,7 +623,12 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>) {
                     dayOfMonth = dayOfMonth,
                     month = month,
                     isSelected = selectedDate.value == currentDate,
-                    onDaySelected = { selectedDate.value = currentDate }
+                    onDaySelected = {
+                        if(selectedDate.value != currentDate) {
+                            pickedHour.value = ""
+                        }
+                        selectedDate.value = currentDate
+                    }
                 )
             }
         }
