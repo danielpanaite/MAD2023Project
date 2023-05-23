@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,26 +38,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -74,17 +64,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
+import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.models.reviews.Review
+import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.gowtham.ratingbar.RatingBar
+import com.gowtham.ratingbar.RatingBarConfig
+import com.gowtham.ratingbar.RatingBarStyle
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -108,10 +108,11 @@ fun AllSports(
     onNavigateUp: () -> Unit,
 
     viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
-
+    val userReviews by reviewViewModel.myReviewsUiState.collectAsState()
 
 
     Scaffold(
@@ -120,14 +121,14 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navController = navController)
+    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navController = navController, userReviews = userReviews.reviewList)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController) {
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController, userReviews: List<Review>) {
     var pickedDate = remember { mutableStateOf(LocalDate.now()) }
 
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
@@ -290,7 +291,15 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         .align(Alignment.TopEnd)
                                         .padding(16.dp)
                                 ) {
-                                    RatingBar(5, onRatingChanged = { /* Aggiungi la logica per gestire il cambio di rating */ })
+                                    RatingBar(
+                                        value = userReviews.find { r -> r.court == it.id }?.rating?.toFloat() ?: 0.toFloat(),
+                                        config = RatingBarConfig()
+                                            .style(RatingBarStyle.HighLighted)
+                                            .size(18.dp)
+                                            .activeColor(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)),
+                                        onValueChange = {},
+                                        onRatingChanged = {}
+                                    )
                                 }
                                 Text(
                                     text = it.name,
@@ -377,7 +386,7 @@ fun RatingBar(maxRating: Int = 5, onRatingChanged: (Int) -> Unit) {
 fun HourButton(hour: String,navController: NavController, navigateToCourtsAvailable: (String) -> Unit, courtID: String, date: LocalDate) {
     Box(
         modifier = Modifier
-            .clickable {navController.navigate("${CourtsAvailableDestination.route}/${courtID}/${date.toString()}?hourOptArg=$hour") }
+            .clickable { navController.navigate("${CourtsAvailableDestination.route}/${courtID}/${date.toString()}?hourOptArg=$hour") }
             .padding(bottom = 8.dp)
             .width(60.dp)
             .shadow(7.dp, shape = RoundedCornerShape(8.dp))
