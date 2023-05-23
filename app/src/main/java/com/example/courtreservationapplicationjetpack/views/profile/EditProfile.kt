@@ -145,14 +145,14 @@ fun ProfileEntryBody(
         }
         item {
             Button(onClick = {
-                 onSaveClick()
-                if(profileUiState.isEntryValid){navigateToProfileDestination()
+
+                if(profileUiState.isEntryValid){onSaveClick(); navigateToProfileDestination()
                 }else{
                     showErrorDialog = true
 
                 }
             },
-                enabled = profileUiState.isEntryValid,
+                //enabled = profileUiState.isEntryValid,
                 modifier = Modifier.fillMaxWidth())
             {
                 Text(text = "EDIT PROFILE")
@@ -162,8 +162,20 @@ fun ProfileEntryBody(
     if (showErrorDialog) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false },
-            title = { Text(text = "Errore") },
-            text = { Text(text = "I valori inseriti non sono validi.") },
+
+            title = { Text(text = "Error") },
+            text = if(profileUiState.userDetails.name == "" || profileUiState.userDetails.nickname == ""
+                || profileUiState.userDetails.email == "" || profileUiState.userDetails.address == ""
+                || profileUiState.userDetails.phone == "" || profileUiState.userDetails.age == ""
+            ){
+                { Text(text = "Fill all the fields") }
+            }else if(!profileUiState.userDetails.email.matches( Regex("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b")) ){
+                { Text(text = "Insert a valid email") }
+
+            }else{
+                { Text(text = "I valori inseriti non sono validi.") }
+
+            },
             confirmButton = {
                 Button(onClick = { showErrorDialog = false }) {
                     Text(text = "Ok")
