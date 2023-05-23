@@ -1,3 +1,4 @@
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import com.example.courtreservationapplicationjetpack.R
@@ -51,7 +52,7 @@ internal fun OptionSample3(
 }
 
 @Composable
-private fun getIconResourceForSport(sport: String): Int {
+fun getIconResourceForSport(sport: String): Int {
     return when (sport) {
         "calcio" -> R.drawable.ic_calcio5
         "basket" -> R.drawable.ic_basket
@@ -61,6 +62,6 @@ private fun getIconResourceForSport(sport: String): Int {
         "pallamano" -> R.drawable.pallamano
         "rugby" -> R.drawable.ic_rugby
         "softball" -> R.drawable.ic_softball
-        else -> R.drawable.ic_bottom_profile // Icona di default per gli sport non riconosciuti
+        else ->  R.drawable.ic_question_mark // Icona di default per gli sport non riconosciuti
     }
 }

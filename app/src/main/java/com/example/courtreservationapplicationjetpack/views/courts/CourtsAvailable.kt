@@ -352,8 +352,20 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
                         ) {
+                            val sportIcon = when (court?.sport) {
+                                "calcio" -> R.drawable.ic_calcio5
+                                "basket" -> R.drawable.ic_basket
+                                "beach volley" -> R.drawable.ic_beachvolley
+                                "pallavolo" -> R.drawable.ic_volley
+                                "tennis" -> R.drawable.ic_tennis
+                                "pallamano" -> R.drawable.pallamano
+                                "rugby" -> R.drawable.ic_rugby
+                                "softball" -> R.drawable.ic_softball
+                                else ->  R.drawable.ic_question_mark
+                            }
+
                             Image(
-                                painter = painterResource(R.drawable.ic_calcio5),
+                                painter = painterResource(sportIcon),
                                 contentDescription = "Sport icon",
                                 colorFilter = ColorFilter.tint(Color.Black),
                                 modifier = Modifier

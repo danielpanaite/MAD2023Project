@@ -139,7 +139,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
     OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
-    // Imposta lo sport su pickedSport
     courtsViewModel.setSport(pickedSport)
 
 
