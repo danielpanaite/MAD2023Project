@@ -72,6 +72,7 @@ import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
+import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
@@ -88,6 +89,7 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object AllSportsDestination : NavigationDestination {
     override val route  = "all_sports"
@@ -194,22 +196,20 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         modifier = Modifier.weight(2f),
                         border = BorderStroke(1.dp, Color.Black),
                         shape = RoundedCornerShape(25),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black, containerColor = Color(
-                            0xFFF8F1FF
-                        )
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black, containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                         )) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Image(
-                                painter = painterResource(R.drawable.ic_calcio5),
+                                painter = painterResource(SportDrawables.getDrawable(pickedSport)),
                                 contentDescription = "Sport icon",
                                 colorFilter = ColorFilter.tint(Color.Black),
                                 modifier = Modifier.size(24.dp)
                             )
                             Text(
-                                text = pickedSport,
+                                text = pickedSport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Start,
@@ -229,9 +229,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         border = BorderStroke(1.dp, Color.Black),
                         shape = RoundedCornerShape(25), // = 50% percent
                         // or shape = CircleShape
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black, containerColor = Color(
-                            0xFFF8F1FF
-                        )
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black, containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                         )){
                         Icon(
                             imageVector = Icons.Outlined.DateRange,

@@ -1,4 +1,4 @@
-import androidx.compose.material.icons.Icons
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import com.example.courtreservationapplicationjetpack.R
@@ -9,6 +9,7 @@ import com.maxkeppeler.sheets.option.models.DisplayMode
 import com.maxkeppeler.sheets.option.models.Option
 import com.maxkeppeler.sheets.option.models.OptionConfig
 import com.maxkeppeler.sheets.option.models.OptionSelection
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,8 +34,8 @@ internal fun OptionSample3(
     }.map { sport ->
         Option(
             IconSource(getIconResourceForSport(sport)),
-            titleText = sport,
-            selected = sport == pickedSport
+            titleText = sport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }.substringBefore(' '),
+            selected = sport == pickedSport,
         )
     }
 

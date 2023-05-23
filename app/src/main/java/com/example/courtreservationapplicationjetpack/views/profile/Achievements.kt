@@ -101,7 +101,7 @@ fun Achievements(
                 Icon(
                     Icons.Filled.Add,
                     contentDescription = "Add",
-                    modifier = Modifier.background(color = MaterialTheme.colorScheme.primary)
+                    //modifier = Modifier.background(color = MaterialTheme.colorScheme.primary)
                 )
             }
         }
