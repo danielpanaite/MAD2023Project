@@ -21,8 +21,12 @@ internal fun OptionSample3(
         when (sport) {
             "calcio" -> true
             "basket" -> true
-            "beach Volley" -> true
+            "beach volley" -> true
             "tennis" -> true
+            "pallamano" -> true
+            "pallavolo"-> true
+            "rugby" -> true
+            "softball" -> true
             else -> true
         }
     }.map { sport ->
@@ -51,8 +55,12 @@ private fun getIconResourceForSport(sport: String): Int {
     return when (sport) {
         "calcio" -> R.drawable.ic_calcio5
         "basket" -> R.drawable.ic_basket
-        "beach Volley" -> R.drawable.ic_beachvolley
+        "beach volley" -> R.drawable.ic_beachvolley
+        "pallavolo" -> R.drawable.ic_volley
         "tennis" -> R.drawable.ic_tennis
+        "pallamano" -> R.drawable.pallamano
+        "rugby" -> R.drawable.ic_rugby
+        "softball" -> R.drawable.ic_softball
         else -> R.drawable.ic_bottom_profile // Icona di default per gli sport non riconosciuti
     }
 }
