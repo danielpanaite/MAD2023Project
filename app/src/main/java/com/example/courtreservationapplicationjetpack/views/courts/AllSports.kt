@@ -86,6 +86,7 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 object AllSportsDestination : NavigationDestination {
@@ -400,17 +401,33 @@ fun HourButton(hour: String,navController: NavController, navigateToCourtsAvaila
 
 
 @Composable
-fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>,navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
-    val hours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00") - reservatedSlot.toSet()
+fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, navController: NavController, navigateToCourtsAvailable: (String) -> Unit) {
+    val currentTime = LocalTime.now()
+    val currentDate = LocalDate.now()
+
+    val hours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+        .filter { time ->
+            val hour = LocalTime.parse(time)
+            date > currentDate || (date == currentDate && hour >= currentTime)
+        }
+        .toSet() - reservatedSlot.toSet()
+
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(hours.size) { index ->
-            HourButton(hour = hours[index],navController, navigateToCourtsAvailable = navigateToCourtsAvailable, courtID = courtID, date = date)
+            HourButton(
+                hour = hours.toList()[index],
+                navController,
+                navigateToCourtsAvailable = navigateToCourtsAvailable,
+                courtID = courtID,
+                date = date
+            )
         }
     }
 }
+
 
 @Composable
 fun CoilImage(modifier: Modifier = Modifier, sport: String) {
