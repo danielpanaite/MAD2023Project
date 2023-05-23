@@ -129,9 +129,12 @@ private fun UserDetails(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp)
+            .clickable { navigateToEditProfileDestination(profileUiState.userDetails.id!!) },
+        verticalAlignment = Alignment.CenterVertically,
+
     ) {
+
         // User's image
         Image(
             modifier = Modifier
