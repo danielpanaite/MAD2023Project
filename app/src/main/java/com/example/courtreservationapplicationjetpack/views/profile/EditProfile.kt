@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.content.ContextCompat
@@ -286,8 +287,10 @@ fun ProfileInputForm(
                                                 crossfade(true)
                                                 placeholder(R.drawable.baseline_person_24)
                                                 transformations(CircleCropTransformation())
-                                            }).build()
+                                            }).build(),
+
                                     )
+
                                 }
 
                             },
@@ -295,13 +298,18 @@ fun ProfileInputForm(
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(CircleShape),
+                            colorFilter = if (chosenPhoto == null && userDetails.imageUri == null) {
+                                ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                            } else {
+                                null
+                            }
 
-                            )
+
+
+                        )
                         IconButton(
                             onClick = { showMenu.value = true },
                             modifier = Modifier
-                                .padding(end = 8.dp)
-                                .padding(15.dp)
                         ) {
                             Icon (
                                 painter = painterResource(id = R.drawable.ic_camera),

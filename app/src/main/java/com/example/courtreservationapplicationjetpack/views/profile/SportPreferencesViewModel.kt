@@ -3,7 +3,9 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.util.Log
 import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
@@ -12,11 +14,15 @@ import com.example.courtreservationapplicationjetpack.models.sport.SportReposito
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMap
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-
 
 /**
  * View Model to retrieve all reservations in the Room database.
@@ -29,6 +35,35 @@ class SportPreferencesViewModel(
      * Holds my sport ui state. The list of all sport are retrieved from [CourtRepository] and mapped to
      * [SportsUiState]
      */
+
+    val sportPreferencesUiState: StateFlow<SportsPreferencesUiState> by lazy {
+        flow {
+            // Emit the loading state initially
+            emit(SportsPreferencesUiState(isLoading = true))
+
+            val sports = sportRepository.getSportUser(1)
+                .filterNotNull()
+                .firstOrNull() ?: emptyList() // Get the first list of sports or an empty list if null
+
+            // Emit the data with isLoading set to false
+            emit(SportsPreferencesUiState(sports, isLoading = false))
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = SportsPreferencesUiState(isLoading = true) // Set initial isLoading state to true
+        )
+    }
+
+
+
+
+
+
+
+
+
+
+
     val allSportsUiState: StateFlow<AllSportsUiState> =
         courtRepository.getSports().map { AllSportsUiState(it) }
             .stateIn(
@@ -37,6 +72,8 @@ class SportPreferencesViewModel(
                 initialValue = AllSportsUiState()
             )
 
+
+/*
 
     val sportPreferencesUiState: StateFlow<SportsPreferencesUiState> =
         sportRepository.getSportUser(1)
@@ -47,6 +84,8 @@ class SportPreferencesViewModel(
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = SportsPreferencesUiState()
             )
+
+ */
 
     suspend fun insertOrUpdateSports(sports: List<Sport>) {
         sportRepository.insertOrUpdateSports(sports)
@@ -108,6 +147,7 @@ class SportPreferencesViewModel(
     }
 }
 
+
 data class AllSportsUiState(val sportsList: List<String> = listOf())
 
 
@@ -120,8 +160,12 @@ data class AllSportsUiState(val sportsList: List<String> = listOf())
     }
 
      */
-data class  SportsPreferencesUiState(val sportsList: List<Sport> = listOf())
+//data class  SportsPreferencesUiState(val sportsList: List<Sport> = listOf())
 
+data class SportsPreferencesUiState(
+    val sportsList: List<Sport> = listOf(),
+    val isLoading: Boolean = false // Add the isLoading property
+)
 
 data class SportPreferencesDetails(
     val idUser: Int = 1,
