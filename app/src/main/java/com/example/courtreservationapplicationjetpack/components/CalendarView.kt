@@ -61,6 +61,7 @@ import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.flow.filterNotNull
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -80,10 +81,12 @@ fun MonthCalendar(
     courts: List<Court>,
     onReservationClick: (Reservation) -> Unit,
 ) {
-    val reservationFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val shorttimeFormatter = DateTimeFormatter.ofPattern("H:mm")
     val reservationList = reservations
-        .filter { LocalDate.parse(it.date, reservationFormatter) > LocalDate.now() }
+        .filter { LocalDate.parse(it.date, reservationFormatter) >= LocalDate.now() }
+        .filter{ LocalTime.parse(it.slot, timeFormatter) < LocalTime.now() }
         .groupBy { LocalDate.parse(it.date, reservationFormatter) }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(500) }

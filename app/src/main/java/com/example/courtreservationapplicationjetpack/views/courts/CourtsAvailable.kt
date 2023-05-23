@@ -81,6 +81,7 @@ import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.models.courts.Court
+import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.coroutineScope
@@ -372,7 +373,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                     )
 
                     CalendarScreen(pickedDate)
-                    TextGrid(pickedHour,listOf("10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"))
+                    TextGrid(pickedHour,listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"))
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 0.dp, vertical = 8.dp)
