@@ -137,6 +137,8 @@
 
         implementation 'com.github.a914-gowtham:compose-ratingbar:1.2.5'
 
+
+
     }
 
 //Escludo la libreria kotlin-stdlib-jdk8 per utilizzare il calendario [DUPLICATO]

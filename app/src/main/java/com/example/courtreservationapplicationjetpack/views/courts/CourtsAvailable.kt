@@ -32,12 +32,15 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonDefaults.textButtonColors
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -74,14 +77,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
+import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.coroutineScope
@@ -125,7 +131,7 @@ fun CourtsAvailable(
     var pickedHour = remember { mutableStateOf(hourOptArg) }
     val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
     val (additionsText, setAdditionsText) = remember { mutableStateOf("1") }
-
+    val showDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -141,6 +147,7 @@ fun CourtsAvailable(
                     onClick = {
                               coroutineScope.launch {
                                   viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
+                                  showDialog.value = true
                               }
 
                     },
@@ -156,7 +163,7 @@ fun CourtsAvailable(
 
     ) {
         _ ->
-        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText)
+        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -237,8 +244,66 @@ private fun CourtItem(
 
 //--------------------------------------------------------------------------------
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController) {
     val courtState = remember { mutableStateOf<Court?>(null) }
+    if(showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { TODO() },
+            title = {
+                Text(
+                    text = "Reservation Correctly Saved",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_success),
+                        contentDescription = "Success Icon",
+                        tint = Color(0xFF02913C),
+                        modifier = Modifier.size(64.dp).padding(top = 4.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // showDialog.value = false
+                        // onDeleteClick()
+                        navController.navigate(MyReservationsDestination.route)
+                    }
+                ) {
+                    Text("Show in Calendar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+
+
+
+
+
+
+
+
 
     LaunchedEffect(Unit) {
         viewModel.getCourt(courtID.toInt()).collect { courtValue ->
