@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -133,6 +134,7 @@ fun CourtsAvailable(
 ) {
     val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
     val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
+    val isMissingSomething = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var pickedHour = remember { mutableStateOf(hourOptArg) }
     val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
@@ -151,9 +153,25 @@ fun CourtsAvailable(
                 .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {
-                        coroutineScope.launch {
-                            viewModel.addReservation(null, "1", courtID, selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
-                            showDialog.value = true
+                        if(pickedHour.value.isNotEmpty()) {
+                            isMissingSomething.value = false
+                            coroutineScope.launch {
+                                viewModel.addReservation(
+                                    null,
+                                    "1",
+                                    courtID,
+                                    selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                        .toString(),
+                                    pickedHour.value,
+                                    additionsText,
+                                    pickedPeople
+                                )
+                                showDialog.value = true
+                            }
+                        }
+                        else{
+                            //TODO: show error
+                            isMissingSomething.value = true
                         }
 
                     },
@@ -169,6 +187,78 @@ fun CourtsAvailable(
 
     ) {
             _ ->
+        if(isMissingSomething.value) {
+            AlertDialog(
+                onDismissRequest = { /* Azione da eseguire quando si chiude il popup */ },
+                title = {
+                    Text(
+                        text = "Error while saving",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                text = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .padding(top = 4.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_error),
+                                contentDescription = "Error Icon",
+                                tint = Color.Red
+                            )
+                        }
+                        Text(
+                            text = "Make sure you have entered your reservation slot",
+                            modifier = Modifier.padding(top = 8.dp),
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                            )
+                        )
+                    }
+                },
+                confirmButton = {
+//                    Button(
+//                        onClick = {
+//                            /* Azione da eseguire quando si fa clic sul pulsante "Show in Calendar" */
+//                            navController.navigate(MyReservationsDestination.route)
+//                        }
+//                    ) {
+//                        Text("Show in Calendar")
+//                    }
+                },
+                dismissButton = {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                /* Azione da eseguire quando si fa clic sul pulsante "Close" */
+                                navController.popBackStack()
+                            },
+                            modifier = Modifier
+                                .sizeIn(minWidth = 120.dp, minHeight = 48.dp)
+                        ) {
+                            Text("Close")
+                        }
+                    }
+                }
+            )
+        }
+
         Ciao(courtID = courtID, viewModel = viewModel, selectedDate = selectedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
