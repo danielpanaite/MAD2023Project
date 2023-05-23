@@ -560,15 +560,28 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
     //TODO: Se courtID è -1, dai errore
 
 
-    allSportViewModel.getSlot(selectedDate.toString(), courtID)
-
-
-
 
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
     val selectedButtonIndex = remember {
         mutableStateOf(textList.indexOfFirst { it == pickedHour.value })
     }
+
+    val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
+
+    LaunchedEffect(selectedDate, courtID) {
+        val slots = allSportViewModel.getSlot(selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), courtID).collect { value ->
+            slotsState.value = value
+        }
+    }
+
+    println("slotsState" + slotsState.value)
+
+    val hoursList = if(slotsState.value.isNotEmpty()){
+        textList - slotsState.value.toSet()
+    } else {
+        textList
+    }
+    println("hoursList $hoursList")
 
     Column {
         repeat(rows) { rowIndex ->
@@ -577,7 +590,7 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
                 .padding(horizontal = 0.dp)) {
                 for (columnIndex in 0 until 5) {
                     val index = rowIndex * 5 + columnIndex
-                    if (index < textList.size) {
+                    if (index < hoursList.size) {
                         val isSelected = index == selectedButtonIndex.value
 
                         Box(
@@ -595,12 +608,12 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
                                 )
                                 .clickable {
                                     selectedButtonIndex.value = index
-                                    pickedHour.value = textList[index]
+                                    pickedHour.value = hoursList[index]
                                 },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = textList[index],
+                                text = hoursList[index],
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     color = if (isSelected) Color.White else Color.Black
