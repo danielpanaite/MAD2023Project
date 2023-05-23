@@ -81,6 +81,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
@@ -90,11 +92,14 @@ import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailab
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -122,9 +127,8 @@ fun CourtsAvailable(
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
 
-    viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
-
+    viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    allSportViewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -145,10 +149,10 @@ fun CourtsAvailable(
                 .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {
-                              coroutineScope.launch {
-                                  viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
-                                  showDialog.value = true
-                              }
+                        coroutineScope.launch {
+                            viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
+                            showDialog.value = true
+                        }
 
                     },
                     modifier = Modifier
@@ -162,8 +166,8 @@ fun CourtsAvailable(
         }
 
     ) {
-        _ ->
-        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController)
+            _ ->
+        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -243,9 +247,11 @@ private fun CourtItem(
 }
 
 //--------------------------------------------------------------------------------
+@SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
     val courtState = remember { mutableStateOf<Court?>(null) }
+    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
     if(showDialog.value) {
         AlertDialog(
             onDismissRequest = { TODO() },
@@ -270,15 +276,15 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                         painter = painterResource(R.drawable.ic_success),
                         contentDescription = "Success Icon",
                         tint = Color(0xFF02913C),
-                        modifier = Modifier.size(64.dp).padding(top = 4.dp)
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(top = 4.dp)
                     )
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        // showDialog.value = false
-                        // onDeleteClick()
                         navController.navigate(MyReservationsDestination.route)
                     }
                 ) {
@@ -296,14 +302,6 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
             }
         )
     }
-
-
-
-
-
-
-
-
 
     LaunchedEffect(Unit) {
         viewModel.getCourt(courtID.toInt()).collect { courtValue ->
@@ -332,7 +330,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
 //            .clip(
 //                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
 //            ),
-                ,
+        ,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = lazyListState
     ) {
@@ -376,7 +374,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                                 1f to Color.Black
                             )
                         )
-                        //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 )
             }
         }
@@ -449,8 +447,24 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
                     )
 
-                    CalendarScreen(pickedDate)
-                    TextGrid(pickedHour,listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"))
+                    CalendarScreen(selectedDate)
+
+                    val currentTime = LocalTime.now()
+
+                    val filteredHours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                    Log.d("Oggi", LocalDate.now().toString())
+                    Log.d("pickedDate", selectedDate.value.toString())
+
+                    val filteredHoursForToday = if (LocalDate.now().toString() == selectedDate.value.toString()) {
+                        filteredHours.filter { LocalTime.parse(it) > currentTime }
+                    } else {
+                        filteredHours
+                    }
+
+
+                    TextGrid(pickedHour, filteredHoursForToday)
+
+
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 0.dp, vertical = 8.dp)
@@ -491,10 +505,10 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
     }
 }
 @Composable
-fun CalendarScreen(pickedDate: String) {
+fun CalendarScreen(selectedDate: MutableState<LocalDate>) {
     val scrollState = rememberScrollState()
     val startDate = LocalDate.now()
-    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
+
 
     Column {
         Row(
@@ -571,7 +585,7 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>) {
                                 .clickable {
                                     selectedButtonIndex.value = index
                                     pickedHour.value = textList[index]
-                                           },
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -683,9 +697,9 @@ fun AdditionsInput(setAdditionsText: (String) -> Unit, onAdditionsChanged: (Stri
         TextField(
             value = additionsText,
             onValueChange = { text ->
-                                additionsText = text
-                                setAdditionsText(text)
-                            },
+                additionsText = text
+                setAdditionsText(text)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 0.dp, vertical = 8.dp)
