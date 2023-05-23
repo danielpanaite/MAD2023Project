@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
@@ -41,12 +44,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
+import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.models.achievements.Achievements
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -172,92 +183,136 @@ fun AchievementsItem(
             .padding(vertical = 8.dp)
     ) {
 
-        CoilImage(modifier = Modifier.fillMaxSize(), sport = achievement.sportName)
+        //CoilImage(modifier = Modifier.fillMaxSize(), sport = achievement.sportName)
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
-                .background(Color.Gray.copy(alpha = 0.2f)) // Colore trasparente
-
-
         ) {
-
-            Column(
+            Box(
                 modifier = Modifier
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth()
-            ) {
-
-
-                Row(
-                ) {
-
-                    Text(
-                        text = "Sport: ${achievement.sportName}",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Date: ${achievement.date}",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        IconButton(
-                            onClick = {
-                                showDialog.value = true
-                            },
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = Color.Red
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Gray.copy(alpha = 0.4f)
                             )
+                        )
+                    )
+            ) {
+                val imageUrl = when (achievement.sportName) {
+                    "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
+                    "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+                    "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                    "pallavolo" -> "https://th.bing.com/th/id/R.9f02eacbdc53b2217aa8c260cbb5e082?rik=FY%2bHCt5RL6u%2bKQ&riu=http%3a%2f%2fwww.adamsport.it%2fwp-content%2fuploads%2f2015%2f02%2fpallavolo1.jpg&ehk=kYTqz5c7R7TDVrHOW%2frwqBEQ3iadw%2bsTrr99esCAj10%3d&risl=&pid=ImgRaw&r=0"
+                    "pallamano" -> "https://static.lvengine.net/reconquista/thumb/&w=500&h=300&zc=1&q=95&src=/Imgs/articles/article_59133/IMG_9969_f5.jpg"
+                    "rugby" -> "https://th.bing.com/th/id/OIP.IWZf734cG-wtATrKOojZVQHaEK?pid=ImgDet&rs=1"
+                    "softball" -> "https://th.bing.com/th/id/OIP.Md4VheCpdtIgWg5F5UuiiQHaEh?pid=ImgDet&rs=1"
+                    "beach volley" -> "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1307&q=80"
+                    else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
+                }
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(R.drawable.placeholder),
+                    contentDescription = "Court Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(128.dp)
+                        .blur(radius = 8.dp)
+                )
+//                Image(
+//                    painter = painterResource(R.drawable.placeholder), // Sostituisci con la tua immagine drawable
+//                    contentDescription = "Background Image",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier
+//                        .height(128.dp)
+//                        .blur(radius = 8.dp)
+//                )
+
+                Column(
+                    modifier = Modifier
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                        .fillMaxWidth()
+                ) {
+                    // Resto del codice...
+                    Row(
+                    ) {
+
+                        Text(
+                            text = "Sport: ${achievement.sportName}",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier
+                                .background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))
+                                .padding(2.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "Date: ${achievement.date}",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(2.dp)
+                        )
+
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    showDialog.value = true
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = Color.Red
+                                )
+                            }
                         }
                     }
-                }
-                if (showDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = { showDialog.value = false },
-                        title = { Text("Delete Achievement") },
-                        text = { Text("Are you sure you want to delete this achievement?") },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showDialog.value = false
-                                    onDeleteClick()
+                    if (showDialog.value) {
+                        AlertDialog(
+                            onDismissRequest = { showDialog.value = false },
+                            title = { Text("Delete Achievement") },
+                            text = { Text("Are you sure you want to delete this achievement?") },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showDialog.value = false
+                                        onDeleteClick()
+                                    }
+                                ) {
+                                    Text("Delete")
                                 }
-                            ) {
-                                Text("Delete")
+                            },
+                            dismissButton = {
+                                Button(
+                                    onClick = { showDialog.value = false }
+                                ) {
+                                    Text("Cancel")
+                                }
                             }
-                        },
-                        dismissButton = {
-                            Button(
-                                onClick = { showDialog.value = false }
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
+                        )
+                    }
+                    Text(
+                        text = "Title: ${achievement.title}",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(vertical = 8.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))
+                    )
+                    Text(
+                        text = "Description: ${achievement.description}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))
                     )
                 }
-                Text(
-                    text = "Title: ${achievement.title}",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-                Text(
-                    text = "Description: ${achievement.description}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
             }
         }
     }
-
 }
+
 
