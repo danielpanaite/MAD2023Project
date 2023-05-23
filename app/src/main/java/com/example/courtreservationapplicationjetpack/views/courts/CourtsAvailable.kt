@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.courts
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -45,6 +46,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
@@ -119,6 +121,11 @@ fun CourtsAvailable(
 ) {
     val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    var pickedHour = remember { mutableStateOf(hourOptArg) }
+    val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
+    val (additionsText, setAdditionsText) = remember { mutableStateOf("1") }
+
+
     Scaffold(
         topBar = {
             //CourtTopAppBar(canNavigateBack = false)
@@ -132,7 +139,7 @@ fun CourtsAvailable(
                 Button(
                     onClick = {
                               coroutineScope.launch {
-                                  viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), hourOptArg, "1", "1")
+                                  viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
                               }
 
                     },
@@ -148,7 +155,7 @@ fun CourtsAvailable(
 
     ) {
         _ ->
-        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, hourOptArg = hourOptArg)
+        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -229,7 +236,7 @@ private fun CourtItem(
 
 //--------------------------------------------------------------------------------
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, hourOptArg: String) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit) {
     val courtState = remember { mutableStateOf<Court?>(null) }
 
     LaunchedEffect(Unit) {
@@ -372,7 +379,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                         //.padding(8.dp)
                     ) {
                         var pickerValue by remember { mutableStateOf(1) }
-
+                        setPickedPeople(pickerValue.toString())
                         Text(
                             text = "Numero di persone coinvolte: $pickerValue",
                             style = MaterialTheme.typography.labelMedium,
@@ -390,6 +397,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                             range = 0..10,
                             onValueChange = {
                                 pickerValue = it
+                                setPickedPeople(it.toString())
                             },
                             dividersColor = Color.Black.copy(alpha = 0.7f),
                         )
@@ -397,7 +405,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
 
                     }
                     Row {
-                        AdditionsInput(onAdditionsChanged = {})
+                        AdditionsInput(setAdditionsText,onAdditionsChanged = {})
                     }
                 }
             }
@@ -453,10 +461,10 @@ fun CalendarScreen(pickedDate: String) {
 
 
 @Composable
-fun TextGrid(hourOptArg: String, textList: List<String>) {
+fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>) {
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
     val selectedButtonIndex = remember {
-        mutableStateOf(textList.indexOfFirst { it == hourOptArg })
+        mutableStateOf(textList.indexOfFirst { it == pickedHour.value })
     }
 
     Column {
@@ -482,7 +490,10 @@ fun TextGrid(hourOptArg: String, textList: List<String>) {
                                     BorderStroke(1.dp, if (isSelected) Color.Black else Color.Gray),
                                     shape = MaterialTheme.shapes.small
                                 )
-                                .clickable { selectedButtonIndex.value = index },
+                                .clickable {
+                                    selectedButtonIndex.value = index
+                                    pickedHour.value = textList[index]
+                                           },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -580,20 +591,23 @@ private fun animateCircleColor(isSelected: Boolean): Color {
 //--------------------------------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdditionsInput(onAdditionsChanged: (String) -> Unit) {
+fun AdditionsInput(setAdditionsText: (String) -> Unit, onAdditionsChanged: (String) -> Unit) {
     var additionsText by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(top = 0.dp)) {
         Text(
             text = "Additions",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 0.dp)
         )
 
         TextField(
             value = additionsText,
-            onValueChange = { text -> additionsText = text },
+            onValueChange = { text ->
+                                additionsText = text
+                                setAdditionsText(text)
+                            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 0.dp, vertical = 8.dp)
@@ -619,5 +633,5 @@ fun AdditionsInput(onAdditionsChanged: (String) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun preview(){
-    AdditionsInput(onAdditionsChanged = {})
+    //AdditionsInput(onAdditionsChanged = {})
 }
