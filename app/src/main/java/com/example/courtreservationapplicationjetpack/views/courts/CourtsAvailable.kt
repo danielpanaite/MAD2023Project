@@ -98,6 +98,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -135,7 +136,7 @@ fun CourtsAvailable(
     val coroutineScope = rememberCoroutineScope()
     var pickedHour = remember { mutableStateOf(hourOptArg) }
     val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
-    val (additionsText, setAdditionsText) = remember { mutableStateOf("1") }
+    val (additionsText, setAdditionsText) = remember { mutableStateOf("") }
     val showDialog = remember { mutableStateOf(false) }
 
     Scaffold(
@@ -463,7 +464,8 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     }
 
 
-                    TextGrid(pickedHour, filteredHoursForToday)
+
+                    TextGrid(pickedHour, filteredHoursForToday, selectedDate.value, allSportViewModel, court?.id ?: -1)
 
 
                     Row(
@@ -554,7 +556,15 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>) {
 
 
 @Composable
-fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>) {
+fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: Int) {
+    //TODO: Se courtID è -1, dai errore
+
+
+    allSportViewModel.getSlot(selectedDate.toString(), courtID)
+
+
+
+
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
     val selectedButtonIndex = remember {
         mutableStateOf(textList.indexOfFirst { it == pickedHour.value })
