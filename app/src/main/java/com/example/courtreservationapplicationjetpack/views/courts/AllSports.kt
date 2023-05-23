@@ -317,6 +317,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     .padding(0.dp)
                             ) {
                                 Column {
+
                                     Text(
                                         text = "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
                                         fontSize = 14.sp,
