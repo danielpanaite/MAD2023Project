@@ -105,7 +105,6 @@ class GoogleAuthUiClient(
                     .setSupported(true) // this way of authenticated is supported (true)
                     .setServerClientId(context.getString(R.string.web_client_id)) //sdk id taken from firebase
                     .setFilterByAuthorizedAccounts(false) //if set to true it will alrady check if you are signed in with a specific account and only show that
-
                     .build()
             )
             //.setAutoSelectEnabled(true) //if you only have s ingle accunt of google it will automatically select that one
