@@ -28,7 +28,7 @@ class CourtViewModel: ViewModel() {
 
     fun getCourtsBySport(sport: String) {
         // Creating a reference to collection
-        val docRef = db.collection("courts").whereEqualTo("sport", sport)
+        val docRef = db.collection("oldcourts").whereEqualTo("sport", sport)
 
         // Listen to data in real-time
         regc = docRef.addSnapshotListener { snapshot, e ->
@@ -48,7 +48,7 @@ class CourtViewModel: ViewModel() {
 
     fun getCourtById(id: String) {
         // Creating a reference to document by id
-        val docRef = db.document("courts/$id")
+        val docRef = db.document("oldcourts/$id")
 
         // Listen to data in real-time
         regc = docRef.addSnapshotListener { snapshot, e ->

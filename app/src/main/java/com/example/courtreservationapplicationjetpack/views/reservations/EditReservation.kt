@@ -36,12 +36,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,12 +71,8 @@ import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.firestore.toTime
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.views.courts.TextGrid
 import com.google.firebase.Timestamp
-import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.util.Date
 import java.util.Locale
 
 
@@ -161,19 +155,10 @@ fun EditReservation(
 
 @Composable
 fun EditReservationForm(
-//    reservationsUiState: ReservationsUiState,
-//    onReservationValueChange: (ReservationDetails) -> Unit,
     modifier: Modifier = Modifier,
     reservation: MutableState<Reservation>,
     courtViewModel: CourtViewModel = viewModel()
 ) {
-//    val courtUiState by myReservationViewModel.reservationCourtsState.collectAsState()
-//    val courtReservations by myReservationViewModel.courtReservationsState.collectAsState()
-//    if(reservationsUiState.reservationDetails.courtId.isNotBlank()){
-//        myReservationViewModel.setDate(reservationsUiState.reservationDetails.date)
-//        myReservationViewModel.setCourt(reservationsUiState.reservationDetails.courtId.toInt())
-//        myReservationViewModel.setCourts(listOf(reservationsUiState.reservationDetails.courtId.toInt()))
-//    }
     Log.d("VIEW", reservation.value.toString())
     courtViewModel.getCourtById(reservation.value.court)
     val court = courtViewModel.court.value
@@ -290,8 +275,12 @@ fun EditReservationForm(
 fun CalendarScreen(
     court: Court,
     reservation: MutableState<Reservation>,
-    viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: ReservationViewModel = viewModel()
 ) {
+    viewModel.getCourtReservations(court.id, reservation.value.date)
+    val oldDate = reservation.value.toDate()
+    val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    Log.d("DATE", Timestamp(format.parse(oldDate)!!).toDate().toString())
     Column {
         Row(
             modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
@@ -308,7 +297,12 @@ fun CalendarScreen(
 //                .filter { !courtReservations.any{ r -> (r.slot == it) && (r.id != reservationsUiState.reservationDetails.id)} },
 //            reservationsUiState,
 //            onReservationValueChange)
-        TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"), reservation)
+        if(viewModel.courtres.value.isNotEmpty()){
+            TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } }
+                , reservation)
+        }
+        //TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"), reservation)
         Row(
             modifier = Modifier
                 .padding(horizontal = 0.dp)
