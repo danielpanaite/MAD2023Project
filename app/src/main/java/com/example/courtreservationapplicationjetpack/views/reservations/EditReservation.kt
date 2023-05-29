@@ -75,7 +75,11 @@ import com.example.courtreservationapplicationjetpack.models.sport.SportDrawable
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.views.courts.TextGrid
 import com.google.firebase.Timestamp
+import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Date
+import java.util.Locale
 
 
 object EditReservationDestination : NavigationDestination {
@@ -405,7 +409,10 @@ fun TextGrid(
                                 )
                                 .clickable {
                                     selectedButtonIndex.value = index
-//                                    reservation.value = reservation.value.copy(slot = textList[selectedButtonIndex.value])
+                                    val oldDate = reservation.value.toDate()
+                                    val newDate = oldDate + " " + textList[selectedButtonIndex.value]
+                                    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                                    reservation.value = reservation.value.copy(date = Timestamp(format.parse(newDate)!!))
                                 },
                             contentAlignment = Alignment.Center
                         ) {
