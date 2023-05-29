@@ -1,14 +1,16 @@
 package com.example.courtreservationapplicationjetpack.signIn
+
+import com.example.courtreservationapplicationjetpack.R
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.example.courtreservationapplicationjetpack.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 
@@ -20,6 +22,7 @@ class GoogleAuthUiClient(
     private val oneTapClient: SignInClient
 
 ){
+
     //private reference to our auth object, that we get from firebase.auth
     private val auth = Firebase.auth
 
@@ -100,11 +103,12 @@ class GoogleAuthUiClient(
             .setGoogleIdTokenRequestOptions( //also build by a builder
                 GoogleIdTokenRequestOptions.builder()
                     .setSupported(true) // this way of authenticated is supported (true)
-                    .setFilterByAuthorizedAccounts(false) //if set to true it will alrady check if you are signed in with a specific account and only show that
                     .setServerClientId(context.getString(R.string.web_client_id)) //sdk id taken from firebase
+                    .setFilterByAuthorizedAccounts(false) //if set to true it will alrady check if you are signed in with a specific account and only show that
+
                     .build()
             )
-            .setAutoSelectEnabled(true) //if you only have s ingle accunt of google it will automatically select that one
+            //.setAutoSelectEnabled(true) //if you only have s ingle accunt of google it will automatically select that one
             .build()
     }
 }

@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -82,7 +83,10 @@ class MainActivity : ComponentActivity() {
                                     state = state,
                                     onSignInClick = {
                                         lifecycleScope.launch {
+                                            Log.d("signInScreen", "$state")
                                             val signInIntentSender = googleAuthUiClient.signIn()
+                                            Log.d("signInScreenintent", "$signInIntentSender")
+
                                             launcher.launch(
                                                 IntentSenderRequest.Builder(
                                                     signInIntentSender ?: return@launch
