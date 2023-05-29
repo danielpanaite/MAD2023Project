@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,6 +46,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.courtreservationapplicationjetpack.R
+import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.toDate
+import com.example.courtreservationapplicationjetpack.firestore.toTime
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
@@ -59,6 +64,7 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.flow.filterNotNull
+import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -67,6 +73,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+import java.util.Random
 
 
 private val pageBackgroundColor: Color @Composable get() = MaterialTheme.colorScheme.background
@@ -79,8 +86,10 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 fun MonthCalendar(
     reservations: List<Reservation>,
     courts: List<Court>,
-    onReservationClick: (Reservation) -> Unit,
+    onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
+    viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    viewModel.getUserReservations(1)
     val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val shorttimeFormatter = DateTimeFormatter.ofPattern("H:mm")
@@ -88,6 +97,9 @@ fun MonthCalendar(
         .filter { LocalDate.parse(it.date, reservationFormatter) >= LocalDate.now() }
         .filter{ LocalTime.parse(it.slot, timeFormatter) < LocalTime.now() }
         .groupBy { LocalDate.parse(it.date, reservationFormatter) }
+    val resList = viewModel.reservations.value.groupBy {
+        LocalDate.parse(it.toDate(), reservationFormatter)
+    }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(500) }
     val endMonth = remember { currentMonth.plusMonths(500) }
@@ -96,7 +108,7 @@ fun MonthCalendar(
     val colors: List<Int> = listOf(R.color.blue_200, R.color.orange_200, R.color.green_200, R.color.red_200, R.color.cyan_200, R.color.yellow_200)
     val date = selection?.date
     val reservationsInSelectedDate =
-        if (date == null) emptyList() else reservationList[date].orEmpty()
+        if (date == null) emptyList() else resList[date].orEmpty()
     //main column that contains the whole page
     Column( modifier = Modifier
         .fillMaxSize()
@@ -131,8 +143,8 @@ fun MonthCalendar(
                 state = state,
                 dayContent = { day ->
                     CompositionLocalProvider(LocalRippleTheme provides Example3RippleTheme) {
-                        val events = if(reservationList[day.date] != null){
-                            reservationList[day.date]!!.count()
+                        val events = if(resList[day.date] != null){
+                            resList[day.date]!!.count()
                         } else {
                             0
                         }
@@ -152,7 +164,9 @@ fun MonthCalendar(
                     )
                 },
             )
-            Surface(modifier = Modifier.fillMaxSize().padding(top = 8.dp), shadowElevation = 12.dp){
+            Surface(modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 8.dp), shadowElevation = 12.dp){
                 //Bottom reservation details
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     if(reservations.isEmpty()){
@@ -169,7 +183,7 @@ fun MonthCalendar(
                         }
                     }else {
                         items(items = reservationsInSelectedDate) { reservation ->
-                            ReservationInformation(reservation, courts.find { it.id == reservation.courtId }!!, onReservationClick, colors)
+                            ReservationInformation(reservation, reservation.court, onReservationClick, colors)
                         }
                     }
                 }
@@ -254,11 +268,14 @@ private fun MonthHeader(
 
 @Composable
 private fun LazyItemScope.ReservationInformation(
-    reservation: Reservation,
-    court: Court,
-    onReservationClick: (Reservation) -> Unit,
-    colors: List<Int>
+    reservation: com.example.courtreservationapplicationjetpack.firestore.Reservation,
+    court: String,
+    onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
+    colors: List<Int>,
+    courtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    courtViewModel.getCourtById(court)
+    val courtDetails: com.example.courtreservationapplicationjetpack.firestore.Court = courtViewModel.court.value
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
@@ -268,20 +285,21 @@ private fun LazyItemScope.ReservationInformation(
                 onReservationClick(reservation)
             }
     ) {
+        Log.d("HASHCODE", (reservation.hashCode()*-1).toString())
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
             Box(
                 modifier = Modifier
-                    .background(color = colorResource(colors[reservation.id!! % colors.size]))
+                    .background(color = colorResource(colors[(1) % colors.size]))
                     .fillParentMaxWidth(1 / 7f)
                     .aspectRatio(1f)
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally){
-                    val sportIcon = SportDrawables.getDrawable(court.sport)
+                    val sportIcon = SportDrawables.getDrawable(courtDetails.sport)
                     Text(
                         modifier = Modifier.padding(bottom = 4.dp),
-                        text = reservation.slot,
+                        text = reservation.toTime(),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSecondary
@@ -302,15 +320,17 @@ private fun LazyItemScope.ReservationInformation(
                     .fillMaxHeight(),
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    text = court.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    text = courtDetails.name,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = court.address,
+                    text = courtDetails.address,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )

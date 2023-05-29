@@ -115,7 +115,7 @@ fun NavigationGraph(
         composable(
             route = ReservationDetailsDestination.routeWithArgs,
             arguments = listOf(navArgument(ReservationDetailsDestination.reservationIdArg) {
-                type = NavType.IntType
+                type = NavType.StringType
             })
         ){
             ReservationDetails(
@@ -127,12 +127,13 @@ fun NavigationGraph(
         composable(
             route = EditReservationDestination.routeWithArgs,
             arguments = listOf(navArgument(EditReservationDestination.reservationIdArg) {
-                type = NavType.IntType
+                type = NavType.StringType
             })
         ){
             EditReservation(
                 navController = navController,
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                reservationArg = it.arguments?.getString("reservationIdArg")
             )
         }
         composable(

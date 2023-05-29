@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "75405539845",
+    "project_id": "ma2023-test",
+    "storage_bucket": "ma2023-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75405539845:android:83e27d03f2e5f209d5ba6c",
+        "android_client_info": {
+          "package_name": "com.example.courtreservationapplicationjetpack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "75405539845-tgaofo9lg8sri8jnklgv3kuqu9df4fri.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4dj_wBNtAIkqA9Oj46nusnGoSxuVLQAM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "75405539845-tgaofo9lg8sri8jnklgv3kuqu9df4fri.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

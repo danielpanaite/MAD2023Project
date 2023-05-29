@@ -47,7 +47,7 @@ object ReservationDetailsDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun ReservationDetails(
-    navigateToEditReservation: (Int) -> Unit,
+    navigateToEditReservation: (String) -> Unit,
     navController: NavController,
     navigateBack: () -> Unit,
 

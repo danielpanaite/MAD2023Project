@@ -32,7 +32,7 @@ object MyReservationsDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun MyReservations(
-    navigateToEditReservation: (Int) -> Unit,
+    navigateToEditReservation: (String) -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -61,7 +61,7 @@ fun MyReservationsBody(
     modifier: Modifier = Modifier,
     reservationList: List<Reservation>,
     courtList: List<Court>,
-    onReservationClick: (Int) -> Unit,
+    onReservationClick: (String) -> Unit,
     ){
     Column(
         modifier = modifier
@@ -72,13 +72,13 @@ fun MyReservationsBody(
             MonthCalendar(
                 reservations = emptyList(),
                 courts = emptyList(),
-                onReservationClick = { onReservationClick(it.id!!) }
+                onReservationClick = { onReservationClick(it.id) }
             )
         } else {
             MonthCalendar(
                 reservations = reservationList,
                 courts = courtList,
-                onReservationClick = { onReservationClick(it.id!!) }
+                onReservationClick = { onReservationClick(it.id) }
             )
         }
     }
