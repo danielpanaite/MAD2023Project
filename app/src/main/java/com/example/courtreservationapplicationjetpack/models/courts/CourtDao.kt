@@ -7,17 +7,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CourtDao {
 
-   /* @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addCourt(court: Court)*/
 
     @Query("SELECT * FROM court ORDER BY id DESC")
     fun getAllCourts(): Flow<List<Court>>
 
     @Query("SELECT * FROM court WHERE id IN (:courts)")
     fun getCourtsWithId(courts: List<Int>): Flow<List<Court>>
-
-    /*@Query("SELECT name FROM court")
-    fun getCourtName(): String*/
 
     //prende tutti gli sport disponibili
     @Query("SELECT DISTINCT sport from court")
@@ -29,8 +24,5 @@ interface CourtDao {
 
     @Query("SELECT * from court WHERE id = :id")
     fun getCourt(id: Int): Flow<Court>
-    /*
-    @Query("DELETE FROM court_table")
-    suspend fun  deleteAll()
-    */
+
 }

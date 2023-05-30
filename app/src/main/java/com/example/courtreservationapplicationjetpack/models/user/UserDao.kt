@@ -1,13 +1,10 @@
 package com.example.courtreservationapplicationjetpack.models.user
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import kotlinx.coroutines.flow.Flow
 
 @Dao

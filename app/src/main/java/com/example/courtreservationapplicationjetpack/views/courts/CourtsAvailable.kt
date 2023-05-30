@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,12 +33,15 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonDefaults.textButtonColors
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -74,21 +78,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
+import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -116,16 +129,17 @@ fun CourtsAvailable(
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
 
-    viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
-
+    viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    allSportViewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val courtsAvailableUiState by viewModel.courtsAvailableUiState.collectAsState()
+    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
+    val isMissingSomething = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var pickedHour = remember { mutableStateOf(hourOptArg) }
     val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
-    val (additionsText, setAdditionsText) = remember { mutableStateOf("1") }
-
+    val (additionsText, setAdditionsText) = remember { mutableStateOf("") }
+    val showDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -139,9 +153,26 @@ fun CourtsAvailable(
                 .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {
-                              coroutineScope.launch {
-                                  viewModel.addReservation(null, "1", courtID, LocalDate.parse(pickedDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), pickedHour.value, additionsText, pickedPeople)
-                              }
+                        if(pickedHour.value.isNotEmpty()) {
+                            isMissingSomething.value = false
+                            coroutineScope.launch {
+                                viewModel.addReservation(
+                                    null,
+                                    "1",
+                                    courtID,
+                                    selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                        .toString(),
+                                    pickedHour.value,
+                                    additionsText,
+                                    pickedPeople
+                                )
+                                showDialog.value = true
+                            }
+                        }
+                        else{
+                            //TODO: show error
+                            isMissingSomething.value = true
+                        }
 
                     },
                     modifier = Modifier
@@ -155,8 +186,81 @@ fun CourtsAvailable(
         }
 
     ) {
-        _ ->
-        Ciao(courtID = courtID, viewModel = viewModel, pickedDate = pickedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText)
+            _ ->
+        if(isMissingSomething.value) {
+            AlertDialog(
+                onDismissRequest = { /* Azione da eseguire quando si chiude il popup */ },
+                title = {
+                    Text(
+                        text = "Error while saving",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                text = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .padding(top = 4.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_error),
+                                contentDescription = "Error Icon",
+                                tint = Color.Red
+                            )
+                        }
+                        Text(
+                            text = "Make sure you have entered your reservation slot",
+                            modifier = Modifier.padding(top = 8.dp),
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                            )
+                        )
+                    }
+                },
+                confirmButton = {
+//                    Button(
+//                        onClick = {
+//                            /* Azione da eseguire quando si fa clic sul pulsante "Show in Calendar" */
+//                            navController.navigate(MyReservationsDestination.route)
+//                        }
+//                    ) {
+//                        Text("Show in Calendar")
+//                    }
+                },
+                dismissButton = {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                /* Azione da eseguire quando si fa clic sul pulsante "Close" */
+                                isMissingSomething.value = false
+                                //navController.popBackStack()
+                            },
+                            modifier = Modifier
+                                .sizeIn(minWidth = 120.dp, minHeight = 48.dp)
+                        ) {
+                            Text("Close")
+                        }
+                    }
+                }
+            )
+        }
+
+        Ciao(courtID = courtID, viewModel = viewModel, selectedDate = selectedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -236,9 +340,62 @@ private fun CourtItem(
 }
 
 //--------------------------------------------------------------------------------
+@SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: String, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
     val courtState = remember { mutableStateOf<Court?>(null) }
+
+    if(showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { TODO() },
+            title = {
+                Text(
+                    text = "Reservation Correctly Saved",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_success),
+                        contentDescription = "Success Icon",
+                        tint = Color(0xFF02913C),
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(top = 4.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        navController.navigate(MyReservationsDestination.route)
+                    }
+                ) {
+                    Text("Show in Calendar")
+                }
+            },
+            dismissButton = {
+
+                Button(
+                    onClick = {
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text("Close")
+                }
+            }
+        )
+    }
 
     LaunchedEffect(Unit) {
         viewModel.getCourt(courtID.toInt()).collect { courtValue ->
@@ -267,7 +424,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
 //            .clip(
 //                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
 //            ),
-                ,
+        ,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = lazyListState
     ) {
@@ -311,7 +468,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                                 1f to Color.Black
                             )
                         )
-                        //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 )
             }
         }
@@ -352,8 +509,20 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
                         ) {
+                            val sportIcon = when (court?.sport) {
+                                "calcio" -> R.drawable.ic_calcio5
+                                "basket" -> R.drawable.ic_basket
+                                "beach volley" -> R.drawable.ic_beachvolley
+                                "pallavolo" -> R.drawable.ic_volley
+                                "tennis" -> R.drawable.ic_tennis
+                                "pallamano" -> R.drawable.pallamano
+                                "rugby" -> R.drawable.ic_rugby
+                                "softball" -> R.drawable.ic_softball
+                                else ->  R.drawable.ic_question_mark
+                            }
+
                             Image(
-                                painter = painterResource(R.drawable.ic_calcio5),
+                                painter = painterResource(sportIcon),
                                 contentDescription = "Sport icon",
                                 colorFilter = ColorFilter.tint(Color.Black),
                                 modifier = Modifier
@@ -372,8 +541,25 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
                             .shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
                     )
 
-                    CalendarScreen(pickedDate)
-                    TextGrid(pickedHour,listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"))
+                    CalendarScreen(selectedDate, pickedHour)
+
+                    val currentTime = LocalTime.now()
+
+                    val filteredHours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                    Log.d("Oggi", LocalDate.now().toString())
+                    Log.d("SelectedDate", selectedDate.value.toString())
+
+                    val filteredHoursForToday = if (LocalDate.now().toString() == selectedDate.value.toString()) {
+                        filteredHours.filter { LocalTime.parse(it) > currentTime }
+                    } else {
+                        filteredHours
+                    }
+
+
+
+                    TextGrid(pickedHour, filteredHoursForToday, selectedDate.value, allSportViewModel, court?.id ?: -1)
+
+
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 0.dp, vertical = 8.dp)
@@ -414,10 +600,10 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, pickedDate: Strin
     }
 }
 @Composable
-fun CalendarScreen(pickedDate: String) {
+fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>) {
     val scrollState = rememberScrollState()
     val startDate = LocalDate.now()
-    val selectedDate = remember { mutableStateOf(LocalDate.parse(pickedDate)) }
+
 
     Column {
         Row(
@@ -438,7 +624,12 @@ fun CalendarScreen(pickedDate: String) {
                     dayOfMonth = dayOfMonth,
                     month = month,
                     isSelected = selectedDate.value == currentDate,
-                    onDaySelected = { selectedDate.value = currentDate }
+                    onDaySelected = {
+                        if(selectedDate.value != currentDate) {
+                            pickedHour.value = ""
+                        }
+                        selectedDate.value = currentDate
+                    }
                 )
             }
         }
@@ -462,11 +653,32 @@ fun CalendarScreen(pickedDate: String) {
 
 
 @Composable
-fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>) {
+fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: Int) {
+    //TODO: Se courtID è -1, dai errore
+
+
+
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
     val selectedButtonIndex = remember {
         mutableStateOf(textList.indexOfFirst { it == pickedHour.value })
     }
+
+    val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
+
+    LaunchedEffect(selectedDate, courtID) {
+        val slots = allSportViewModel.getSlot(selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), courtID).collect { value ->
+            slotsState.value = value
+        }
+    }
+
+    println("slotsState" + slotsState.value)
+
+    val hoursList = if(slotsState.value.isNotEmpty()){
+        textList - slotsState.value.toSet()
+    } else {
+        textList
+    }
+    println("hoursList $hoursList")
 
     Column {
         repeat(rows) { rowIndex ->
@@ -475,7 +687,7 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>) {
                 .padding(horizontal = 0.dp)) {
                 for (columnIndex in 0 until 5) {
                     val index = rowIndex * 5 + columnIndex
-                    if (index < textList.size) {
+                    if (index < hoursList.size) {
                         val isSelected = index == selectedButtonIndex.value
 
                         Box(
@@ -493,12 +705,12 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>) {
                                 )
                                 .clickable {
                                     selectedButtonIndex.value = index
-                                    pickedHour.value = textList[index]
-                                           },
+                                    pickedHour.value = hoursList[index]
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = textList[index],
+                                text = hoursList[index],
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     color = if (isSelected) Color.White else Color.Black
@@ -606,9 +818,9 @@ fun AdditionsInput(setAdditionsText: (String) -> Unit, onAdditionsChanged: (Stri
         TextField(
             value = additionsText,
             onValueChange = { text ->
-                                additionsText = text
-                                setAdditionsText(text)
-                            },
+                additionsText = text
+                setAdditionsText(text)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 0.dp, vertical = 8.dp)

@@ -1,7 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,10 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,8 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -134,9 +129,12 @@ private fun UserDetails(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp)
+            .clickable { navigateToEditProfileDestination(profileUiState.userDetails.id!!) },
+        verticalAlignment = Alignment.CenterVertically,
+
     ) {
+
         // User's image
         Image(
             modifier = Modifier
@@ -243,7 +241,6 @@ private fun OptionsItemStyle(
                     text = "Sports",
                     style = TextStyle(
                         fontSize = 18.sp,
-                       // fontFamily = FontFamily(Font(R.font.roboto_medium, FontWeight.Medium))
                     )
                 )
 
@@ -255,7 +252,6 @@ private fun OptionsItemStyle(
                     style = TextStyle(
                         fontSize = 14.sp,
                         letterSpacing = (0.8).sp,
-                        //fontFamily = FontFamily(Font(R.font.roboto_regular, FontWeight.Normal)),
                         color = Color.Gray
                     )
                 )

@@ -1,3 +1,4 @@
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import com.example.courtreservationapplicationjetpack.R
@@ -8,6 +9,7 @@ import com.maxkeppeler.sheets.option.models.DisplayMode
 import com.maxkeppeler.sheets.option.models.Option
 import com.maxkeppeler.sheets.option.models.OptionConfig
 import com.maxkeppeler.sheets.option.models.OptionSelection
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,15 +23,19 @@ internal fun OptionSample3(
         when (sport) {
             "calcio" -> true
             "basket" -> true
-            "beach Volley" -> true
+            "beach volley" -> true
             "tennis" -> true
+            "pallamano" -> true
+            "pallavolo"-> true
+            "rugby" -> true
+            "softball" -> true
             else -> true
         }
     }.map { sport ->
         Option(
             IconSource(getIconResourceForSport(sport)),
-            titleText = sport,
-            selected = sport == pickedSport
+            titleText = sport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }.substringBefore(' '),
+            selected = sport == pickedSport,
         )
     }
 
@@ -47,12 +53,16 @@ internal fun OptionSample3(
 }
 
 @Composable
-private fun getIconResourceForSport(sport: String): Int {
+fun getIconResourceForSport(sport: String): Int {
     return when (sport) {
         "calcio" -> R.drawable.ic_calcio5
         "basket" -> R.drawable.ic_basket
-        "beach Volley" -> R.drawable.ic_beachvolley
+        "beach volley" -> R.drawable.ic_beachvolley
+        "pallavolo" -> R.drawable.ic_volley
         "tennis" -> R.drawable.ic_tennis
-        else -> R.drawable.ic_bottom_profile // Icona di default per gli sport non riconosciuti
+        "pallamano" -> R.drawable.pallamano
+        "rugby" -> R.drawable.ic_rugby
+        "softball" -> R.drawable.ic_softball
+        else ->  R.drawable.ic_question_mark // Icona di default per gli sport non riconosciuti
     }
 }

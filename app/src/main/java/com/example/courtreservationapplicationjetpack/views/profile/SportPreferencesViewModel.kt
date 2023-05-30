@@ -1,11 +1,7 @@
 
 package com.example.courtreservationapplicationjetpack.views.profile
 
-import android.util.Log
-import androidx.compose.runtime.Recomposer
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
@@ -14,14 +10,10 @@ import com.example.courtreservationapplicationjetpack.models.sport.SportReposito
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMap
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 /**
@@ -73,44 +65,11 @@ class SportPreferencesViewModel(
             )
 
 
-/*
-
-    val sportPreferencesUiState: StateFlow<SportsPreferencesUiState> =
-        sportRepository.getSportUser(1)
-            .filterNotNull()
-            .map { SportsPreferencesUiState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = SportsPreferencesUiState()
-            )
-
- */
 
     suspend fun insertOrUpdateSports(sports: List<Sport>) {
         sportRepository.insertOrUpdateSports(sports)
 
     }
-
-    /*
-    suspend fun insertOrUpdateSportsWithLevels(sports: List<Sport>){
-        sportRepository.insertOrUpdateSports(sports)
-    }*/
-
-    /*
-    suspend fun insertOrUpdateSportsWithLevels(selectedSports: Set<String>, sportsWithLevels: Map<String, String>) {
-        val currentUser = 1 // replace with the actual user ID
-        val selectedSportsWithLevels = sportsWithLevels.filterKeys { selectedSports.contains(it) }
-            .map { (sportName, masteryLevel) ->
-                Sport(idUser = currentUser, sportName = sportName, masteryLevel = masteryLevel, achievements = null)
-            }
-        sportRepository.insertOrUpdateSports(selectedSportsWithLevels)
-    }
-
-     */
-
-
-
 
     fun updateSportMastery(sportName: String, masteryLevel: String?) {
         val currentUser = 1 // replace with the actual user ID
@@ -147,20 +106,8 @@ class SportPreferencesViewModel(
     }
 }
 
-
 data class AllSportsUiState(val sportsList: List<String> = listOf())
 
-
-    /*
-    private suspend fun deleteUncheckedSports(currentUser: Int, selectedSports: Set<String>) {
-        // First, delete all sports that are not selected by the user
-        val uncheckedSports = sportRepository.getSportUser(currentUser)
-            .filter { !selectedSports.contains(it.sportName) }
-        sportRepository.deleteSports(uncheckedSports)
-    }
-
-     */
-//data class  SportsPreferencesUiState(val sportsList: List<Sport> = listOf())
 
 data class SportsPreferencesUiState(
     val sportsList: List<Sport> = listOf(),
@@ -197,73 +144,3 @@ fun Sport.toSportPreferencesDetails(): SportPreferencesDetails = SportPreference
     masteryLevel = masteryLevel,
     achievements = achievements,
 )
-
-/*
-
-/**
- * Represents Ui State for an Item.
- */
-data class ProfileUiState(
-    val userDetails: UserDetails = UserDetails(),
-    val isEntryValid: Boolean = false
-)
-
-data class UserDetails(
-    val id: Int? = 0,
-    val name: String = "",
-    val nickname: String = "",
-    val email: String = "",
-    val address: String = "",
-    val age: String = "",
-    val phone: String = "",
-    val sportId: String? = "",
-    val imageUri: String? = ""
-)
-
-
-
-
-/**
- * Extension function to convert [ProfileUiState] to [User]. If the value of [ProfileUiState.name] is
- * not a valid [String], then the name will be set to "User1".
- */
-fun UserDetails.toUser(): User = User(
-    id = id,
-    name = name,
-    nickname = nickname,
-    email = email,
-    address = address,
-    age = age.toIntOrNull()?:0,
-    phone = phone,
-    sportId = sportId?.toIntOrNull() ?:0,
-    imageUri = imageUri // se non ci fosse bisognerebbe mettere qualla di default
-
-
-)
-
-
-
-/**
- * Extension function to convert [Reservation] to [ReservationsUiState]
- */
-fun User.toProfileUiState(isEntryValid: Boolean = false): ProfileUiState = ProfileUiState(
-    userDetails = this.toUserDetails(),
-    isEntryValid = isEntryValid
-)
-
-/**
- * Extension function to convert [Item] to [ItemDetails]
- */
-fun User.toUserDetails(): UserDetails = UserDetails(
-    id = id,
-    name = name,
-    nickname = nickname,
-    email = email,
-    address = address,
-    age = age.toString(),
-    phone = phone,
-    sportId = sportId.toString(),
-    imageUri = imageUri
-)
-*/
-

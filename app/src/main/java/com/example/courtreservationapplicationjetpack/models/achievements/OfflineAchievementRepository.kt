@@ -1,13 +1,5 @@
 package com.example.courtreservationapplicationjetpack.models.achievements
 
-
-
-import com.example.courtreservationapplicationjetpack.models.sport.Sport
-import com.example.courtreservationapplicationjetpack.models.sport.SportDao
-import com.example.courtreservationapplicationjetpack.models.sport.SportRepository
-import com.example.courtreservationapplicationjetpack.models.user.User
-import com.example.courtreservationapplicationjetpack.models.user.UserDao
-import com.example.courtreservationapplicationjetpack.models.user.UserRepository
 import kotlinx.coroutines.flow.Flow
 
 class OfflineAchievementRepository (private val achievementsDao: AchievementsDao) :

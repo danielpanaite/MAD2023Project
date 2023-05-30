@@ -7,9 +7,7 @@ import com.example.courtreservationapplicationjetpack.models.reservations.Reserv
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import com.example.courtreservationapplicationjetpack.models.user.User
 import com.example.courtreservationapplicationjetpack.models.user.UserRepository
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationsUiState
-import com.example.courtreservationapplicationjetpack.views.reservations.toReservationDetails
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull

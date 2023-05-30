@@ -50,10 +50,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
-import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 object SportPreferencesDestination : NavigationDestination {
     override val route  = "sport_preferences"
@@ -221,7 +222,7 @@ private fun SportsList(
                 )
 
                 Text(
-                    text = sport,
+                    text = sport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
                     modifier = Modifier.weight(0.7f),
                     fontWeight = FontWeight.Bold
                 )
