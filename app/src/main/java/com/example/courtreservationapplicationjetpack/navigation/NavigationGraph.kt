@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.navigation
 
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -10,6 +11,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.example.courtreservationapplicationjetpack.signIn.ProfileGoogle
+import com.example.courtreservationapplicationjetpack.signIn.ProfileGoogleDestination
+import com.example.courtreservationapplicationjetpack.signIn.SignIn
+import com.example.courtreservationapplicationjetpack.signIn.SignInDestination
 import com.example.courtreservationapplicationjetpack.views.MainScreen
 import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.views.courts.AllSports
@@ -44,11 +50,13 @@ import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPa
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    context: Context,
+    googleAuthUiClient: GoogleAuthUiClient
 ){
     NavHost(
         navController = navController,
-        startDestination = MainScreenDestination.route,
+        startDestination = SignInDestination.route,
         modifier = modifier
     ){
         composable(
@@ -240,6 +248,30 @@ fun NavigationGraph(
 
 
                 )
+        }
+
+        composable(
+            route = SignInDestination.route
+
+        ){
+            SignIn(
+                navController = navController,
+                context = context,
+                googleAuthUiClient = googleAuthUiClient
+                //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
+            )
+        }
+
+        composable(
+            route = ProfileGoogleDestination.route
+
+        ){
+            ProfileGoogle(
+                navController = navController,
+                context = context,
+                googleAuthUiClient = googleAuthUiClient
+                //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
+            )
         }
     }
 }

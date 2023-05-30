@@ -1,4 +1,5 @@
 <resources>
+    <string name="web_client_id">75405539845-f1nro901e3ofpgeeome5ks727fb16gtq.apps.googleusercontent.com</string>
     <string name="app_name">CourtReservationApplicationJetpack</string>
     <string name="back_button">Back</string>
     <string name="no_reservations_description">No future reservations made</string>
