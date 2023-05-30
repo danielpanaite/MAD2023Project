@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "75405539845-tgaofo9lg8sri8jnklgv3kuqu9df4fri.apps.googleusercontent.com",
+          "client_id": "75405539845-atgpku6vg9npqnq4a0a268mp8uipkh71.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.polito.ma.firebaselecture",
+            "certificate_hash": "9171e028594836849dc64cd4f2191981d4cc1340"
+          }
+        },
+        {
+          "client_id": "75405539845-f1nro901e3ofpgeeome5ks727fb16gtq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "75405539845-tgaofo9lg8sri8jnklgv3kuqu9df4fri.apps.googleusercontent.com",
+              "client_id": "75405539845-f1nro901e3ofpgeeome5ks727fb16gtq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

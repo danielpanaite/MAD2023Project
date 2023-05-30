@@ -99,8 +99,7 @@ fun EditReservation(
     val toastUpdate = Toast.makeText(LocalContext.current, "Reservation updated!", Toast.LENGTH_SHORT)
     val toastDelete = Toast.makeText(LocalContext.current, "Reservation deleted!", Toast.LENGTH_SHORT)
     var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
-    val reservationDetails by remember { mutableStateOf(viewModel.reservation) }
-    Log.d("START", reservationDetails.value.toString())
+    val reservationDetails by remember { mutableStateOf(viewModel.reservation) } //reservation to be edited
     if (deleteConfirmationRequired) {
         DeleteConfirmationDialog(
             onDeleteConfirm = {
@@ -141,11 +140,8 @@ fun EditReservation(
         }
     ) {
             innerPadding ->
-        Log.d("COMPOSE", reservationDetails.toString())
         if(reservationDetails.value.court != "")
             EditReservationForm(
-    //            reservationsUiState = viewModel.reservationsUiState,
-    //            onReservationValueChange = viewModel::updateUiState,
                 modifier = Modifier.padding(innerPadding),
                 reservation = reservationDetails
             )
@@ -159,8 +155,7 @@ fun EditReservationForm(
     reservation: MutableState<Reservation>,
     courtViewModel: CourtViewModel = viewModel()
 ) {
-    Log.d("VIEW", reservation.value.toString())
-    courtViewModel.getCourtById(reservation.value.court)
+    courtViewModel.getCourtById(reservation.value.court) //get court info to be displayed
     val court = courtViewModel.court.value
     val lazyListState = rememberLazyListState()
     val firstItemTranslationY by remember {
@@ -277,10 +272,8 @@ fun CalendarScreen(
     reservation: MutableState<Reservation>,
     viewModel: ReservationViewModel = viewModel()
 ) {
-    viewModel.getCourtReservations(court.id, reservation.value.date)
-    val oldDate = reservation.value.toDate()
     val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    Log.d("DATE", Timestamp(format.parse(oldDate)!!).toDate().toString())
+    viewModel.getCourtReservations(court.id, Timestamp(format.parse(reservation.value.toDate())!!))
     Column {
         Row(
             modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
@@ -371,6 +364,7 @@ fun TextGrid(
     textList: List<String>,
     reservation: MutableState<Reservation>
 ) {
+    Log.d("EDIT", textList.toString())
     val rows = (textList.size + 4) / 5 //Calculate the number of rows necessary
     val selectedButtonIndex = remember { mutableStateOf(1) }
     selectedButtonIndex.value = textList.indexOfFirst { reservation.value.toTime() == it }

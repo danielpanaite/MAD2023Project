@@ -46,6 +46,7 @@ class ReservationViewModel: ViewModel(){
             if (e != null)
                 Log.d(TAG, "Error getting data", e)
             if (snapshot != null) {
+                Log.d(TAG, "getUserReservations")
                 val resList = mutableListOf<Reservation>()
                 for (document in snapshot.documents) {
                     val res = document.toObject(Reservation::class.java)
@@ -73,6 +74,7 @@ class ReservationViewModel: ViewModel(){
             if (e != null)
                 Log.d(TAG, "Error getting data", e)
             if (snapshot != null) {
+                Log.d(TAG, "getCourtReservations")
                 val resList = mutableListOf<Reservation>()
                 for (document in snapshot.documents) {
                     val res = document.toObject(Reservation::class.java)
@@ -93,6 +95,7 @@ class ReservationViewModel: ViewModel(){
             if (e != null)
                 Log.d(TAG, "Error getting data", e)
             if (snapshot != null) {
+                Log.d(TAG, "getReservationById")
                 val res = snapshot.toObject(Reservation::class.java)
                 res?.id = snapshot.id // Map the document ID to the "id" property of the Reservation object
                 _reservation.value = res!!
@@ -114,7 +117,7 @@ class ReservationViewModel: ViewModel(){
 
         docRef.update(hash).addOnSuccessListener {
             Log.d(TAG, "Document ${reservation.value.id} updated successfully")
-        }.addOnFailureListener { e ->
+        }.addOnFailureListener {
             Log.d(TAG, "Failed to update document ${reservation.value.id}")
         }
     }
@@ -126,7 +129,7 @@ class ReservationViewModel: ViewModel(){
 
         docRef.delete().addOnSuccessListener {
             Log.d(TAG, "Document ${reservation.value.id} deleted successfully")
-        }.addOnFailureListener { e ->
+        }.addOnFailureListener {
             Log.d(TAG, "Failed to delete document ${reservation.value.id}")
         }
     }
