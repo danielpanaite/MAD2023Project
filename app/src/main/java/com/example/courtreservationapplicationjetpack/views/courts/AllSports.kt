@@ -72,6 +72,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -113,6 +115,7 @@ fun AllSports(
     viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory),
     reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
     val userReviews by reviewViewModel.myReviewsUiState.collectAsState()
@@ -132,6 +135,7 @@ fun AllSports(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController, userReviews: List<Review>) {
+
     var pickedDate = remember { mutableStateOf(LocalDate.now()) }
 
     val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
@@ -143,8 +147,12 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     val optionState = rememberUseCaseState()
     val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
+    //questo è il viewmodel firebase
+    val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
     OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
     courtsViewModel.setSport(pickedSport)
+    firebaseCourtViewModel.getCourtsBySport(pickedSport)
 
 
     CalendarDialog(
@@ -267,15 +275,17 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             val viewModel2 = viewModel<AllSportsViewModel>()
             val isLoading by viewModel2.isLoading.collectAsState()
             val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
+            println( firebaseCourtViewModel.courts.value.toString())
+
 
             SwipeRefresh(
                 state = swipeRefreshState,
-                onRefresh = viewModel2::loadStuff,)
+                onRefresh = { viewModel2.loadStuff(pickedSport = pickedSport, firebaseCourtViewModel) })
             {
                 LazyColumn {
-                    items(courtsAvailableUiState.courtsAvailableList.size) { _ ->
+                    items(firebaseCourtViewModel.courts.value.size) { _ ->
 
-                        courtsAvailableUiState.courtsAvailableList.forEach {
+                        firebaseCourtViewModel.courts.value.forEach {
                             Box(modifier = Modifier.aspectRatio(1.5f)) {
                                 CoilImage(
                                     modifier = Modifier
@@ -333,8 +343,8 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     )
 
 
-
-                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), it.id).collectAsState(
+                                    /// TODO: get slot from firebase
+                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 0).collectAsState(
                                         initial = emptyList<String>()
                                     )
                                     

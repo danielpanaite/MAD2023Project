@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack.views.courts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
 import kotlinx.coroutines.delay
@@ -36,11 +37,17 @@ private val reservationRepository: ReservationRepository
         loadStuff()
     }
 
-    fun loadStuff(){
+    fun loadStuff(pickedSport: String? = null, courtViewModel: CourtViewModel? = null){
         viewModelScope.launch {
             _isLoading.value = true
             delay(3000L)
             // do stuff
+            println(pickedSport)
+            if (courtViewModel != null) {
+                if (pickedSport != null) {
+                    courtViewModel.getCourtsBySport("tennis")
+                }
+            }
             _isLoading.value = false
         }
     }
