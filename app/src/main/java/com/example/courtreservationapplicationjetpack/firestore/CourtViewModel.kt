@@ -26,7 +26,7 @@ class CourtViewModel: ViewModel() {
 
     fun getCourtsBySport(sport: String) {
         // Creating a reference to collection
-        val docRef = db.collection("oldcourts").whereEqualTo("sport", sport)
+        val docRef = db.collection("courts").whereEqualTo("sport", sport)
 
         docRef.get().addOnSuccessListener {
             Log.d(TAG, "getCourtsBySport")
@@ -44,7 +44,7 @@ class CourtViewModel: ViewModel() {
 
     fun getCourtById(id: String) {
         // Creating a reference to document by id
-        val docRef = db.document("oldcourts/$id")
+        val docRef = db.document("courts/$id")
 
         docRef.get().addOnSuccessListener {
             Log.d(TAG, "getCourtById")

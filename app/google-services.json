@@ -14,11 +14,27 @@
       },
       "oauth_client": [
         {
-          "client_id": "75405539845-7dtttjpkfi4dt09sao6q200dt34n1tcn.apps.googleusercontent.com",
+          "client_id": "75405539845-2vgpdmlc0b0give3830q1avcccn8t853.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.courtreservationapplicationjetpack",
             "certificate_hash": "9171e028594836849dc64cd4f2191981d4cc1340"
+          }
+        },
+        {
+          "client_id": "75405539845-4dsisghm1jurhthe2d5ncduptq9smt5h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.courtreservationapplicationjetpack",
+            "certificate_hash": "82554f1e9e8231a3ff67b914435cd84db9e29ba4"
+          }
+        },
+        {
+          "client_id": "75405539845-u6hq32nf89krba436sv8rcf64eu5mlad.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.courtreservationapplicationjetpack",
+            "certificate_hash": "7f4c22b02d75df9dab9f017ee572369ef8dcd197"
           }
         },
         {
@@ -56,6 +72,14 @@
           "android_info": {
             "package_name": "it.polito.ma.firebaselecture",
             "certificate_hash": "9171e028594836849dc64cd4f2191981d4cc1340"
+          }
+        },
+        {
+          "client_id": "75405539845-kcvpg521s9lgh4n8lev4s5rg8vdccju4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.polito.ma.firebaselecture",
+            "certificate_hash": "82554f1e9e8231a3ff67b914435cd84db9e29ba4"
           }
         },
         {
