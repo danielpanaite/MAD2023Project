@@ -50,8 +50,6 @@ import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.firestore.toTime
-import com.example.courtreservationapplicationjetpack.models.courts.Court
-import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.ui.theme.GreyItemInactive
 import com.kizitonwose.calendar.compose.CalendarLayoutInfo
@@ -64,16 +62,13 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.flow.filterNotNull
-import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
-import java.util.Random
 
 
 private val pageBackgroundColor: Color @Composable get() = MaterialTheme.colorScheme.background
@@ -84,22 +79,15 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 
 @Composable
 fun MonthCalendar(
-    reservations: List<Reservation>,
-    courts: List<Court>,
     onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
     viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     viewModel.getUserReservations(1)
     val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    val shorttimeFormatter = DateTimeFormatter.ofPattern("H:mm")
-    val reservationList = reservations
-        .filter { LocalDate.parse(it.date, reservationFormatter) >= LocalDate.now() }
-        .filter{ LocalTime.parse(it.slot, timeFormatter) < LocalTime.now() }
-        .groupBy { LocalDate.parse(it.date, reservationFormatter) }
-    val resList = viewModel.reservations.value.groupBy {
-        LocalDate.parse(it.toDate(), reservationFormatter)
-    }
+    val resList = viewModel.reservations.value
+//        .filter { LocalDate.parse(it.toDate(), reservationFormatter) >= LocalDate.now() }
+//        .filter { LocalTime.parse(it.toTime(), timeFormatter) > LocalTime.now() }
+        .groupBy { LocalDate.parse(it.toDate(), reservationFormatter) }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(500) }
     val endMonth = remember { currentMonth.plusMonths(500) }
@@ -169,7 +157,7 @@ fun MonthCalendar(
                 .padding(top = 8.dp), shadowElevation = 12.dp){
                 //Bottom reservation details
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    if(reservations.isEmpty()){
+                    if(viewModel.reservations.value.isEmpty()){
                         item {
                             Text(
                                 modifier = Modifier

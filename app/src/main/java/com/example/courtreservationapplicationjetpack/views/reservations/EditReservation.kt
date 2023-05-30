@@ -73,6 +73,9 @@ import com.example.courtreservationapplicationjetpack.models.sport.SportDrawable
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 
@@ -273,6 +276,8 @@ fun CalendarScreen(
     viewModel: ReservationViewModel = viewModel()
 ) {
     val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val localFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     viewModel.getCourtReservations(court.id, Timestamp(format.parse(reservation.value.toDate())!!))
     Column {
         Row(
@@ -284,18 +289,21 @@ fun CalendarScreen(
                 color = Color.Gray
             )
         }
-
-//        TextGrid(
-//            mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
-//                .filter { !courtReservations.any{ r -> (r.slot == it) && (r.id != reservationsUiState.reservationDetails.id)} },
-//            reservationsUiState,
-//            onReservationValueChange)
         if(viewModel.courtres.value.isNotEmpty()){
-            TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
-                .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } }
-                , reservation)
+            Log.d("FILTER", "before")
+            if(LocalDate.now().format(localFormat) == viewModel.reservation.value.toDate()){
+                Log.d("FILTER", "today")
+                TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                    .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } } //filter slots occupied by others
+                    .filter { LocalTime.parse(it, timeFormatter) > LocalTime.now() }
+                    , reservation)
+            }else{
+                Log.d("FILTER", "another")
+                TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                    .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } } //filter slots occupied by others
+                    , reservation)
+            }
         }
-        //TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"), reservation)
         Row(
             modifier = Modifier
                 .padding(horizontal = 0.dp)

@@ -39,7 +39,9 @@ class ReservationViewModel: ViewModel(){
 
     fun getUserReservations(user: Int) {
         // Creating a reference to collection
-        val docRef = db.collection("reservations").whereEqualTo("user", user)
+        val docRef = db.collection("reservations")
+            .whereEqualTo("user", user)
+            .whereGreaterThan("date", Timestamp.now())
 
         // Listen to data in real-time
         reg1 = docRef.addSnapshotListener { snapshot, e ->
