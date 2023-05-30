@@ -145,10 +145,10 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     val dateRange = now..future //creo closedRange per boundary
     val optionState = rememberUseCaseState()
-    val courtsAvailableUiState by courtsViewModel.courtsAvailableUiState.collectAsState()
 
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
 
     OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
     courtsViewModel.setSport(pickedSport)
