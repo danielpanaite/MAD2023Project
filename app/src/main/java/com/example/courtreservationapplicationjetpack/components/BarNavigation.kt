@@ -42,8 +42,8 @@ fun BarNavigation(
 fun BottomBar(navController: NavHostController){
     val screens = listOf(
         MainScreenDestination,
-        //ProfileDestination,
-        ProfileGoogleDestination,
+        ProfileDestination,
+        //ProfileGoogleDestination,
         MyReservationsDestination
     )
 

@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Edit
@@ -31,12 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -45,11 +49,18 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Users
+import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-/*
+
 object ProfileDestination : NavigationDestination {
     override val route = "profile"
     override val titleRes = "Profile"
@@ -69,10 +80,19 @@ fun Profile(
     navigateBack: () -> Unit,
     context: Context,
     googleAuthUiClient : GoogleAuthUiClient,
-    viewModel: ProfileViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: UserViewModel = viewModel()
 
 ){
-    val uiState = viewModel.uiState.collectAsState()
+    val lifecycle = LocalLifecycleOwner.current
+
+    val email = googleAuthUiClient.getSignedInUser()?.email
+
+    if (email != null) {
+        viewModel.getUserByEmail(email)
+    }
+    val user = viewModel.user.value
+
+    //val uiState = viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
@@ -85,10 +105,22 @@ fun Profile(
         ProfileBody(
             modifier = modifier.padding(innerPadding),
             navController = rememberNavController(),
-            profileUiState = uiState.value,
+            user = user,
             navigateToEditProfileDestination = navigateToEditProfileDestination,
             navigateToSportPreferencesDestination =navigateToSportPreferencesDestination,
-            navigateToAchievementsDestination = navigateToAchievementsDestination
+            navigateToAchievementsDestination = navigateToAchievementsDestination,
+            onSignOut = {
+                lifecycle.lifecycleScope.launch {
+                    googleAuthUiClient.signOut()
+                    Toast.makeText(
+                        context,
+                        "Signed out",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    navController.navigate("sign_in")
+                }
+            }
         )
     }
 }
@@ -97,48 +129,56 @@ fun Profile(
 fun ProfileBody(
     modifier: Modifier = Modifier,
     navController: NavController,
-    profileUiState: ProfileUiState,
+    user: Users,
     navigateToEditProfileDestination: (Int) -> Unit,
     navigateToSportPreferencesDestination: () -> Unit,
     navigateToAchievementsDestination: () -> Unit,
+    onSignOut: () -> Unit
+
 
 ){
 
     LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 60.dp)
-        ) {
-            item {
-                // User's image, name, email and edit button
-                UserDetails(profileUiState = profileUiState,
-                    navigateToEditProfileDestination = navigateToEditProfileDestination)
-            }
-            item{
-                OptionsItemStyle(
-                    profileUiState = profileUiState,
-                    navigateToSportPreferencesDestination = navigateToSportPreferencesDestination,
-                    navigateToAchievementsDestination = navigateToAchievementsDestination
-                )
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 60.dp)
+    ) {
+        item {
+            // User's image, name, email and edit button
+            UserDetails(user = user,
+                navigateToEditProfileDestination = navigateToEditProfileDestination)
+        }
+        item{
+            OptionsItemStyle(
+                user = user,
+                navigateToSportPreferencesDestination = navigateToSportPreferencesDestination,
+                navigateToAchievementsDestination = navigateToAchievementsDestination
+            )
+        }
+        item{
+            Button(onClick = onSignOut) {
+                Text(text = "Sign out")
             }
         }
     }
+
+}
 
 
 // This composable displays user's image, name, email and edit button
 @Composable
 private fun UserDetails(
-    profileUiState: ProfileUiState,
-    navigateToEditProfileDestination: (Int) -> Unit
+user: Users,
+navigateToEditProfileDestination: (Int) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable { navigateToEditProfileDestination(profileUiState.userDetails.id!!) },
-        verticalAlignment = Alignment.CenterVertically,
+            //.clickable { navigateToEditProfileDestination(profileUiState.userDetails.id!!) },
+        //verticalAlignment = Alignment.CenterVertically,
 
-    ) {
+        ) {
 
         // User's image
         Image(
@@ -146,8 +186,8 @@ private fun UserDetails(
                 .size(72.dp)
                 .clip(shape = CircleShape),
             //this should be the image in the db for each user
-            painter = if(profileUiState.userDetails.imageUri!=="" && profileUiState.userDetails.imageUri!==null){
-                rememberAsyncImagePainter(model = Uri.parse(profileUiState.userDetails.imageUri)?: R.drawable.ic_person_new)
+            painter = if(user.imageUri!=="" && user.imageUri!==null){
+                rememberAsyncImagePainter(model = Uri.parse(user.imageUri)?: R.drawable.ic_person_new)
             }else{
                 painterResource(id = R.drawable.ic_person_new)
             },
@@ -165,18 +205,20 @@ private fun UserDetails(
                     .padding(start = 16.dp)
             ) {
                 // User's name
-                Text(
-                    text = profileUiState.userDetails.name,
-                    style = TextStyle(
-                        fontSize = 23.sp,
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                user.name?.let {
+                    Text(
+                        text = it,
+                        style = TextStyle(
+                            fontSize = 23.sp,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 // User's email
                 Text(
-                    text = profileUiState.userDetails.email,
+                    text = user.email,
                     style = TextStyle(
                         fontSize = 14.sp,
                         color = Color.Gray,
@@ -192,7 +234,7 @@ private fun UserDetails(
                 modifier = Modifier
                     .weight(weight = 1f, fill = false),
                 onClick = {
-                    navigateToEditProfileDestination(profileUiState.userDetails.id!!)
+                   // navigateToEditProfileDestination(profileUiState.userDetails.id!!)
                 }) {
                 Icon(
                     modifier = Modifier.size(30.dp),
@@ -210,7 +252,7 @@ private fun UserDetails(
 private fun OptionsItemStyle(
     navigateToSportPreferencesDestination: () -> Unit,
     navigateToAchievementsDestination: () -> Unit,
-    profileUiState: ProfileUiState
+    user: Users
 ) {
     Row(
         modifier = Modifier
@@ -218,7 +260,7 @@ private fun OptionsItemStyle(
             .padding(all = 16.dp)
             .clickable(
                 onClick = {
-                    navigateToSportPreferencesDestination()
+                    //navigateToSportPreferencesDestination()
                 }),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -226,8 +268,8 @@ private fun OptionsItemStyle(
             modifier = Modifier
                 .size(32.dp),
             painter = painterResource(id = R.drawable.ic_star_new),
-        contentDescription = "Sports",
-            )
+            contentDescription = "Sports",
+        )
 
         Row(
             modifier = Modifier
@@ -346,7 +388,7 @@ private fun OptionsItemStyle(
 
 
 
-
+/*
 @ExperimentalMaterial3Api
 @Composable
 @Preview(showBackground = true)
@@ -361,7 +403,7 @@ fun ProfileScreenUser(){
             ), true
         ), navigateToEditProfileDestination ={}
 
-)
+    )
 }
 
 
@@ -370,7 +412,7 @@ fun ProfileScreenUser(){
 @Preview(showBackground = true)
 fun ProfileBody(){
     ProfileBody(
-         modifier = Modifier,
+        modifier = Modifier,
         rememberNavController(),
 
         ProfileUiState(
@@ -388,6 +430,7 @@ fun ProfileBody(){
 
     )
 }
-*/
+
+ */
 
 

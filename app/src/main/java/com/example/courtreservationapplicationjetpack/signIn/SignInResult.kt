@@ -9,5 +9,6 @@ data class SignInResult(
 data class UserData(
     val userId: String, //unique identifier that comes from firebase
     val username: String?, //
+    val email: String?,
     val profilePictureUrl: String? //nullable string since not every user can have a profile picture
 )

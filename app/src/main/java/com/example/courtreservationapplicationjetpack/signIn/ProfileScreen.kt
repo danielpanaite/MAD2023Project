@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -34,7 +35,7 @@ object ProfileGoogleDestination : NavigationDestination {
 fun ProfileGoogle(
     googleAuthUiClient : GoogleAuthUiClient,
     context : Context,
-    navController: NavController
+    navController: NavController,
 
 ){
     val lifecycle = LocalLifecycleOwner.current
@@ -60,6 +61,7 @@ fun ProfileScreen(
     userData: UserData?,
     onSignOut: () -> Unit
 ) {
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -88,5 +90,6 @@ fun ProfileScreen(
         Button(onClick = onSignOut) {
             Text(text = "Sign out")
         }
+        //Button(onClick = {UsersViewModel.getUserByEmail("laura.zurru")})
     }
 }

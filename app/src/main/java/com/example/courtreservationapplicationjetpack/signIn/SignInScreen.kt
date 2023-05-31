@@ -53,7 +53,7 @@ fun SignIn(
 
     LaunchedEffect(key1 = Unit) {
         if (googleAuthUiClient.getSignedInUser() != null) {
-            navController.navigate("profile_google")
+            navController.navigate("home")
         }
     }
 
@@ -83,8 +83,12 @@ fun SignIn(
                 Toast.LENGTH_LONG
             ).show()
 
-            navController.navigate("home")
+            //qua mettere che se non esiste un user con quella mail se ne crea uno con questi dati
+            viewModel.addUser(googleAuthUiClient)
             viewModel.resetState()
+
+            navController.navigate("home")
+
         }
     }
 

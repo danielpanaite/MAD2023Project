@@ -92,6 +92,8 @@ fun NavigationGraph(
                 navigateBack = { navController.navigateUp() },
                 navigateToSportPreferencesDestination = {navController.navigate(SportPreferencesDestination.route)},
                 navigateToAchievementsDestination = {navController.navigate(AchievementsDestination.route)},
+                context = context,
+                googleAuthUiClient = googleAuthUiClient
 
                 )
 
