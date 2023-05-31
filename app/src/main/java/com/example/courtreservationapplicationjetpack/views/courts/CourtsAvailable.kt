@@ -345,9 +345,18 @@ private fun CourtItem(
 @Composable
 fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
     val firebaseCourtViewModel: CourtViewModel = viewModel()
-    firebaseCourtViewModel.getCourtById(courtID)
-    val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court>(firebaseCourtViewModel.court.value) }
+    val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
+
+    LaunchedEffect(Unit) {
+        firebaseCourtViewModel.getCourtById(courtID)
+    }
+
+    LaunchedEffect(firebaseCourtViewModel.court.value) {
+        courtState.value = firebaseCourtViewModel.court.value
+    }
+
     println(courtState.value)
+
 
     if(showDialog.value) {
         AlertDialog(
@@ -441,7 +450,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                         .background(Color.Red)
                         .align(Alignment.TopCenter)
                 )
-                val imageUrl = when (courtState.value.sport) {
+                var imageUrl = when (courtState.value?.sport) {
                     "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
                     "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
                     "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
@@ -452,6 +461,10 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     "beach volley" -> "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1307&q=80"
                     else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
                 }
+                if(!courtState.value?.URL.isNullOrEmpty()){
+                    imageUrl = courtState.value?.URL!!
+                }
+
                 AsyncImage(
                     modifier = Modifier.fillMaxWidth(),
                     model = ImageRequest.Builder(LocalContext.current)
@@ -497,12 +510,12 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     ) {
                         Column(modifier = Modifier.weight(3f)) {
                             Text(
-                                text = "${courtState.value.name}",
+                                text = "${courtState.value?.name}",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "${courtState.value.address}}",
+                                text = "${courtState.value?.address}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Start
@@ -513,7 +526,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
                         ) {
-                            val sportIcon = when (courtState.value.sport) {
+                            val sportIcon = when (courtState.value?.sport) {
                                 "calcio" -> R.drawable.ic_calcio5
                                 "basket" -> R.drawable.ic_basket
                                 "beach volley" -> R.drawable.ic_beachvolley

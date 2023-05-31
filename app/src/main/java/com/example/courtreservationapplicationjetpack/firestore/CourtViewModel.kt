@@ -46,14 +46,16 @@ class CourtViewModel: ViewModel() {
         // Creating a reference to document by id
         val docRef = db.document("courts/$id")
 
-        docRef.get().addOnSuccessListener {
+        docRef.get().addOnSuccessListener { documentSnapshot ->
             Log.d(TAG, "getCourtById")
-            val res = it.toObject(Court::class.java)
-            res?.id = it.id // Map the document ID to the "id" property of the Reservation object
-            _court.value = res!!
-        }.addOnFailureListener {
-            Log.d(TAG, "Error getting data", it)
+            val court = documentSnapshot.toObject(Court::class.java)
+            court?.id = documentSnapshot.id
+            _court.value = court!!
+        }.addOnFailureListener { exception ->
+            Log.d(TAG, "Error getting data", exception)
         }
     }
+
+    //BinHexs
 
 }
