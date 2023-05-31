@@ -9,5 +9,12 @@ data class Users(
     val address: String? = "",
     val age: Int? = 0,
     val phone: String? = "",
-    val imageUri: String? = ""
+    val imageUri: String? = "",
+    val sportPreferences: MutableList<Sport> = mutableListOf<Sport>()
+)
+
+
+data class Sport(
+    val sportName: String = "",
+    val masteryLevel: String = "",
 )

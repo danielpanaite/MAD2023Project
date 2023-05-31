@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -65,15 +66,15 @@ object ProfileDestination : NavigationDestination {
     override val route = "profile"
     override val titleRes = "Profile"
     override val icon = Icons.Default.Person
-    const val profileIdArg = "profileIdArg"
-    val routeWithArgs = "${EditProfileDestination.route}/{$profileIdArg}"
+    const val profileArg = "profileArg"
+    val routeWithArgs = "${EditProfileDestination.route}/{$profileArg}"
 }
 
 @ExperimentalMaterial3Api
 @Composable
 fun Profile(
     modifier: Modifier = Modifier,
-    navigateToEditProfileDestination: (Int) -> Unit,
+    navigateToEditProfileDestination: (String) -> Unit,
     navigateToSportPreferencesDestination: () -> Unit,
     navigateToAchievementsDestination: () -> Unit,
     navController: NavController,
@@ -104,7 +105,7 @@ fun Profile(
             innerPadding ->
         ProfileBody(
             modifier = modifier.padding(innerPadding),
-            navController = rememberNavController(),
+            navController = navController,
             user = user,
             navigateToEditProfileDestination = navigateToEditProfileDestination,
             navigateToSportPreferencesDestination =navigateToSportPreferencesDestination,
@@ -130,7 +131,7 @@ fun ProfileBody(
     modifier: Modifier = Modifier,
     navController: NavController,
     user: Users,
-    navigateToEditProfileDestination: (Int) -> Unit,
+    navigateToEditProfileDestination: (String) -> Unit,
     navigateToSportPreferencesDestination: () -> Unit,
     navigateToAchievementsDestination: () -> Unit,
     onSignOut: () -> Unit
@@ -146,7 +147,9 @@ fun ProfileBody(
         item {
             // User's image, name, email and edit button
             UserDetails(user = user,
-                navigateToEditProfileDestination = navigateToEditProfileDestination)
+                navigateToEditProfileDestination = navigateToEditProfileDestination,
+                navController = navController
+            )
         }
         item{
             OptionsItemStyle(
@@ -169,16 +172,20 @@ fun ProfileBody(
 @Composable
 private fun UserDetails(
 user: Users,
-navigateToEditProfileDestination: (Int) -> Unit
+navigateToEditProfileDestination: (String) -> Unit,
+navController: NavController
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            //.clickable { navigateToEditProfileDestination(profileUiState.userDetails.id!!) },
+            //.clickable {navController.navigate("home")}
+            //.clickable { navigateToEditProfileDestination(user.email); Log.d("email dentro click", "${user.email}") },
         //verticalAlignment = Alignment.CenterVertically,
 
         ) {
+        Log.d("email", "${user.email}")
+
 
         // User's image
         Image(
@@ -234,7 +241,8 @@ navigateToEditProfileDestination: (Int) -> Unit
                 modifier = Modifier
                     .weight(weight = 1f, fill = false),
                 onClick = {
-                   // navigateToEditProfileDestination(profileUiState.userDetails.id!!)
+                    //navController.navigate("home")
+                   navigateToEditProfileDestination(user.email!!)
                 }) {
                 Icon(
                     modifier = Modifier.size(30.dp),
@@ -260,7 +268,9 @@ private fun OptionsItemStyle(
             .padding(all = 16.dp)
             .clickable(
                 onClick = {
-                    //navigateToSportPreferencesDestination()
+                    //navigateToSportPreferencesDestination(user.email!!)
+                    navigateToSportPreferencesDestination()
+
                 }),
         verticalAlignment = Alignment.CenterVertically
     ) {

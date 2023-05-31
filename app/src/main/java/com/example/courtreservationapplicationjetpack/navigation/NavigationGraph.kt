@@ -73,15 +73,19 @@ fun NavigationGraph(
 
         composable(
             route = EditProfileDestination.routeWithArgs,
-            arguments = listOf(navArgument(EditProfileDestination.profileIdArg) {
-                type = NavType.IntType
+            arguments = listOf(navArgument(EditProfileDestination.profileArg) {
+                type = NavType.StringType
             })
         ){
             EditProfile(
                 navController = navController,
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
-                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
+                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)},
+                context = context,
+                googleAuthUiClient = googleAuthUiClient,
+                profileArg = it.arguments?.getString("profileArg")
+
             )
         }
         composable(
@@ -217,7 +221,8 @@ fun NavigationGraph(
             SportPreferences(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() },
-                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
+                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)},
+                googleAuthUiClient = googleAuthUiClient
 
             )
         }

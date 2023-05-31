@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/*
 
 /**
  * ViewModel to retrieve and update a reservation from the [UserRepository]'s data source.
@@ -26,7 +27,7 @@ class EditProfileViewModel(
     var profileUiState by mutableStateOf(ProfileUiState())
         private set
 
-    private val profileId: Int = checkNotNull(savedStateHandle[EditProfileDestination.profileIdArg])
+    private val profileId: Int = checkNotNull(savedStateHandle[EditProfileDestination.profileArg])
 
     init {
         viewModelScope.launch {
@@ -72,3 +73,4 @@ private fun validateEmail(email: String): Boolean {
     return email.matches(emailRegex)
 }
 
+*/

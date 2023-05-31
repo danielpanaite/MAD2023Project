@@ -68,7 +68,6 @@ class SportPreferencesViewModel(
 
     suspend fun insertOrUpdateSports(sports: List<Sport>) {
         sportRepository.insertOrUpdateSports(sports)
-
     }
 
     fun updateSportMastery(sportName: String, masteryLevel: String?) {

@@ -10,7 +10,6 @@ import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
-import com.example.courtreservationapplicationjetpack.views.profile.EditProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
@@ -34,12 +33,15 @@ object AppViewModelProvider {
             )
         }
 
+        /*
         initializer {
             EditProfileViewModel(
                 this.createSavedStateHandle(),
                 courtApplication().container.userRepository
             )
         }
+
+         */
         // Initializer for ReservationDetails View Model
         initializer {
             ReservationDetailsViewModel(

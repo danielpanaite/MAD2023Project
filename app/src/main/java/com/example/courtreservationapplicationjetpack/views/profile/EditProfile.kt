@@ -76,6 +76,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Objects
 
+/*
 object EditProfileDestination : NavigationDestination {
     override val route = "profile_edit"
     override val titleRes = "edit Profile"
@@ -522,3 +523,4 @@ fun ProfileEntryBody(){
     )
 }
 
+*/

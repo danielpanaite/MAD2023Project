@@ -1,6 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
-
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,13 +51,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-/*
 object SportPreferencesDestination : NavigationDestination {
     override val route  = "sport_preferences"
     override val titleRes = "Sport Preferences"
@@ -73,9 +75,25 @@ fun SportPreferences(
     modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
     navigateToProfileDestination: () ->Unit,
-    viewModel: SportPreferencesViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
-    val allSportsUiState by viewModel.allSportsUiState.collectAsState()
+    googleAuthUiClient: GoogleAuthUiClient,
+    viewModel: UserViewModel = viewModel(),
+    viewModelVecchio: SportPreferencesViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
+    ) {
+    //val allSportsUiState by viewModelVecchio.allSportsUiState.collectAsState()
+
+    val email = googleAuthUiClient.getSignedInUser()?.email
+    var launchOnce by rememberSaveable { mutableStateOf(true) }
+    if(launchOnce){
+        viewModel.getSportsList()
+        if (email != null) {
+            viewModel.getSportWithLevels(email)
+        }
+        launchOnce = false
+    }
+    val sports by remember { mutableStateOf(viewModel.sports) } //reservation to be edited
+
+    Log.d("sportsList", "${viewModel.sports}")
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true,
@@ -83,10 +101,13 @@ fun SportPreferences(
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         SportsBody(
-            sportsList = allSportsUiState.sportsList,
+            //sportsList = allSportsUiState.sportsList,
             modifier = modifier.padding(innerPadding),
-            viewModel = viewModel,
-            navigateToProfileDestination = navigateToProfileDestination
+            viewModelVecchio = viewModelVecchio,
+            navigateToProfileDestination = navigateToProfileDestination,
+            sports = sports,
+            //sportsWithLevel = sportsWithLevel
+
 
 
         )
@@ -95,13 +116,22 @@ fun SportPreferences(
 
 @Composable
 fun SportsBody(
-    sportsList: List<String>,
+    sports: State<List<String>>,
+    //sportsList: List<String>,
     modifier: Modifier = Modifier,
-    viewModel: SportPreferencesViewModel,
     navigateToProfileDestination: () ->Unit,
-    ){
-    val selectedSportsWithLevels by viewModel.sportPreferencesUiState.collectAsState()
+    //sportsWithLevel:  State<Map<String, String>>,
+    viewModelVecchio: SportPreferencesViewModel,
+    viewModel: UserViewModel = viewModel()
 
+
+){
+    //val selectedSportsWithLevels by viewModelVecchio.sportPreferencesUiState.collectAsState()
+    val sportsWithLevel by remember { mutableStateOf(viewModel.sportsWithLevel) } //reservation to be edited
+
+    Log.d("selected sports with levels", "${sportsWithLevel.value}")
+
+    /*
     if (selectedSportsWithLevels.isLoading) {
         // Show circular progress indicator while loading
         Box(modifier = Modifier.fillMaxSize()){
@@ -109,10 +139,13 @@ fun SportsBody(
         }
         return
     }
+    */
+
     var selectedSports by remember { mutableStateOf(emptySet<String>()) }
     val sportsWithLevels = remember { mutableMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
     // Initialize selectedSports with the names of the sports that are already selected
+    /*
     selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
 
 
@@ -172,6 +205,8 @@ fun SportsBody(
         Spacer(modifier = Modifier.height(16.dp))
 
     }
+
+     */
 }
 
 
@@ -289,5 +324,3 @@ private fun SportLevelInput(
         }
     }
 }
-
- */
