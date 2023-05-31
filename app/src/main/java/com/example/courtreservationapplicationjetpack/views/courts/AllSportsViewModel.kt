@@ -43,11 +43,11 @@ private val reservationRepository: ReservationRepository
             delay(3000L)
             // do stuff
             println(pickedSport)
-            if (courtViewModel != null) {
-                if (pickedSport != null) {
-                    courtViewModel.getCourtsBySport("tennis")
-                }
-            }
+//            if (courtViewModel != null) {
+//                if (pickedSport != null) {
+//                    courtViewModel.getCourtsBySport("tennis")
+//                }
+//            }
             _isLoading.value = false
         }
     }
