@@ -65,85 +65,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
+//        window.setFlags(
+//            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+//            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+//        )
         setContent {
             CourtReservationApplicationJetpackTheme {
-                val composition = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.splash_animation))
-                val progress by animateLottieCompositionAsState(
-                    composition = composition.value,
-                    iterations = LottieConstants.IterateForever
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black)
-                ){
-                    LottieAnimation(
-                        modifier = Modifier.fillMaxSize(),
-                        composition = composition.value,
-                        progress = { progress }
-                    )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = 40.dp).padding(bottom = 100.dp)
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text = "Sportify",
-                            color = Color.White,
-                            fontSize = androidx.compose.material3.MaterialTheme.typography.displayLarge.fontSize,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text = "La prima app che ti permette di prenotare ogni maledettissimo giorno il campo stella\nEffettua il Login!",
-                            color = Color.White,
-                            fontSize = androidx.compose.material3.MaterialTheme.typography.bodyLarge.fontSize,
-                            fontWeight = FontWeight.Normal
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Button(
-                            modifier = Modifier.fillMaxWidth().height(54.dp),
-                            onClick = {},
-                            shape = CircleShape
-                        ){
-                            Text(
-                                text = "Log-in!",
-                                color = Color.Black
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            modifier = Modifier.fillMaxWidth().height(54.dp),
-                            onClick = {},
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_google), // Sostituisci con l'immagine di Google
-                                    contentDescription = "Google",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Login with Google",
-                                    color = Color.Black
-                                )
-                            }
-                        }
-                    }
-                }
+
 
                 CourtApp(context = applicationContext, googleAuthUiClient = googleAuthUiClient)
 
