@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,7 +51,11 @@ fun SplashScreen(navController: NavHostController) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_splash))
         val logoAnimationState =
             animateLottieCompositionAsState(composition = composition)
+
         LottieAnimation(
+            modifier = Modifier
+                .fillMaxSize()
+                .align(Alignment.Center).background(Color.White).padding(0.dp),
             composition = composition,
             progress = { logoAnimationState.progress }
         )
@@ -72,9 +77,9 @@ fun SplashScreen(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                    //alto 1/4 dello schermo
                 .height(200.dp)
                 .align(Alignment.BottomCenter)
+                .offset(y = (-16).dp) // sposta di 16.dp in alto
                 .background(Color.White)
         )
     }
