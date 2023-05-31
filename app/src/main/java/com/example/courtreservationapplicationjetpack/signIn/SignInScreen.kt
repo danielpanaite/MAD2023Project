@@ -54,6 +54,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
@@ -116,6 +117,7 @@ fun SignIn(
 
     SignInScreen(
         state = state,
+        navController = navController,
         onSignInClick = {
             lifecycle.lifecycleScope.launch {
                 Log.d("signInScreen", "$state")
@@ -135,6 +137,7 @@ fun SignIn(
 fun SignInScreen(
     //so we can update the UI
     state: SignInState,
+    navController: NavController,
     //call when we click in the sign in button
     onSignInClick: () -> Unit,
 
@@ -214,7 +217,7 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 modifier = Modifier.fillMaxWidth().height(54.dp),
-                onClick = { onSignInClick },
+                onClick = { navController.navigate(MainScreenDestination.route) },
                 shape = CircleShape,
                 colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 1f))
             ) {

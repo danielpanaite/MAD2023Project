@@ -3,6 +3,7 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import OptionSample3
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -73,7 +74,6 @@ import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
-import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -81,9 +81,6 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.gowtham.ratingbar.RatingBar
-import com.gowtham.ratingbar.RatingBarConfig
-import com.gowtham.ratingbar.RatingBarStyle
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -287,13 +284,15 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
                         firebaseCourtViewModel.courts.value.forEach {
                             Box(modifier = Modifier.aspectRatio(1.5f)) {
+                                println(it.name + " " + it.sport + " " + (it.URL ?: "NONE"))
                                 CoilImage(
                                     modifier = Modifier
                                         .shadow(10.dp, RoundedCornerShape(0.dp))
                                         .fillMaxSize()
                                         .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate.value}") }
                                         .height(100.dp),
-                                    sport = it.sport
+                                    sport = it.sport,
+                                    URL = it.URL ?: null,
                                 )
                                 Box(
                                     modifier = Modifier
@@ -457,8 +456,9 @@ fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, 
 
 
 @Composable
-fun CoilImage(modifier: Modifier = Modifier, sport: String) {
-    val imageUrl = when (sport) {
+fun CoilImage(modifier: Modifier = Modifier, sport: String, URL: String? = null) {
+
+    var imageUrl = when (sport) {
         "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
         "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
         "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
@@ -469,7 +469,9 @@ fun CoilImage(modifier: Modifier = Modifier, sport: String) {
         "beach volley" -> "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1307&q=80"
         else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
     }
-
+    if(!URL.isNullOrEmpty()){
+        imageUrl = URL
+    }
     Box(modifier = modifier) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)

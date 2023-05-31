@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.firestore
 
 data class Court(
+    var URL: String? = "",
     var id: String = "",
     val name: String = "",
     val address: String = "",
