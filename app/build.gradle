@@ -156,6 +156,8 @@
         implementation 'com.airbnb.android:lottie-compose:6.0.0'
 
 
+
+
     }
 
 //Escludo la libreria kotlin-stdlib-jdk8 per utilizzare il calendario [DUPLICATO]

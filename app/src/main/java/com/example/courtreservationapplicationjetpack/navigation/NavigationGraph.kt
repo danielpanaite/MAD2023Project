@@ -11,6 +11,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.courtreservationapplicationjetpack.Screen
+import com.example.courtreservationapplicationjetpack.SplashScreen
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.signIn.ProfileGoogle
 import com.example.courtreservationapplicationjetpack.signIn.ProfileGoogleDestination
@@ -56,9 +58,12 @@ fun NavigationGraph(
 ){
     NavHost(
         navController = navController,
-        startDestination = SignInDestination.route,
+        startDestination = Screen.Splash.route,
         modifier = modifier
     ){
+        composable(route = Screen.Splash.route) {
+            SplashScreen(navController = navController)
+        }
         composable(
             route = MainScreenDestination.route
 
