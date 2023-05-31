@@ -88,6 +88,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
+import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
@@ -343,7 +344,10 @@ private fun CourtItem(
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @Composable
 fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
-    val courtState = remember { mutableStateOf<Court?>(null) }
+    val firebaseCourtViewModel: CourtViewModel = viewModel()
+    firebaseCourtViewModel.getCourtById(courtID)
+    val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court>(firebaseCourtViewModel.court.value) }
+    println(courtState.value)
 
     if(showDialog.value) {
         AlertDialog(
@@ -397,13 +401,13 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
         )
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.getCourt(courtID.toInt()).collect { courtValue ->
-            courtState.value = courtValue
-        }
-    }
-
-    val court = courtState.value
+//    LaunchedEffect(Unit) {
+//        viewModel.getCourt(courtID.toInt()).collect { courtValue ->
+//            courtState.value = courtValue
+//        }
+//    }
+//
+//    val court = courtState.value
 
     val lazyListState = rememberLazyListState()
     val firstItemTranslationY by remember {
@@ -437,7 +441,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                         .background(Color.Red)
                         .align(Alignment.TopCenter)
                 )
-                val imageUrl = when (court?.sport) {
+                val imageUrl = when (courtState.value.sport) {
                     "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
                     "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
                     "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
@@ -493,12 +497,12 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     ) {
                         Column(modifier = Modifier.weight(3f)) {
                             Text(
-                                text = "${court?.name}",
+                                text = "${courtState.value.name}",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "${court?.address}}",
+                                text = "${courtState.value.address}}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.Gray,
                                 textAlign = TextAlign.Start
@@ -509,7 +513,7 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
                         ) {
-                            val sportIcon = when (court?.sport) {
+                            val sportIcon = when (courtState.value.sport) {
                                 "calcio" -> R.drawable.ic_calcio5
                                 "basket" -> R.drawable.ic_basket
                                 "beach volley" -> R.drawable.ic_beachvolley
@@ -556,8 +560,8 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     }
 
 
-
-                    TextGrid(pickedHour, filteredHoursForToday, selectedDate.value, allSportViewModel, court?.id ?: -1)
+                    //Todo: risolvere errore di compilazione
+                    //TextGrid(pickedHour, filteredHoursForToday, selectedDate.value, allSportViewModel, court?.id ?: -1)
 
 
                     Row(

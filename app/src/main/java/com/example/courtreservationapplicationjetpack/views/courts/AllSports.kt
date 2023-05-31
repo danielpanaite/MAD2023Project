@@ -289,6 +289,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     modifier = Modifier
                                         .shadow(10.dp, RoundedCornerShape(0.dp))
                                         .fillMaxSize()
+//                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate.value}") }
                                         .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate.value}") }
                                         .height(100.dp),
                                     sport = it.sport,
