@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -101,6 +102,14 @@ fun Achievements(
         launchOnce = false
     }
     val achievementsUi by viewModel.achievements.collectAsState()
+
+    if (achievementsUi.isLoading) {
+        // Show circular progress indicator while loading
+        Box(modifier = Modifier.fillMaxSize()){
+            CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))
+        }
+        return
+    }
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true,  navigateUp = navigateToProfileDestination) },

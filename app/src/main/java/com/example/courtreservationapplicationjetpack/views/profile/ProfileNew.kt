@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -139,31 +140,39 @@ fun ProfileBody(
 
 ){
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 60.dp)
-    ) {
-        item {
-            // User's image, name, email and edit button
-            UserDetails(user = user,
-                navigateToEditProfileDestination = navigateToEditProfileDestination,
-                navController = navController
-            )
-        }
-        item{
-            OptionsItemStyle(
-                user = user,
-                navigateToSportPreferencesDestination = navigateToSportPreferencesDestination,
-                navigateToAchievementsDestination = navigateToAchievementsDestination
-            )
-        }
-        item{
-            Button(onClick = onSignOut) {
-                Text(text = "Sign out")
+    Box() {
+
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp)
+        ) {
+            item {
+                // User's image, name, email and edit button
+                UserDetails(
+                    user = user,
+                    navigateToEditProfileDestination = navigateToEditProfileDestination,
+                    navController = navController
+                )
+            }
+            item {
+                OptionsItemStyle(
+                    user = user,
+                    navigateToSportPreferencesDestination = navigateToSportPreferencesDestination,
+                    navigateToAchievementsDestination = navigateToAchievementsDestination
+                )
             }
         }
+        Button(
+            onClick = onSignOut, modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp)
+        ) {
+            Text(text = "Sign out")
+        }
     }
+
 
 }
 

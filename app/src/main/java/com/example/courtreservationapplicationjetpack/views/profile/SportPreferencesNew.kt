@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,15 +59,12 @@ import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-
 object SportPreferencesDestination : NavigationDestination {
     override val route  = "sport_preferences"
     override val titleRes = "Sport Preferences"
     override val icon = Icons.Default.Place
 
 }
-
-
 
 @ExperimentalMaterial3Api
 @Composable
@@ -79,8 +77,6 @@ fun SportPreferences(
     viewModel: UserViewModel = viewModel(),
 
     ) {
-    //val allSportsUiState by viewModelVecchio.allSportsUiState.collectAsState()
-
     val email = googleAuthUiClient.getSignedInUser()?.email
     var launchOnce by rememberSaveable { mutableStateOf(true) }
     if(launchOnce){
@@ -90,9 +86,8 @@ fun SportPreferences(
         }
         launchOnce = false
     }
-    val sportsList by remember { mutableStateOf(viewModel.sports) } //reservation to be edited
+    val sportsList by remember { mutableStateOf(viewModel.sports) }
 
-    Log.d("sportsList", "${viewModel.sports}")
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true,
@@ -100,15 +95,10 @@ fun SportPreferences(
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         SportsBody(
-            //sportsList = allSportsUiState.sportsList,
             modifier = modifier.padding(innerPadding),
             navigateToProfileDestination = navigateToProfileDestination,
             sportsList = sportsList,
             email = email
-            //sportsWithLevel = sportsWithLevel
-
-
-
         )
     }
 }
@@ -121,20 +111,29 @@ fun SportsBody(
     email: String?,
     viewModel: UserViewModel = viewModel()
 ){
-    //val selectedSportsWithLevels by viewModel.sportsWithLevels.collectAsState()
+
+
+
     val selectedSportsWithLevels by viewModel.sportsPreferencesUiState.collectAsState()
+
+    if (selectedSportsWithLevels.isLoading) {
+        // Show circular progress indicator while loading
+        Box(modifier = Modifier.fillMaxSize()){
+            CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))
+        }
+        return
+    }
+
     var selectedSports by remember { mutableStateOf(emptySet<String>()) }
     val sportsWithLevels = remember { mutableMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
-
     selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
-
     val initialLevels: Map<String, String> = selectedSportsWithLevels.sportsList.associate { sport ->
         sport.sportName to sport.masteryLevel
     }
-    Log.d("selected sports with levels", "${selectedSportsWithLevels}")
-
     val context = LocalContext.current
+
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -159,24 +158,11 @@ fun SportsBody(
                                 Sport(sportName, masteryLevel)
                             }
                             val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
-                            Log.d("unchecked Sports", "$uncheckedSports")
-                            Log.d("sports che passo al viewModel", "$sports")
                             if (email != null) {
                                 viewModel.updateSportsPreferences(email, sports, uncheckedSports)
                             }
-
-                            Toast.makeText(context, "Salvataggio completato", Toast.LENGTH_SHORT).show()
-
-                            navigateToProfileDestination()
-                            Log.d(" sports", "${sports}")
-
-
-                            //viewModel.deleteSports(email, uncheckedSports)
-
                             Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
-
                             navigateToProfileDestination()
-
                         }
                     },
                     modifier = Modifier.align(Alignment.CenterVertically)
@@ -191,17 +177,9 @@ fun SportsBody(
             onSportCheckedChange = { sport, isChecked, masteryLevel ->
                 if (isChecked) {
                     selectedSports += sport
-                    Log.d(" selectedSport +", "${selectedSports}")
-                    Log.d(" sport +", "${sport}")
-
-
                     sportsWithLevels[sport] = masteryLevel // Update mastery level for the selected sport in the map
                 } else {
                     selectedSports -= sport
-                    Log.d(" selectedSport -", "${selectedSports}")
-                    Log.d(" sport -", "${sport}")
-
-
                     sportsWithLevels.remove(sport)
                 }
             },
@@ -209,16 +187,8 @@ fun SportsBody(
             initialLevels = initialLevels
         )
         Spacer(modifier = Modifier.height(16.dp))
-
-
-
     }
-
-
 }
-
-
-
 
 @Composable
 private fun SportsList(
@@ -238,7 +208,6 @@ private fun SportsList(
             val selectedLevel = rememberSaveable {
                 mutableStateOf(initialLevels[sport] ?: "Beginner")
             }
-
             // Check if the sport exists in the user's preference
             val sportPreference = selectedSportsWithLevels.sportsList.filter { it.sportName == sport }
 
@@ -277,7 +246,6 @@ private fun SportsList(
                             // save the level for this sport
                             // update the selected level
                             selectedLevel.value = it
-
                             // pass the selected level as a plain string to the onSportCheckedChange lambda
                             onSportCheckedChange(sport, isChecked.value, selectedLevel.value)
                         },

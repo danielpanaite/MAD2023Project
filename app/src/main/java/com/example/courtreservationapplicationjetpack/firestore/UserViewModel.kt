@@ -51,6 +51,45 @@ class UserViewModel: ViewModel(){
 
     //----------------------Methods----------------------
 
+    fun getUserByEmail(email: String) {
+        // Creating a reference to document by id
+        val docRef = db.document("users/$email")
+
+        // Listen to data in real-time
+        reg3 = docRef.addSnapshotListener { snapshot, e ->
+            if (e != null)
+                Log.d(TAG, "Error getting data", e)
+            if (snapshot != null) {
+                Log.d(TAG, "getUserByEmail")
+                val res = snapshot.toObject(Users::class.java)
+                res?.id = snapshot.id // Map the document ID to the "id" property of the Reservation object
+                _user.value = res!!
+            }
+        }
+    }
+
+
+    fun updateProfile(){
+        // Creating a reference to document by id
+        val docRef = db.document("users/${user.value.email}")
+        val hash = hashMapOf<String, Any>(
+            "id" to user.value.id,
+            "name" to user.value.name.toString(),
+            "nickname" to user.value.nickname.toString(),
+            "email" to user.value.email,
+            "address" to user.value.address.toString(),
+            "age" to (user.value.age?.toInt() ?: 0),
+            "phone" to user.value.phone.toString(),
+            "imageUri" to user.value.imageUri.toString(),
+            "sportPreferences" to user.value.sportPreferences
+        )
+        docRef.update(hash).addOnSuccessListener {
+            Log.d(TAG, "Document ${user.value.id} updated successfully")
+        }.addOnFailureListener {
+            Log.d(TAG, "Failed to update document ${user.value.id}")
+        }
+    }
+
     fun getSportsWithLevels(email: String) {
         val docRef = db.collection("users").document(email)
         docRef.get().addOnSuccessListener { documentSnapshot ->
@@ -219,44 +258,7 @@ class UserViewModel: ViewModel(){
         }
     }
 
-    fun getUserByEmail(email: String) {
-        // Creating a reference to document by id
-        val docRef = db.document("users/$email")
 
-        // Listen to data in real-time
-        reg3 = docRef.addSnapshotListener { snapshot, e ->
-            if (e != null)
-                Log.d(TAG, "Error getting data", e)
-            if (snapshot != null) {
-                Log.d(TAG, "getUserByEmail")
-                val res = snapshot.toObject(Users::class.java)
-                res?.id = snapshot.id // Map the document ID to the "id" property of the Reservation object
-                _user.value = res!!
-            }
-        }
-    }
-
-
-    fun updateProfile(){
-        // Creating a reference to document by id
-        val docRef = db.document("users/${user.value.email}")
-        val hash = hashMapOf<String, Any>(
-            "id" to user.value.id,
-            "name" to user.value.name.toString(),
-            "nickname" to user.value.nickname.toString(),
-            "email" to user.value.email,
-            "address" to user.value.address.toString(),
-            "age" to (user.value.age?.toInt() ?: 0),
-            "phone" to user.value.phone.toString(),
-            "imageUri" to user.value.imageUri.toString(),
-            "sportPreferences" to user.value.sportPreferences
-            )
-        docRef.update(hash).addOnSuccessListener {
-            Log.d(TAG, "Document ${user.value.id} updated successfully")
-        }.addOnFailureListener {
-            Log.d(TAG, "Failed to update document ${user.value.id}")
-        }
-    }
     //-----------------------------------------------------
     //allows the listener to be removed when the viewModel is destroyed
     override fun onCleared() {
