@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,12 +58,14 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 /*
+
 object SportPreferencesDestination : NavigationDestination {
     override val route  = "sport_preferences"
     override val titleRes = "Sport Preferences"
     override val icon = Icons.Default.Place
 
 }
+
 
 
 
@@ -102,6 +105,9 @@ fun SportsBody(
     ){
     val selectedSportsWithLevels by viewModel.sportPreferencesUiState.collectAsState()
 
+    Log.d("sportPreferencesUiState", "${viewModel.sportPreferencesUiState}")
+    Log.d("sportsList", "${sportsList}")
+    Log.d("selectedSportsWithLevels", "${selectedSportsWithLevels}")
     if (selectedSportsWithLevels.isLoading) {
         // Show circular progress indicator while loading
         Box(modifier = Modifier.fillMaxSize()){
@@ -114,6 +120,12 @@ fun SportsBody(
     val coroutineScope = rememberCoroutineScope()
     // Initialize selectedSports with the names of the sports that are already selected
     selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
+
+    Log.d("selectedSportsWithLevels.sportList", "${selectedSportsWithLevels.sportsList}")
+
+    Log.d("selectedSports", "${selectedSports}")
+
+    Log.d("sportsWithLevels", "${sportsWithLevels}")
 
 
     val context = LocalContext.current
@@ -140,6 +152,8 @@ fun SportsBody(
                                 viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
                             }
                             val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
+                            Log.d("uncheckedSports", "${uncheckedSports}")
+
                             viewModel.deleteSports(1, uncheckedSports)
 
                             Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
@@ -290,4 +304,4 @@ private fun SportLevelInput(
     }
 }
 
- */
+*/

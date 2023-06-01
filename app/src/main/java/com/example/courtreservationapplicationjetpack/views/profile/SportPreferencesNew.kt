@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,13 +50,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.SportsPreferencesUiState
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
-import com.example.courtreservationapplicationjetpack.models.sport.Sport
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
 import java.util.Locale
+
 
 object SportPreferencesDestination : NavigationDestination {
     override val route  = "sport_preferences"
@@ -77,7 +76,6 @@ fun SportPreferences(
     navigateToProfileDestination: () ->Unit,
     googleAuthUiClient: GoogleAuthUiClient,
     viewModel: UserViewModel = viewModel(),
-    viewModelVecchio: SportPreferencesViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
     //val allSportsUiState by viewModelVecchio.allSportsUiState.collectAsState()
@@ -87,11 +85,11 @@ fun SportPreferences(
     if(launchOnce){
         viewModel.getSportsList()
         if (email != null) {
-            viewModel.getSportWithLevels(email)
+            viewModel.getSportsWithLevels(email)
         }
         launchOnce = false
     }
-    val sports by remember { mutableStateOf(viewModel.sports) } //reservation to be edited
+    val sportsList by remember { mutableStateOf(viewModel.sports) } //reservation to be edited
 
     Log.d("sportsList", "${viewModel.sports}")
 
@@ -103,9 +101,9 @@ fun SportPreferences(
         SportsBody(
             //sportsList = allSportsUiState.sportsList,
             modifier = modifier.padding(innerPadding),
-            viewModelVecchio = viewModelVecchio,
             navigateToProfileDestination = navigateToProfileDestination,
-            sports = sports,
+            sportsList = sportsList,
+            email = email
             //sportsWithLevel = sportsWithLevel
 
 
@@ -116,38 +114,24 @@ fun SportPreferences(
 
 @Composable
 fun SportsBody(
-    sports: State<List<String>>,
-    //sportsList: List<String>,
+    sportsList: State<List<String>>,
     modifier: Modifier = Modifier,
     navigateToProfileDestination: () ->Unit,
-    //sportsWithLevel:  State<Map<String, String>>,
-    viewModelVecchio: SportPreferencesViewModel,
+    email: String?,
     viewModel: UserViewModel = viewModel()
-
-
 ){
-    //val selectedSportsWithLevels by viewModelVecchio.sportPreferencesUiState.collectAsState()
-    val sportsWithLevel by remember { mutableStateOf(viewModel.sportsWithLevel) } //reservation to be edited
-
-    Log.d("selected sports with levels", "${sportsWithLevel.value}")
-
-    /*
-    if (selectedSportsWithLevels.isLoading) {
-        // Show circular progress indicator while loading
-        Box(modifier = Modifier.fillMaxSize()){
-            CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))
-        }
-        return
-    }
-    */
-
+    //val selectedSportsWithLevels by viewModel.sportsWithLevels.collectAsState()
+    val selectedSportsWithLevels by viewModel.sportsPreferencesUiState.collectAsState()
     var selectedSports by remember { mutableStateOf(emptySet<String>()) }
     val sportsWithLevels = remember { mutableMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
-    // Initialize selectedSports with the names of the sports that are already selected
-    /*
-    selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
 
+    //selectedSports = selectedSportsWithLevels.map { it.sportName }.toMutableSet()
+
+    val initialLevels: Map<String, String> = selectedSportsWithLevels.sportsList.associate { sport ->
+        sport.sportName to sport.masteryLevel
+    }
+    Log.d("selected sports with levels", "${selectedSportsWithLevels}")
 
     val context = LocalContext.current
     Column(
@@ -162,18 +146,26 @@ fun SportsBody(
                     text = "Select your preferred sports",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(3f).align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .weight(3f)
+                        .align(Alignment.CenterVertically)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = {
                         coroutineScope.launch {
                             val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
-                                Sport(1, sportName, masteryLevel, null)
-                                viewModel.updateSportMastery(sportName, masteryLevel) // use masteryLevel from map
+                                viewModel.updateSportMastery(sportName, masteryLevel, email) // use masteryLevel from map
+                                Log.d(" Sports", "${sportName}")
+                                Log.d(" masteryLevel", "${masteryLevel}")
+
+
                             }
-                            val uncheckedSports = sportsList.filter { !selectedSports.contains(it) }
-                            viewModel.deleteSports(1, uncheckedSports)
+                            Log.d(" sports", "${sports}")
+
+                            val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
+                            Log.d("unchecked Sports", "$uncheckedSports")
+                            //viewModel.deleteSports(uncheckedSports)
 
                             Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
 
@@ -187,9 +179,9 @@ fun SportsBody(
                 }
             }
         }
+
         SportsList(
-            viewModel = viewModel,
-            sportsList = sportsList,
+            sportsList = sportsList.value,
             onSportCheckedChange = { sport, isChecked, masteryLevel ->
                 if (isChecked) {
                     selectedSports += sport
@@ -200,21 +192,24 @@ fun SportsBody(
                 }
             },
             selectedSportsWithLevels = selectedSportsWithLevels,
-            initialLevels = selectedSportsWithLevels.sportsList.associateBy({it.sportName}, {it.masteryLevel ?: ""})
+            initialLevels = initialLevels
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+
+
     }
 
-     */
+
 }
+
+
 
 
 @Composable
 private fun SportsList(
     sportsList: List<String>,
     onSportCheckedChange: (String, Boolean, String) -> Unit,
-    viewModel: SportPreferencesViewModel,
     selectedSportsWithLevels: SportsPreferencesUiState,
     initialLevels: Map<String, String>
 ) {
@@ -231,12 +226,11 @@ private fun SportsList(
             }
 
             // Check if the sport exists in the user's preference
-            val sportPreference =
-                selectedSportsWithLevels.sportsList.find { it.sportName == sport }
-            if (sportPreference != null && !initialLevels.containsKey(sport)) {
-                // If the sport exists and wasn't pre-selected, set isChecked to true and pre-populate the selectedLevel state
+            val sportPreference = selectedSportsWithLevels.sportsList.filter { it.sportName == sport }
+
+            if (sportPreference.isNotEmpty() && !initialLevels.containsKey(sport)) {
                 isChecked.value = true
-                selectedLevel.value = sportPreference.masteryLevel ?: ""
+                selectedLevel.value = sportPreference[0].masteryLevel ?: ""
             }
 
             Row(
@@ -273,13 +267,14 @@ private fun SportsList(
                             // pass the selected level as a plain string to the onSportCheckedChange lambda
                             onSportCheckedChange(sport, isChecked.value, selectedLevel.value)
                         },
-                        currentLevel = sportPreference?.masteryLevel ?: ""
+                        currentLevel = sportPreference.firstOrNull()?.masteryLevel ?: ""
                     )
                 }
             }
 
             Divider()
         }
+
     }
 }
 
@@ -324,3 +319,4 @@ private fun SportLevelInput(
         }
     }
 }
+

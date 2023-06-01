@@ -31,6 +31,7 @@ import com.example.courtreservationapplicationjetpack.views.profile.NewAchieveme
 import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
+//import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
@@ -213,6 +214,7 @@ fun NavigationGraph(
                 navigateToCourtReservation = { navController.navigate("${route}/${it}") }
             )
         }
+        
 
         composable(
             route = SportPreferencesDestination.route
@@ -226,6 +228,8 @@ fun NavigationGraph(
 
             )
         }
+
+
 
         composable(
             route = AchievementsDestination.route

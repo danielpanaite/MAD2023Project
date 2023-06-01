@@ -11,6 +11,13 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import java.util.Objects
 
 class UserViewModel: ViewModel(){
@@ -33,29 +40,97 @@ class UserViewModel: ViewModel(){
     private var _sports = mutableStateOf<List<String>>(emptyList())
     val sports: State<List<String>> = _sports
 
-    private var _sportsWithLevels = mutableStateOf<Map<String, String>>(emptyMap())
-    val sportsWithLevel: State<Map<String, String>> = _sportsWithLevels
-
-
-
     //----------------------Methods----------------------
 
-    @SuppressLint("SuspiciousIndentation")
-    fun getSportWithLevels(email: String) {
-        // Creating a reference to collection
-        Log.d("user email", "${user.value.email}")
-        Log.d("user email", "${email}")
 
+
+    private val _sportsWithLevels = MutableStateFlow<Map<String, String>>(emptyMap())
+    val sportsWithLevels: StateFlow<Map<String, String>> = _sportsWithLevels
+
+    private val _sportsPreferencesUiState = MutableStateFlow<SportsPreferencesUiState>(SportsPreferencesUiState(isLoading = true))
+    val sportsPreferencesUiState: StateFlow<SportsPreferencesUiState> = _sportsPreferencesUiState
+
+
+    fun getSportsWithLevels(email: String) {
         val docRef = db.collection("users").document(email)
-        docRef.get().addOnSuccessListener {documentSnapshot->
-            val list = mutableListOf<Sport>()
-            Log.d("docuemnt snapshot .to obejct user", "${documentSnapshot.toObject(Users::class.java)}")
-
+        docRef.get().addOnSuccessListener { documentSnapshot ->
             val sportPreferences = documentSnapshot.toObject(Users::class.java)?.sportPreferences
-                if (sportPreferences != null) {
-                    _sportsWithLevels.value = sportPreferences.associateBy { it.sportName }
-                        .mapValues { it.value.masteryLevel }
+
+            if (sportPreferences != null) {
+                for (sport in sportPreferences) {
+                    val sportName = sport.sportName
+                    val masteryLevel = sport.masteryLevel
+                    // Esegui altre azioni necessarie con i dati dello sport
+                    val sportObject = Sport(email, sportName, masteryLevel)
+                    val sportsList : MutableList<Sport> = mutableListOf()
+                    sportsList.add(sportObject)
+
+                    _sportsPreferencesUiState.value = SportsPreferencesUiState(sportsList, isLoading = false)
                 }
+                //val sportsList = sportPreferences.map { it.toSport() }
+                //_sportsPreferencesUiState.value = SportsPreferencesUiState(sportsList, isLoading = false)
+            }
+        }
+    }
+
+    fun updateSportMastery(sportName: String, masteryLevel: String?, email: String?) {
+        val docRef = email?.let { db.collection("users").document(it) }
+        if (docRef != null) {
+            docRef.get().addOnSuccessListener { documentSnapshot ->
+                val user = documentSnapshot.toObject(Users::class.java)
+                val sportPreferences = user?.sportPreferences?.toMutableList() ?: mutableListOf()
+
+                if (masteryLevel == null) {
+                    // Remove the sport from the sportPreferences list
+                    sportPreferences.removeAll { it.sportName == sportName }
+                } else {
+                    val existingSportIndex = sportPreferences.indexOfFirst { it.sportName == sportName }
+                    if (existingSportIndex != -1) {
+                        // If the sport exists, update its mastery level
+                        val existingSport = sportPreferences[existingSportIndex]
+                        val updatedSport = existingSport.copy(masteryLevel = masteryLevel)
+                        sportPreferences[existingSportIndex] = updatedSport
+                    } else {
+                        // If the sport doesn't exist, add it to the sportPreferences list
+                        val newSport =
+                            Sport(idUser = email, sportName = sportName, masteryLevel = masteryLevel)
+                        sportPreferences.add(newSport)
+                    }
+                }
+
+                val updatedUser = user?.copy(sportPreferences = sportPreferences)
+
+                // Update the user document with the updated sportPreferences
+                updatedUser?.let {
+                    docRef.set(it).addOnSuccessListener {
+                        // Sport mastery level updated successfully
+                    }.addOnFailureListener {
+                        // Failed to update sport mastery level
+                    }
+                }
+            }
+        }
+    }
+
+    fun deleteSports(email: String, uncheckedSports: List<String>) {
+        val docRef = db.collection("users").document(email)
+        docRef.get().addOnSuccessListener { documentSnapshot ->
+            val user = documentSnapshot.toObject(Users::class.java)
+            val sportPreferences = user?.sportPreferences?.toMutableList() ?: mutableListOf()
+
+            // Remove the unchecked sports from the sportPreferences list
+            sportPreferences.removeAll { uncheckedSports.contains(it.sportName) }
+
+            val updatedUser = user?.copy(sportPreferences = sportPreferences)
+
+            // Update the user document with the updated sportPreferences
+            updatedUser?.let {
+                docRef.set(it).addOnSuccessListener {
+                    // Sports deleted successfully
+                }.addOnFailureListener {
+                    // Failed to delete sports
+                }
+            }
 
         }
     }
@@ -77,6 +152,7 @@ class UserViewModel: ViewModel(){
             Log.d(CourtViewModel.TAG, "Error getting data", it)
         }
     }
+
     fun getUserByEmail(email: String) {
         // Creating a reference to document by id
         val docRef = db.document("users/$email")
@@ -95,6 +171,8 @@ class UserViewModel: ViewModel(){
             }
         }
     }
+
+
 
 
     fun updateProfile(){
@@ -152,3 +230,38 @@ class UserViewModel: ViewModel(){
     }
 
 }
+
+
+
+data class SportsPreferencesUiState(
+    val sportsList: List<Sport> = listOf(),
+    val isLoading: Boolean = false // Add the isLoading property
+)
+
+
+
+data class SportPreferencesDetails(
+    val idUser: String = "",
+    val sportName: String ="",
+    val masteryLevel :String = "",
+)
+
+fun SportPreferencesDetails.toSport(): Sport = Sport(
+
+        idUser = idUser,
+        sportName = sportName,
+        masteryLevel = masteryLevel,
+    )
+
+fun Sport.toSportPreferencesUiState(): SportsPreferencesUiState = SportsPreferencesUiState(
+    //sportPreferencesDetails = this.toSportPreferencesDetails(),
+)
+
+/**
+ * Extension function to convert [Item] to [ItemDetails]
+ */
+fun Sport.toSportPreferencesDetails(): SportPreferencesDetails = SportPreferencesDetails(
+    idUser = idUser,
+    sportName = sportName,
+    masteryLevel = masteryLevel,
+)
