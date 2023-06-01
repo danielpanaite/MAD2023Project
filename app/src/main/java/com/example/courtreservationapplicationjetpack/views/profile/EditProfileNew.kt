@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -102,22 +103,34 @@ fun EditProfile(
     navController: NavController,
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
-    navigateToProfileDestination: () ->Unit,
+    navigateToProfileDestination: () -> Unit,
     context: Context,
-    googleAuthUiClient : GoogleAuthUiClient,
+    googleAuthUiClient: GoogleAuthUiClient,
     profileArg: String?,
 
     viewModel: UserViewModel = viewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
     var launchOnce by rememberSaveable { mutableStateOf(true) }
-    if(launchOnce){
+    if (launchOnce) {
         viewModel.getUserByEmail(profileArg!!)
         Log.d("profileArg", "$profileArg")
         launchOnce = false
     }
     val userDetails by remember { mutableStateOf(viewModel.user) } //reservation to be edited
     Log.d("profile ui state", "${viewModel.user}")
+
+    val chosenPhotoUri = remember { mutableStateOf<Uri?>(null) }
+
+    val profileImageUrl = remember { mutableStateOf("") }
+
+    // Recupera l'URL dell'immagine del profilo dall'oggetto UserDetails
+    LaunchedEffect(userDetails) {
+        userDetails.value.imageUri?.let { imageUri ->
+            profileImageUrl.value = imageUri
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -127,19 +140,20 @@ fun EditProfile(
             )
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
-
-    ) {
-            innerPadding ->
+    ) { innerPadding ->
         ProfileEntryBody(
             user = userDetails,
             navigateToProfileDestination = navigateToProfileDestination,
             onSaveClick = {
-                Log.d("inside onSaveClick prima di update profile", "$userDetails")
-                coroutineScope.launch {
-                    viewModel.updateProfile()
-                }
+                viewModel.updateProfile(chosenPhotoUri.value)
+                //saveImageToStorage(context, userDetails.value.imageUri)
+                viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
+
+                navigateToProfileDestination()
             },
+            chosenPhotoUri = chosenPhotoUri,
             modifier = modifier.padding(innerPadding),
+            profileImageUrl = profileImageUrl
         )
     }
 }
@@ -147,37 +161,53 @@ fun EditProfile(
 @Composable
 fun ProfileEntryBody(
     user: MutableState<Users>,
-    //onProfileValueChange: (MutableState<Users>) -> Unit,
+    chosenPhotoUri: MutableState<Uri?>,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
-    navigateToProfileDestination: () ->Unit,
-){
+    navigateToProfileDestination: () -> Unit,
+    profileImageUrl: MutableState<String>,
+
+    viewModel: UserViewModel = viewModel()
+
+) {
+
+    val context = LocalContext.current
+    val chosenPhotoUriState = rememberUpdatedState(chosenPhotoUri.value)
 
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    LazyColumn (
+    LaunchedEffect(chosenPhotoUri.value) {
+        user.value = user.value.copy(imageUri = chosenPhotoUri.value?.toString())
+    }
+
+    LazyColumn(
         modifier = modifier
             .fillMaxWidth()
             .padding(1.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
-    ){
+    ) {
         item {
-            ProfileInputForm(user = user)
+            ProfileInputForm(user = user, chosenPhotoUri=chosenPhotoUri, onSaveClick = onSaveClick, profileImageUrl = profileImageUrl)
         }
         item {
-            Button(onClick = {
+            Button(
+                onClick = {
+                    if (user.value.name != "" && user.value.email != "") {
+                        onSaveClick()
 
-               if(user.value.name!=="" && user.value.email!==""){
-                   onSaveClick();
-                   navigateToProfileDestination()
-                }else{
-                    showErrorDialog = true
-               }
-            },
-                modifier = Modifier.fillMaxWidth())
-            {
+                        // Carica l'immagine nello storage di Firebase
+                        viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
+
+                        navigateToProfileDestination()
+                    } else {
+                        showErrorDialog = true
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(text = "EDIT PROFILE")
             }
+
         }
     }
 
@@ -186,13 +216,12 @@ fun ProfileEntryBody(
             onDismissRequest = { showErrorDialog = false },
 
             title = { Text(text = "Error") },
-            text = if(user.value.name === ""
-            ){
+            text = if (user.value.name == "") {
                 { Text(text = "Please insert at least a name and an email") }
-            }else if(!user.value.email.matches( Regex("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b")) ){
+            } else if (!user.value.email.matches(Regex("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"))) {
                 { Text(text = "Insert a valid email") }
 
-            }else{
+            } else {
                 { Text(text = "I valori inseriti non sono validi.") }
 
             },
@@ -210,8 +239,10 @@ fun ProfileEntryBody(
 @Composable
 fun ProfileInputForm(
     user: MutableState<Users>,
+    onSaveClick: () -> Unit,
+    chosenPhotoUri: MutableState<Uri?>,
     modifier: Modifier = Modifier,
-    //onValueChange: (MutableState<Users>) -> Unit ={},
+    profileImageUrl: MutableState<String>,
     enabled: Boolean = true
 ) {
 
@@ -225,14 +256,15 @@ fun ProfileInputForm(
     var photoUri by rememberSaveable { mutableStateOf<Uri?>(Uri.parse(user.value.imageUri)) }
     var chosenPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri->
-        chosenPhoto = uri
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        chosenPhotoUri.value = uri
+        user.value = user.value.copy(imageUri = uri.toString())
     }
-    var cameraLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
-            chosenPhoto = uri
 
-        }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
+        chosenPhotoUri.value = uri
+        user.value = user.value.copy(imageUri = uri.toString())
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -249,27 +281,25 @@ fun ProfileInputForm(
 
     val showMenu = remember { mutableStateOf(false) }
 
-
-    LaunchedEffect(chosenPhoto){
-        //onValueChange(profileUiState.userDetails.copy(imageUri = chosenPhoto.toString()))
-        user.value = user.value.copy(imageUri =  chosenPhoto.toString())
+    LaunchedEffect(chosenPhoto) {
+        user.value = user.value.copy(imageUri = chosenPhoto.toString())
     }
 
     Box(
         modifier = Modifier.fillMaxSize(),
-    ){
+    ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp),
             color = Color.White,
-            ) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
                 contentAlignment = Alignment.Center
-            )
-            {
+            ) {
                 Image(
                     painter = if (chosenPhoto != null) {
                         rememberAsyncImagePainter(
@@ -282,10 +312,10 @@ fun ProfileInputForm(
                                 }).build()
                         )
                     } else {
-                        if (user.value.imageUri != null) {
+                        if (profileImageUrl!==null) {
                             rememberAsyncImagePainter(
                                 ImageRequest.Builder(LocalContext.current)
-                                    .data(data = user.value.imageUri)
+                                    .data(data = profileImageUrl)
                                     .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
                                         crossfade(true)
                                         placeholder(R.drawable.baseline_person_24)
@@ -301,7 +331,7 @@ fun ProfileInputForm(
                                         placeholder(R.drawable.baseline_person_24)
                                         transformations(CircleCropTransformation())
                                     }).build(),
-                                )
+                            )
                         }
 
                     },
@@ -309,7 +339,7 @@ fun ProfileInputForm(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape),
-                    colorFilter = if (chosenPhoto == null && user.value.imageUri == null) {
+                    colorFilter = if (chosenPhoto == null && profileImageUrl===null) {
                         ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
                     } else {
                         null
@@ -319,185 +349,106 @@ fun ProfileInputForm(
                     onClick = { showMenu.value = true },
                     modifier = Modifier
                 ) {
-                    Icon (
+                    Icon(
                         painter = painterResource(id = R.drawable.ic_camera),
                         contentDescription = "camera icon",
-                        tint = Color.Black.copy(alpha = 0.70f)
+                        tint = Color.Black
                     )
                 }
             }
         }
 
-
-
-
-
-
-        if(showMenu.value){
-            DropdownMenu(
-                expanded = showMenu.value,
-                onDismissRequest = { showMenu.value = false },
-                modifier = Modifier.wrapContentSize()
-            ) {
-                DropdownMenuItem(
-                    onClick = {
-                        launcher.launch("image/*")
-                        showMenu.value = false
-                    },
-                    text = { Text("Select Image from gallery", color = Color.Black) },
-                )
-                DropdownMenuItem(
-                    onClick = {
-                        val permissionCheckResult =
-                            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                            cameraLauncher.launch(uri)
-                        } else {
-                            // Request a permission
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                        showMenu.value = false
-                    },
-                    text = { Text("Capture Image From Camera", color = Color.Black) },
-                )
-            }
-        }
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color.White)
-            .border(
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = Color.LightGray
-                ),
-                shape = RoundedCornerShape(8.dp)
-            )
-    ) {
-        Column(
+        DropdownMenu(
+            expanded = showMenu.value,
+            onDismissRequest = { showMenu.value = false },
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
+                .padding(16.dp)
+                .wrapContentSize()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                user.value.name?.let {
-                    OutlinedTextField(
-                        value = it,
-                        onValueChange = {
-                            user.value = user.value.copy(name = it)
-                        },
-                        label = { Text(text = "NAME") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = enabled,
-                        singleLine = true
-                    )
-                }
-            }
+            DropdownMenuItem(
+                onClick = {
+                    showMenu.value = false
+                    //chosenPhotoUri.value = null
+                    launcher.launch("image/*")
+                },
+                text = { Text("Select Image from gallery", color = Color.Black) },
+            )
+            DropdownMenuItem(
+                onClick = {
+                    showMenu.value = false
+                    //chosenPhotoUri.value = null
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                },
+                text = { Text("take a photo from camera", color = Color.Black) },
+            )
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                user.value.nickname?.let {
-                    OutlinedTextField(
-                        value = it,
-                        onValueChange = { user.value = user.value.copy(nickname = it) },
-                        label = { Text(text = "NICKNAME") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = enabled,
-                        singleLine = true
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                OutlinedTextField(
-                    value = user.value.email,
-                    onValueChange = {user.value = user.value},
-                    label = { Text(text = "EMAIL") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = enabled,
-                    singleLine = true
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(top = 100.dp)
+        ) {
+            user.value.name?.let {
+                TextField(
+                    value = it,
+                    onValueChange = { user.value = user.value.copy(name = it) },
+                    label = { Text(text = "Name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    enabled = enabled
                 )
             }
-
-            Row(
+            user.value.nickname?.let {
+                TextField(
+                    value = it,
+                    onValueChange = { user.value = user.value.copy(nickname = it) },
+                    label = { Text(text = "Nickname") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    enabled = enabled
+                )
+            }
+            TextField(
+                value = user.value.email,
+                onValueChange = { user.value = user.value.copy(email = it) },
+                label = { Text(text = "Email") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-
-                user.value.address?.let {
-                    OutlinedTextField(
-                        value = it,
-                        onValueChange = {
-                            user.value = user.value.copy(address = it)
-                        },
-
-                        label = { Text(text = "ADDRESS") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = enabled,
-                        singleLine = true
-                    )
-                }
+                    .padding(bottom = 8.dp),
+                enabled = enabled
+            )
+            user.value.address?.let {
+                TextField(
+                    value = it,
+                    onValueChange = { user.value = user.value.copy(address = it) },
+                    label = { Text(text = "Address") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    enabled = enabled
+                )
             }
-
-            Row(
+            TextField(
+                value = user.value.age.toString(),
+                onValueChange = { user.value = user.value.copy(age = it.toIntOrNull()) },
+                label = { Text(text = "Age") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
+                    .padding(bottom = 8.dp),
+                enabled = enabled
+            )
 
-                user.value.phone?.let {
-                    OutlinedTextField(
-                        value = it,
-                        onValueChange = {user.value = user.value.copy(phone = it)},
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(text = "PHONE NUMBER") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = enabled,
-                        singleLine = true
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                user.value.age.toString()?.let {
-                    OutlinedTextField(
-                        value = it,
-                        onValueChange = { user.value = user.value.copy(age = it.toIntOrNull()) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(text = "AGE") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = enabled,
-                        singleLine = true
-                    )
-                }
-            }
         }
     }
-
 }
-
 
 fun Context.createImageFile(): File {
     // Create an image file name
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-    val imageFileName = "JPEG_" + timeStamp + "_"
+    val imageFileName = "JPEG-$timeStamp.jpg"
     val image = File.createTempFile(
         imageFileName, /* prefix */
         ".jpg", /* suffix */
@@ -505,3 +456,18 @@ fun Context.createImageFile(): File {
     )
     return image
 }
+
+/*
+fun saveImageToStorage(context: Context, uri: Uri?) {
+    if (uri != null) {
+        val sourceFile = File(uri.path!!)
+        if (sourceFile.exists()) {
+            val destinationFile = File(context.filesDir, "profile_image.jpg")
+            sourceFile.copyTo(destinationFile, overwrite = true)
+        } else {
+            // Il file di origine non esiste
+            Log.e("saveImageToStorage", "Source file doesn't exist: $uri")
+        }
+    }
+}
+*/

@@ -1,5 +1,7 @@
 package com.example.courtreservationapplicationjetpack.firestore
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -14,6 +16,9 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -68,28 +73,62 @@ class UserViewModel: ViewModel(){
         }
     }
 
+    fun uploadImageToStorage(context: Context, imageUri: Uri?) {
+        val storage = FirebaseStorage.getInstance()
+        val storageRef: StorageReference = storage.reference
 
-    fun updateProfile(){
-        // Creating a reference to document by id
-        val docRef = db.document("users/${user.value.email}")
-        val hash = hashMapOf<String, Any>(
-            "id" to user.value.id,
-            "name" to user.value.name.toString(),
-            "nickname" to user.value.nickname.toString(),
-            "email" to user.value.email,
-            "address" to user.value.address.toString(),
-            "age" to (user.value.age?.toInt() ?: 0),
-            "phone" to user.value.phone.toString(),
-            "imageUri" to user.value.imageUri.toString(),
-            "sportPreferences" to user.value.sportPreferences
-        )
-        docRef.update(hash).addOnSuccessListener {
-            Log.d(TAG, "Document ${user.value.id} updated successfully")
-        }.addOnFailureListener {
-            Log.d(TAG, "Failed to update document ${user.value.id}")
+        imageUri?.let {
+            val imageFileName = "profile_image_${user.value.email}.jpg"
+            val imageRef = storageRef.child("profile-images").child(imageFileName)
+
+            val uploadTask = imageRef.putFile(imageUri)
+
+            uploadTask.continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let {
+                        throw it
+                    }
+                }
+                imageRef.downloadUrl
+            }.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val downloadUri = task.result
+                    // Esegui le azioni desiderate con l'URL di download dell'immagine
+                    // Ad esempio, aggiorna l'URL dell'immagine nel database Firebase
+                    updateImageUrlInFirebaseDatabase(downloadUri.toString())
+                } else {
+                    // Gestisci l'errore durante il caricamento dell'immagine
+                    Log.d(TAG, "Failed to upload image: $imageRef")
+                }
+            }
         }
     }
 
+
+
+    fun updateImageUrlInFirebaseDatabase(imageUrl: String) {
+        val docRef = db.collection("users").document(user.value.email)
+        docRef.update("imageUri", imageUrl)
+            .addOnSuccessListener {
+                Log.d(TAG, "Image URL updated successfully")
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to update image URL")
+            }
+    }
+
+
+    fun updateProfile(imageUri: Uri?) {
+        val updatedUser = user.value.copy(imageUri = imageUri?.toString())
+        val docRef = db.document("users/${user.value.email}")
+        docRef.set(updatedUser)
+            .addOnSuccessListener {
+                Log.d(TAG, "Document ${user.value.id} updated successfully")
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to update document ${user.value.id}")
+            }
+    }
     fun getSportsWithLevels(email: String) {
         val docRef = db.collection("users").document(email)
         docRef.get().addOnSuccessListener { documentSnapshot ->
