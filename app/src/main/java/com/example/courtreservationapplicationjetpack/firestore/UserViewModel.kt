@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -44,6 +45,9 @@ class UserViewModel: ViewModel(){
 
     private val _achievements = MutableStateFlow<AchievementsUi>(AchievementsUi(isLoading = true))
     val achievements: StateFlow<AchievementsUi> = _achievements
+
+
+
 
     //----------------------Methods----------------------
 
@@ -122,14 +126,33 @@ class UserViewModel: ViewModel(){
             .addOnSuccessListener {
                 // Achievement deleted successfully
                 Log.d(TAG, "Achievement deleted successfully")
-
+                updateAchievements(email) // Update the list after deletion
             }
             .addOnFailureListener { e ->
                 // Handle failure to delete achievement
                 Log.d(TAG, "Error deleting achievement")
-
-
             }
+    }
+
+    private fun updateAchievements(email: String) {
+        val docRef = db.collection("users").document(email)
+        docRef.get().addOnSuccessListener { documentSnapshot ->
+            val achievements = documentSnapshot.toObject(Users::class.java)?.achievements
+            val achievementsList: MutableList<Achievements> = mutableListOf()
+
+            if (achievements != null) {
+                for (achievement in achievements) {
+                    val title = achievement.title
+                    val sportName = achievement.sportName
+                    val date = achievement.date
+                    val description = achievement.description
+
+                    val achievementObject = Achievements(title, sportName, date, description)
+                    achievementsList.add(achievementObject)
+                }
+                _achievements.value = AchievementsUi(achievementsList, isLoading = false)
+            }
+        }
     }
 
     fun updateSportsPreferences(email: String, sports: List<Sport>, uncheckedSports: List<String>) {
