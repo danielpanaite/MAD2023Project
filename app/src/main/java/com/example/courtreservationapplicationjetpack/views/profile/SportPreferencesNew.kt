@@ -158,9 +158,11 @@ fun SportsBody(
                             val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
                                 Sport(sportName, masteryLevel)
                             }
+                            val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
+                            Log.d("unchecked Sports", "$uncheckedSports")
                             Log.d("sports che passo al viewModel", "$sports")
                             if (email != null) {
-                                viewModel.updateSportsPreferences(email, sports)
+                                viewModel.updateSportsPreferences(email, sports, uncheckedSports)
                             }
 
                             Toast.makeText(context, "Salvataggio completato", Toast.LENGTH_SHORT).show()
@@ -168,8 +170,7 @@ fun SportsBody(
                             navigateToProfileDestination()
                             Log.d(" sports", "${sports}")
 
-                            val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
-                            Log.d("unchecked Sports", "$uncheckedSports")
+
                             //viewModel.deleteSports(email, uncheckedSports)
 
                             Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()

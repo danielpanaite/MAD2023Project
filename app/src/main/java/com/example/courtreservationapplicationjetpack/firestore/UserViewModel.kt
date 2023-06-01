@@ -66,7 +66,7 @@ class UserViewModel: ViewModel(){
     }
 
 
-    fun updateSportsPreferences(email: String, sports: List<Sport>) {
+    fun updateSportsPreferences(email: String, sports: List<Sport>, uncheckedSports: List<String>) {
         val userRef = db.collection("users").document(email)
         viewModelScope.launch {
             try {
@@ -98,6 +98,8 @@ class UserViewModel: ViewModel(){
                         }
                     }
                     Log.d("updated sports che inserisce in userRef", "$updatedSports")
+
+                    updatedSports.removeIf { sport -> uncheckedSports.contains(sport.sportName) }
 
                     userRef.update("sportPreferences", updatedSports).await()
                 } else {
