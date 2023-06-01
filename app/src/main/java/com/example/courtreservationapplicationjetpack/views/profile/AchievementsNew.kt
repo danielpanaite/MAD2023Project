@@ -1,7 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
-
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -29,10 +27,10 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,13 +58,17 @@ import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.models.achievements.Achievements
+import com.example.courtreservationapplicationjetpack.firestore.Achievements
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
+import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
-import com.example.courtreservationapplicationjetpack.views.courts.CoilImage
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.Locale
 
-/*
 object AchievementsDestination : NavigationDestination {
     override val route  = "achievements"
     override val titleRes = "Achievements"
@@ -79,10 +82,24 @@ fun Achievements(
     modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
     navigateToProfileDestination: () -> Unit,
+    googleAuthUiClient: GoogleAuthUiClient,
+
 
     navigateToNewAchievementsDestination: () -> Unit,
-    viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: UserViewModel = viewModel(),
+
+    //viewModelVecchio: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    //val achievementsUi by viewModelVecchio.achievements.collectAsState()
+
+    val email = googleAuthUiClient.getSignedInUser()?.email
+    var launchOnce by rememberSaveable { mutableStateOf(true) }
+    if(launchOnce){
+        if (email != null) {
+            viewModel.getAchievements(email)
+        }
+        launchOnce = false
+    }
     val achievementsUi by viewModel.achievements.collectAsState()
 
     Scaffold(
@@ -96,6 +113,7 @@ fun Achievements(
             AchievementsBody(
                 achievementList = achievementsUi.achievementsList,
                 viewModel = viewModel,
+                email = email,
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 5.dp)
@@ -124,7 +142,8 @@ fun Achievements(
 fun AchievementsBody(
     achievementList: List<Achievements>?,
     modifier: Modifier = Modifier,
-    viewModel: AchievementsViewModel
+    email: String?,
+    viewModel: UserViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -141,7 +160,7 @@ fun AchievementsBody(
                 Text(
                     text = "You don't have any achievements saved, click on the add button to insert a new one",
 
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
 
@@ -161,7 +180,12 @@ fun AchievementsBody(
                     achievement = achievement,
                     onDeleteClick = {
                         coroutineScope.launch {
-                        viewModel.deleteAchievement(achievement.id) }
+                            //viewModel.deleteAchievement()
+                            if (email != null) {
+                                viewModel.deleteAchievement(email, achievement)
+                            }
+
+                        }
                     }
                 )
             }
@@ -175,6 +199,9 @@ fun AchievementsItem(
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val showDialog = remember { mutableStateOf(false) }
+
+    Log.d("achievement", "$achievement")
+    Log.d("achievement.toData", "${achievement.toDate()}")
 
 
     Box(
@@ -238,7 +265,6 @@ fun AchievementsItem(
                         .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
                         .fillMaxWidth()
                 ) {
-                    // Resto del codice...
                     Row(
                     ) {
 
@@ -252,7 +278,7 @@ fun AchievementsItem(
 
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
-                            text = "Date: ${achievement.date}",
+                            text = "Date: ${achievement.toDate()}",
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(2.dp)
                         )
@@ -315,4 +341,7 @@ fun AchievementsItem(
     }
 }
 
-*/
+
+fun Achievements.toDate(): String{
+    return SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date.toDate())
+}

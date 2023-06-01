@@ -1,5 +1,5 @@
 package com.example.courtreservationapplicationjetpack.views.profile
-
+/*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/*
+
 
 /**
  * ViewModel to retrieve and update a reservation from the [UserRepository]'s data source.

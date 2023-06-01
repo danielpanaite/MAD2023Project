@@ -31,7 +31,6 @@ import com.example.courtreservationapplicationjetpack.views.profile.NewAchieveme
 import com.example.courtreservationapplicationjetpack.views.profile.Profile
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
-//import com.example.courtreservationapplicationjetpack.views.profile.SportPreferences
 import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservation
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationDestination
@@ -241,10 +240,12 @@ fun NavigationGraph(
 
                 onNavigateUp = { navController.navigateUp() },
                 navigateBackAction = { navController.popBackStack() },
-                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)}
+                navigateToProfileDestination = {navController.navigate(ProfileDestination.route)},
+                googleAuthUiClient = googleAuthUiClient,
 
 
-            )
+
+                )
         }
 
         composable(
@@ -255,9 +256,7 @@ fun NavigationGraph(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() },
                 navigateToAchievementsDestination = {navController.navigate(AchievementsDestination.route)},
-
-
-
+                googleAuthUiClient = googleAuthUiClient,
                 )
         }
 

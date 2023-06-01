@@ -9,7 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
-import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
+//import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
@@ -76,10 +76,13 @@ object AppViewModelProvider {
         }
 
          */
+        /*
 
         initializer {
             AchievementsViewModel(courtApplication().container.sportRepository, courtApplication().container.achievementsRepository)
         }
+
+         */
 
         initializer {
             ReviewViewModel(

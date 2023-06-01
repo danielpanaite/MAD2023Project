@@ -1,5 +1,5 @@
 package com.example.courtreservationapplicationjetpack.views.profile
-
+/*
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -76,7 +76,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Objects
 
-/*
+
 object EditProfileDestination : NavigationDestination {
     override val route = "profile_edit"
     override val titleRes = "edit Profile"

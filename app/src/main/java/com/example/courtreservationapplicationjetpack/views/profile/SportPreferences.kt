@@ -1,6 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
-
+/*
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -57,7 +57,7 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-/*
+
 
 object SportPreferencesDestination : NavigationDestination {
     override val route  = "sport_preferences"

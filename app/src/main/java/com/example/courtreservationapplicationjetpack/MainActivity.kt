@@ -36,34 +36,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             CourtReservationApplicationJetpackTheme {
                 CourtApp(context = applicationContext, googleAuthUiClient = googleAuthUiClient)
-
-
-                /*
-                        val navController = rememberNavController()
-                        NavHost(navController = navController, startDestination = "sign_in") {
-                            composable("sign_in") {
-
-                            }
-
-                            composable("profile") {
-                                ProfileScreen(
-                                    userData = googleAuthUiClient.getSignedInUser(),
-                                    onSignOut = {
-                                        lifecycleScope.launch {
-                                            googleAuthUiClient.signOut()
-                                            Toast.makeText(
-                                                applicationContext,
-                                                "Signed out",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-
-                                            navController.popBackStack()
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }*/
             }
         }
     }

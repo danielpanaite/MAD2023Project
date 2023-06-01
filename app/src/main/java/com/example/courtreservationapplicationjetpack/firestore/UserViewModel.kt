@@ -8,6 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -36,13 +38,14 @@ class UserViewModel: ViewModel(){
     private var _sports = mutableStateOf<List<String>>(emptyList())
     val sports: State<List<String>> = _sports
 
-    //----------------------Methods----------------------
-
-    private val _sportsWithLevels = MutableStateFlow<Map<String, String>>(emptyMap())
-    val sportsWithLevels: StateFlow<Map<String, String>> = _sportsWithLevels
 
     private val _sportsPreferencesUiState = MutableStateFlow<SportsPreferencesUiState>(SportsPreferencesUiState(isLoading = true))
     val sportsPreferencesUiState: StateFlow<SportsPreferencesUiState> = _sportsPreferencesUiState
+
+    private val _achievements = MutableStateFlow<AchievementsUi>(AchievementsUi(isLoading = true))
+    val achievements: StateFlow<AchievementsUi> = _achievements
+
+    //----------------------Methods----------------------
 
     fun getSportsWithLevels(email: String) {
         val docRef = db.collection("users").document(email)
@@ -59,12 +62,75 @@ class UserViewModel: ViewModel(){
                     sportsList.add(sportObject)
                 }
                 _sportsPreferencesUiState.value = SportsPreferencesUiState(sportsList, isLoading = false)
-                //val sportsList = sportPreferences.map { it.toSport() }
-                //_sportsPreferencesUiState.value = SportsPreferencesUiState(sportsList, isLoading = false)
             }
         }
     }
 
+    fun getAchievements(email: String) {
+        val docRef = db.collection("users").document(email)
+        docRef.get().addOnSuccessListener { documentSnapshot ->
+            val achievements = documentSnapshot.toObject(Users::class.java)?.achievements
+            val achievementsList : MutableList<Achievements> = mutableListOf()
+
+            if (achievements != null) {
+                for (achievement in achievements) {
+                    val title = achievement.title
+                    val sportName = achievement.sportName
+                    val date = achievement.date
+                    val description = achievement.description
+
+                    val achievementObject = Achievements(title, sportName, date, description)
+                    achievementsList.add(achievementObject)
+                }
+                _achievements.value = AchievementsUi(achievementsList, isLoading = false)
+            }
+        }
+    }
+
+    fun addAchievement(
+        email: String?,
+        selectedSport: String,
+        date: Timestamp,
+        certificateName: String,
+        additionalInfo: String
+    ) {
+        val userRef = email?.let { db.collection("users").document(it) }
+        val achievement = Achievements(
+            title = certificateName,
+            sportName = selectedSport,
+            date = date, // Assumi che dateString sia nel formato "yyyy-MM-dd"
+            description = additionalInfo
+        )
+        if (userRef != null) {
+            userRef.update("achievements", FieldValue.arrayUnion(achievement))
+                .addOnSuccessListener {
+                    // L'achievement è stato aggiunto con successo
+                    Log.d(TAG, "New achievement inserted correctly")
+
+                }
+                .addOnFailureListener { e ->
+                    // Gestisci eventuali errori durante l'aggiunta dell'achievement
+                    Log.d(TAG, "Error inserting new achievement")
+
+                }
+        }
+    }
+
+    fun deleteAchievement(email: String, achievement: Achievements) {
+        val userRef = db.collection("users").document(email)
+        userRef.update("achievements", FieldValue.arrayRemove(achievement))
+            .addOnSuccessListener {
+                // Achievement deleted successfully
+                Log.d(TAG, "Achievement deleted successfully")
+
+            }
+            .addOnFailureListener { e ->
+                // Handle failure to delete achievement
+                Log.d(TAG, "Error deleting achievement")
+
+
+            }
+    }
 
     fun updateSportsPreferences(email: String, sports: List<Sport>, uncheckedSports: List<String>) {
         val userRef = db.collection("users").document(email)
@@ -112,30 +178,6 @@ class UserViewModel: ViewModel(){
         }
     }
 
-    fun deleteSports(email: String?, uncheckedSports: List<String>) {
-        val docRef = email?.let { db.collection("users").document(it) }
-        if (docRef != null) {
-            docRef.get().addOnSuccessListener { documentSnapshot ->
-                val user = documentSnapshot.toObject(Users::class.java)
-                val sportPreferences = user?.sportPreferences?.toMutableList() ?: mutableListOf()
-
-                // Remove the unchecked sports from the sportPreferences list
-                sportPreferences.removeIf { sport -> uncheckedSports.contains(sport.sportName) }
-
-                val updatedUser = user?.copy(sportPreferences = sportPreferences)
-                Log.d("updateUser", "${updatedUser}")
-                // Update the user document with the updated sportPreferences
-                updatedUser?.let {
-                    docRef.set(it).addOnSuccessListener {
-                        // Sports deleted successfully
-                    }.addOnFailureListener {
-                        // Failed to delete sports
-                    }
-                }
-            }
-        }
-    }
-
     fun getSportsList() {
         // Creating a reference to collection
         val docRef = db.collection("courts")
@@ -150,7 +192,7 @@ class UserViewModel: ViewModel(){
             }
             _sports.value = list.toSet().toList()
         }.addOnFailureListener {
-            Log.d(CourtViewModel.TAG, "Error getting data", it)
+            Log.d(TAG, "Error getting data", it)
         }
     }
 
@@ -217,19 +259,9 @@ data class SportPreferencesDetails(
     val masteryLevel :String = "",
 )
 
-fun SportPreferencesDetails.toSport(): Sport = Sport(
-     sportName = sportName,
-        masteryLevel = masteryLevel,
-    )
 
-fun Sport.toSportPreferencesUiState(): SportsPreferencesUiState = SportsPreferencesUiState(
-    //sportPreferencesDetails = this.toSportPreferencesDetails(),
+data class AchievementsUi(
+    val achievementsList: List<Achievements> = listOf(),
+    val isLoading: Boolean = false // Add the isLoading property
 )
 
-/**
- * Extension function to convert [Item] to [ItemDetails]
- */
-fun Sport.toSportPreferencesDetails(): SportPreferencesDetails = SportPreferencesDetails(
-    sportName = sportName,
-    masteryLevel = masteryLevel,
-)

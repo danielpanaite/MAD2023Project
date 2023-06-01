@@ -1,5 +1,5 @@
 package com.example.courtreservationapplicationjetpack.views.profile
-
+/*
 import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -49,7 +49,7 @@ import com.example.courtreservationapplicationjetpack.navigation.NavigationDesti
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 
-/*
+
 object ProfileDestination : NavigationDestination {
     override val route = "profile"
     override val titleRes = "Profile"
