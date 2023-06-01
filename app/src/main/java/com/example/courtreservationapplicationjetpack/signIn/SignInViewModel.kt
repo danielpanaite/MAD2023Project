@@ -88,7 +88,8 @@ class SignInViewModel(
                                     "address" to "",
                                     "age" to 1,
                                     "phone" to "",
-                                    "imageUri" to (UserData?.profilePictureUrl ?: "")
+                                    "imageUri" to (UserData?.profilePictureUrl ?: ""),
+                                    "sportPreferences" to "" // probabilmente da cambiare dovrebbe essere un array vuoto
 
                                 )
 

@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.Sport
 import com.example.courtreservationapplicationjetpack.firestore.SportsPreferencesUiState
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -126,7 +127,7 @@ fun SportsBody(
     val sportsWithLevels = remember { mutableMapOf<String, String>() }
     val coroutineScope = rememberCoroutineScope()
 
-    //selectedSports = selectedSportsWithLevels.map { it.sportName }.toMutableSet()
+    selectedSports = selectedSportsWithLevels.sportsList.map { it.sportName }.toMutableSet()
 
     val initialLevels: Map<String, String> = selectedSportsWithLevels.sportsList.associate { sport ->
         sport.sportName to sport.masteryLevel
@@ -155,17 +156,21 @@ fun SportsBody(
                     onClick = {
                         coroutineScope.launch {
                             val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
-                                viewModel.updateSportMastery(sportName, masteryLevel, email) // use masteryLevel from map
-                                Log.d(" Sports", "${sportName}")
-                                Log.d(" masteryLevel", "${masteryLevel}")
-
-
+                                Sport(sportName, masteryLevel)
                             }
+                            Log.d("sports che passo al viewModel", "$sports")
+                            if (email != null) {
+                                viewModel.updateSportsPreferences(email, sports)
+                            }
+
+                            Toast.makeText(context, "Salvataggio completato", Toast.LENGTH_SHORT).show()
+
+                            navigateToProfileDestination()
                             Log.d(" sports", "${sports}")
 
                             val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
                             Log.d("unchecked Sports", "$uncheckedSports")
-                            //viewModel.deleteSports(uncheckedSports)
+                            //viewModel.deleteSports(email, uncheckedSports)
 
                             Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
 
@@ -185,9 +190,17 @@ fun SportsBody(
             onSportCheckedChange = { sport, isChecked, masteryLevel ->
                 if (isChecked) {
                     selectedSports += sport
+                    Log.d(" selectedSport +", "${selectedSports}")
+                    Log.d(" sport +", "${sport}")
+
+
                     sportsWithLevels[sport] = masteryLevel // Update mastery level for the selected sport in the map
                 } else {
                     selectedSports -= sport
+                    Log.d(" selectedSport -", "${selectedSports}")
+                    Log.d(" sport -", "${sport}")
+
+
                     sportsWithLevels.remove(sport)
                 }
             },

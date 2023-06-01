@@ -11,7 +11,6 @@ import com.example.courtreservationapplicationjetpack.views.courts.AllSportsView
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
-import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
@@ -70,10 +69,13 @@ object AppViewModelProvider {
         initializer {
             CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository, courtApplication().container.reservationRepository)
         }
+        /*
 
         initializer {
             SportPreferencesViewModel(courtApplication().container.courtRepository, courtApplication().container.sportRepository)
         }
+
+         */
 
         initializer {
             AchievementsViewModel(courtApplication().container.sportRepository, courtApplication().container.achievementsRepository)

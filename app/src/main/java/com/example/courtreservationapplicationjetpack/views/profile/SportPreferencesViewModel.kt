@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
+/*
 /**
  * View Model to retrieve all reservations in the Room database.
  */
@@ -143,3 +143,5 @@ fun Sport.toSportPreferencesDetails(): SportPreferencesDetails = SportPreference
     masteryLevel = masteryLevel,
     achievements = achievements,
 )
+
+ */

@@ -15,7 +15,6 @@ data class Users(
 
 
 data class Sport(
-    val idUser: String = "",
     val sportName: String = "",
     val masteryLevel: String = "",
 )
