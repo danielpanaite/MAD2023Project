@@ -136,6 +136,7 @@ class ReservationViewModel: ViewModel(){
         }
     }
 
+
     //-----------------------------------------------------
 
     //allows the listener to be removed when the viewModel is destroyed

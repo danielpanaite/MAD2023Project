@@ -3,7 +3,6 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import OptionSample3
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -74,6 +73,8 @@ import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
@@ -81,15 +82,20 @@ import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewMod
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.firebase.Timestamp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalQueries.localDate
 import java.util.Locale
+
 
 object AllSportsDestination : NavigationDestination {
     override val route  = "all_sports"
@@ -145,6 +151,19 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val reservation by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
+
+    val l = LocalDate.parse("30-05-2023", DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+
+    val unix = l.atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
+
+    val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val localFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    firebaseReservationViewModel.getCourtReservations("document1", Timestamp(unix, 0))
+
+
 
 
     OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
@@ -177,6 +196,11 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable {
+                                firebaseReservationViewModel.courtres.value.forEach {
+                                    println(it.date.toDate())
+                                }
+                            }
                     )
                 },
                 backgroundColor = Color.White,
@@ -348,7 +372,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         initial = emptyList<String>()
                                     )
                                     
-                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id.toString(), date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
+                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
 
                                 }
                             }
