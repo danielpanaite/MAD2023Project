@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -39,6 +40,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -303,26 +305,20 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             println( firebaseCourtViewModel.courts.value.toString())
 
 
-            SwipeRefresh(
-                state = swipeRefreshState,
-                onRefresh = { viewModel2.loadStuff(pickedSport = pickedSport, firebaseCourtViewModel) })
-            {
-                LazyColumn {
-                    items(firebaseCourtViewModel.courts.value.size) { _ ->
 
-                        firebaseCourtViewModel.courts.value.forEach {
-                            Box(modifier = Modifier.aspectRatio(1.5f)) {
-                                println(it.name + " " + it.sport + " " + (it.URL ?: "NONE"))
-                                CoilImage(
-                                    modifier = Modifier
-                                        .shadow(10.dp, RoundedCornerShape(0.dp))
-                                        .fillMaxSize()
-//                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate.value}") }
-                                        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${it.id}/${pickedDate.value}") }
-                                        .height(100.dp),
-                                    sport = it.sport,
-                                    URL = it.URL ?: null,
-                                )
+            LazyColumn {
+                itemsIndexed(firebaseCourtViewModel.courts.value) { index, court ->
+                    Box(modifier = Modifier.aspectRatio(1.5f)) {
+                        println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
+                        CoilImage(
+                            modifier = Modifier
+                                .shadow(10.dp, RoundedCornerShape(0.dp))
+                                .fillMaxSize()
+                                .clickable { navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}") }
+                                .height(100.dp),
+                            sport = court.sport,
+                            URL = court.URL ?: null,
+                        )
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
@@ -339,7 +335,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 //                                    )
                                 }
                                 Text(
-                                    text = it.name,
+                                    text = court.name,
                                     style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 26.sp,
@@ -375,19 +371,18 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 //                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 0).collectAsState(
 //                                        initial = emptyList<String>()
 //                                    )
-                                    
-                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
+
+                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = court.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
 
                                 }
                             }
                         }
                     }
                 }
-            }
+
 
 
         }
-    }
 }
 @Composable
 fun RatingBar(maxRating: Int = 5, onRatingChanged: (Int) -> Unit) {
