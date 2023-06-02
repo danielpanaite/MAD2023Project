@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.CourtRepository
 import com.example.courtreservationapplicationjetpack.models.reservations.ReservationRepository
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 //retrieve all sports in the Room database as a StateFlow observable API for UI state
 //with the Room Court data changes, the UI updates automatically
@@ -63,6 +69,7 @@ private val reservationRepository: ReservationRepository
     fun getSlot(date:String, courtId: Int): Flow<List<String>> {
         return reservationRepository.getSlot(date, courtId)
     }
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

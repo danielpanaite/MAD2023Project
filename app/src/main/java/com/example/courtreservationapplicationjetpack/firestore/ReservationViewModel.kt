@@ -9,8 +9,11 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 class ReservationViewModel: ViewModel(){
 
@@ -135,7 +138,6 @@ class ReservationViewModel: ViewModel(){
             Log.d(TAG, "Failed to delete document ${reservation.value.id}")
         }
     }
-
 
     //-----------------------------------------------------
 

@@ -94,7 +94,9 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalQueries.localDate
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 
 object AllSportsDestination : NavigationDestination {
@@ -152,16 +154,20 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-    val reservation by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
 
-    val l = LocalDate.parse("30-05-2023", DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+    val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+    firebaseReservationViewModel.getCourtReservations("document1", Timestamp(dateInTimeZone, 0))
 
-    val unix = l.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+    val slots = firebaseReservationViewModel.courtres.value.map {reservation ->
+        val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
 
-    val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val localFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    firebaseReservationViewModel.getCourtReservations("document1", Timestamp(unix, 0))
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
+
+        timeFormat.format(date)
+    }
+
+    var slotRiservato = remember { mutableStateOf(slots) }
 
 
 
@@ -197,9 +203,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                firebaseReservationViewModel.courtres.value.forEach {
-                                    println(it.date.toDate())
-                                }
+
                             }
                     )
                 },
@@ -367,10 +371,10 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                     )
 
 
-                                    /// TODO: get slot from firebase
-                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 0).collectAsState(
-                                        initial = emptyList<String>()
-                                    )
+//                                    /// TODO: get slot from firebase
+//                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 0).collectAsState(
+//                                        initial = emptyList<String>()
+//                                    )
                                     
                                     HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = it.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
 
