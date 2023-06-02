@@ -96,6 +96,8 @@ object EditProfileDestination : NavigationDestination {
     val routeWithArgs = "$route/{$profileArg}"
 
 }
+
+
 @ExperimentalMaterial3Api
 @Composable
 fun EditProfile(
@@ -110,27 +112,32 @@ fun EditProfile(
 
     viewModel: UserViewModel = viewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
     var launchOnce by rememberSaveable { mutableStateOf(true) }
     if (launchOnce) {
         viewModel.getUserByEmail(profileArg!!)
-        Log.d("profileArg", "$profileArg")
         launchOnce = false
     }
     val userDetails by remember { mutableStateOf(viewModel.user) } //reservation to be edited
-    Log.d("profile ui state", "${viewModel.user}")
+    val profileImageUrl = remember { mutableStateOf("") }
 
     val chosenPhotoUri = remember { mutableStateOf<Uri?>(null) }
 
-    val profileImageUrl = remember { mutableStateOf("") }
+    Log.d("Edit prof use.v.ima", "${userDetails.value.imageUri}")
+    Log.d("Chosen phot edit", "${chosenPhotoUri}")
+    Log.d("profileimageUrl edit", "${profileImageUrl}")
+
+
+
 
     // Recupera l'URL dell'immagine del profilo dall'oggetto UserDetails
     LaunchedEffect(userDetails) {
         userDetails.value.imageUri?.let { imageUri ->
             profileImageUrl.value = imageUri
         }
-    }
+        Log.d("dentro launch effect", "${userDetails.value.imageUri}")
+        Log.d("profile imageUrl", "${profileImageUrl}")
 
+    }
 
     Scaffold(
         topBar = {
@@ -146,14 +153,20 @@ fun EditProfile(
             navigateToProfileDestination = navigateToProfileDestination,
             onSaveClick = {
                 viewModel.updateProfile(chosenPhotoUri.value)
-                //saveImageToStorage(context, userDetails.value.imageUri)
-                viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
+                Log.d("save click", "${chosenPhotoUri}")
+                Log.d("save click .value", "${chosenPhotoUri.value}")
 
+
+                if(chosenPhotoUri.value!=null){
+
+                    viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
+
+                }
                 navigateToProfileDestination()
             },
             chosenPhotoUri = chosenPhotoUri,
             modifier = modifier.padding(innerPadding),
-            profileImageUrl = profileImageUrl
+            profileImageUrl = profileImageUrl.value
         )
     }
 }
@@ -165,20 +178,25 @@ fun ProfileEntryBody(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
     navigateToProfileDestination: () -> Unit,
-    profileImageUrl: MutableState<String>,
-
+    profileImageUrl: String,
     viewModel: UserViewModel = viewModel()
 
 ) {
-
     val context = LocalContext.current
-    val chosenPhotoUriState = rememberUpdatedState(chosenPhotoUri.value)
+    //val chosenPhotoUriState = rememberUpdatedState(chosenPhotoUri.value)
 
     var showErrorDialog by remember { mutableStateOf(false) }
 
+    /*
     LaunchedEffect(chosenPhotoUri.value) {
+        Log.d("launch eff chosenPhoto", "${chosenPhotoUri.value}")
+
         user.value = user.value.copy(imageUri = chosenPhotoUri.value?.toString())
     }
+
+     */
+
+
 
     LazyColumn(
         modifier = modifier
@@ -196,9 +214,8 @@ fun ProfileEntryBody(
                         onSaveClick()
 
                         // Carica l'immagine nello storage di Firebase
-                        viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
-
-                        navigateToProfileDestination()
+                        //viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
+                        //navigateToProfileDestination()
                     } else {
                         showErrorDialog = true
                     }
@@ -214,16 +231,13 @@ fun ProfileEntryBody(
     if (showErrorDialog) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false },
-
             title = { Text(text = "Error") },
             text = if (user.value.name == "") {
                 { Text(text = "Please insert at least a name and an email") }
             } else if (!user.value.email.matches(Regex("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"))) {
                 { Text(text = "Insert a valid email") }
-
             } else {
                 { Text(text = "I valori inseriti non sono validi.") }
-
             },
             confirmButton = {
                 Button(onClick = { showErrorDialog = false }) {
@@ -242,7 +256,7 @@ fun ProfileInputForm(
     onSaveClick: () -> Unit,
     chosenPhotoUri: MutableState<Uri?>,
     modifier: Modifier = Modifier,
-    profileImageUrl: MutableState<String>,
+    profileImageUrl: String, // URL dell'immagine del profilo
     enabled: Boolean = true
 ) {
 
@@ -253,17 +267,22 @@ fun ProfileInputForm(
         BuildConfig.APPLICATION_ID + ".provider", file
     )
 
-    var photoUri by rememberSaveable { mutableStateOf<Uri?>(Uri.parse(user.value.imageUri)) }
-    var chosenPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
+    //var photoUri by rememberSaveable { mutableStateOf<Uri?>(Uri.parse(user.value.imageUri)) }
+    //var chosenPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         chosenPhotoUri.value = uri
         user.value = user.value.copy(imageUri = uri.toString())
+        Log.d("launcher gallery", "${chosenPhotoUri.value}")
+
     }
 
+
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
-        chosenPhotoUri.value = uri
+        chosenPhotoUri.value  = uri
         user.value = user.value.copy(imageUri = uri.toString())
+        Log.d("launcher camera", "${chosenPhotoUri.value}")
+
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -277,13 +296,18 @@ fun ProfileInputForm(
         }
     }
 
-    val chosenPhotUriState = rememberUpdatedState(chosenPhoto)
+    //val chosenPhotUriState = rememberUpdatedState(chosenPhoto)
 
     val showMenu = remember { mutableStateOf(false) }
 
-    LaunchedEffect(chosenPhoto) {
-        user.value = user.value.copy(imageUri = chosenPhoto.toString())
+
+
+    LaunchedEffect(chosenPhotoUri) {
+        user.value = user.value.copy(imageUri = chosenPhotoUri.value.toString())
+        Log.d("chosenPhoto launched Effec", "$chosenPhotoUri")
     }
+
+
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -301,45 +325,50 @@ fun ProfileInputForm(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = if (chosenPhoto != null) {
+                    painter = if (chosenPhotoUri.value != null) {
+                        // Mostra l'immagine selezionata dall'utente
+                        Log.d("chosenPhoto !=null", "$chosenPhotoUri")
                         rememberAsyncImagePainter(
                             ImageRequest.Builder(LocalContext.current)
-                                .data(data = chosenPhoto)
+                                .data(data = chosenPhotoUri.value)
                                 .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
                                     crossfade(true)
                                     placeholder(R.drawable.baseline_person_24)
                                     transformations(CircleCropTransformation())
                                 }).build()
                         )
+                    } else if (profileImageUrl!==null && profileImageUrl !=="") {
+                        // Mostra l'immagine del profilo esistente
+
+                        Log.d("user.value.imageUri!=null", "${profileImageUrl}")
+                        rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(Uri.parse(profileImageUrl))
+                                .apply <ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                                    crossfade(true)
+                                    placeholder(R.drawable.baseline_person_24)
+                                    transformations(CircleCropTransformation())
+                                }).build()
+                        )
                     } else {
-                        if (profileImageUrl!==null) {
-                            rememberAsyncImagePainter(
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(data = profileImageUrl)
-                                    .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
-                                        crossfade(true)
-                                        placeholder(R.drawable.baseline_person_24)
-                                        transformations(CircleCropTransformation())
-                                    }).build()
-                            )
-                        } else {
-                            rememberAsyncImagePainter(
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(data = R.drawable.baseline_person_24)
-                                    .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
-                                        crossfade(true)
-                                        placeholder(R.drawable.baseline_person_24)
-                                        transformations(CircleCropTransformation())
-                                    }).build(),
-                            )
-                        }
+                        // Mostra un'immagine di default
+                        Log.d("non c'è nessuna foto", "${user.value.imageUri}")
+                        rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(data = R.drawable.baseline_person_24)
+                                .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                                    crossfade(true)
+                                    placeholder(R.drawable.baseline_person_24)
+                                    transformations(CircleCropTransformation())
+                                }).build(),
+                        )
 
                     },
                     contentDescription = "Selected Image",
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape),
-                    colorFilter = if (chosenPhoto == null && profileImageUrl===null) {
+                    colorFilter = if (chosenPhotoUri.toString() == "" && user.value.imageUri == null) {
                         ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
                     } else {
                         null
@@ -362,14 +391,14 @@ fun ProfileInputForm(
             expanded = showMenu.value,
             onDismissRequest = { showMenu.value = false },
             modifier = Modifier
-                .padding(16.dp)
                 .wrapContentSize()
         ) {
             DropdownMenuItem(
                 onClick = {
+
                     showMenu.value = false
-                    //chosenPhotoUri.value = null
                     launcher.launch("image/*")
+
                 },
                 text = { Text("Select Image from gallery", color = Color.Black) },
             )
@@ -378,77 +407,128 @@ fun ProfileInputForm(
                     showMenu.value = false
                     //chosenPhotoUri.value = null
                     permissionLauncher.launch(Manifest.permission.CAMERA)
+
+
                 },
                 text = { Text("take a photo from camera", color = Color.Black) },
             )
         }
 
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .padding(top = 100.dp)
+            modifier = Modifier
+                .padding(8.dp)
+                .padding(top = 200.dp)
+                .fillMaxWidth()
         ) {
-            user.value.name?.let {
-                TextField(
-                    value = it,
-                    onValueChange = { user.value = user.value.copy(name = it) },
-                    label = { Text(text = "Name") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    enabled = enabled
-                )
-            }
-            user.value.nickname?.let {
-                TextField(
-                    value = it,
-                    onValueChange = { user.value = user.value.copy(nickname = it) },
-                    label = { Text(text = "Nickname") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    enabled = enabled
-                )
-            }
-            TextField(
-                value = user.value.email,
-                onValueChange = { user.value = user.value.copy(email = it) },
-                label = { Text(text = "Email") },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                enabled = enabled
-            )
-            user.value.address?.let {
-                TextField(
-                    value = it,
-                    onValueChange = { user.value = user.value.copy(address = it) },
-                    label = { Text(text = "Address") },
+                    .padding(vertical = 4.dp)
+            ){
+                user.value.name?.let {
+                    OutlinedTextField(
+                        value = it,
+                        onValueChange = { user.value = user.value.copy(name = it) },
+                        label = { Text(text = "Name") },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        enabled = enabled,
+                        singleLine = true
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ){
+                user.value.nickname?.let {
+                    OutlinedTextField(
+                        value = it,
+                        onValueChange = { user.value = user.value.copy(nickname = it) },
+                        label = { Text(text = "Nickname") },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        enabled = enabled,
+                        singleLine = true
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ){
+                OutlinedTextField(
+                    value = user.value.email,
+                    onValueChange = { user.value = user.value.copy(email = it) },
+                    label = { Text(text = "EMAIL") },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    enabled = enabled,
+                    singleLine = true
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ){
+                user.value.address?.let {
+                    OutlinedTextField(
+                        value = it,
+                        onValueChange = { user.value = user.value.copy(address = it) },
+                        label = { Text(text = "Address") },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        enabled = enabled,
+                        singleLine = true
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ){
+                OutlinedTextField(
+                    value = user.value.phone.toString(),
+                    onValueChange = { user.value = user.value.copy(phone = it) },
+                    label = { Text(text = "Phone") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
                     enabled = enabled
                 )
             }
-            TextField(
-                value = user.value.age.toString(),
-                onValueChange = { user.value = user.value.copy(age = it.toIntOrNull()) },
-                label = { Text(text = "Age") },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                enabled = enabled
-            )
+                    .padding(vertical = 4.dp)
+            ){
+                OutlinedTextField(
+                    value = user.value.age.toString(),
+                    onValueChange = { user.value = user.value.copy(age = it.toIntOrNull()) },
+                    label = { Text(text = "Age") },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    enabled = enabled
+                )
+            }
+
+
+
 
         }
+
+
     }
 }
 
 fun Context.createImageFile(): File {
     // Create an image file name
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-    val imageFileName = "JPEG-$timeStamp.jpg"
+    val imageFileName = "JPEG_" + timeStamp +"_"
     val image = File.createTempFile(
         imageFileName, /* prefix */
         ".jpg", /* suffix */
@@ -456,6 +536,8 @@ fun Context.createImageFile(): File {
     )
     return image
 }
+
+
 
 /*
 fun saveImageToStorage(context: Context, uri: Uri?) {
