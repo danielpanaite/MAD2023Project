@@ -156,7 +156,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     val l = LocalDate.parse("30-05-2023", DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
-    val unix = l.atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
+    val unix = l.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
 
     val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val localFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
