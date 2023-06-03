@@ -9,10 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.courtreservationapplicationjetpack.CourtApplication
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableViewModel
-import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
-import com.example.courtreservationapplicationjetpack.views.profile.EditProfileViewModel
+//import com.example.courtreservationapplicationjetpack.views.profile.AchievementsViewModel
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileViewModel
-import com.example.courtreservationapplicationjetpack.views.profile.SportPreferencesViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.EditReservationViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsViewModel
@@ -34,12 +32,15 @@ object AppViewModelProvider {
             )
         }
 
+        /*
         initializer {
             EditProfileViewModel(
                 this.createSavedStateHandle(),
                 courtApplication().container.userRepository
             )
         }
+
+         */
         // Initializer for ReservationDetails View Model
         initializer {
             ReservationDetailsViewModel(
@@ -68,14 +69,20 @@ object AppViewModelProvider {
         initializer {
             CourtsAvailableViewModel(this.createSavedStateHandle(), courtApplication().container.courtRepository, courtApplication().container.reservationRepository)
         }
+        /*
 
         initializer {
             SportPreferencesViewModel(courtApplication().container.courtRepository, courtApplication().container.sportRepository)
         }
 
+         */
+        /*
+
         initializer {
             AchievementsViewModel(courtApplication().container.sportRepository, courtApplication().container.achievementsRepository)
         }
+
+         */
 
         initializer {
             ReviewViewModel(

@@ -1,9 +1,10 @@
 package com.example.courtreservationapplicationjetpack
 
 import android.os.Bundle
-import android.view.WindowManager
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,8 +72,6 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             CourtReservationApplicationJetpackTheme {
-
-
                 CourtApp(context = applicationContext, googleAuthUiClient = googleAuthUiClient)
 
 
@@ -106,3 +105,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

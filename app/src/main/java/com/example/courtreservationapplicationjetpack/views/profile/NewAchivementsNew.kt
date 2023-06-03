@@ -25,16 +25,19 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,9 +49,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsViewModel
+import com.google.firebase.Timestamp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.date_time.DateTimeDialog
 import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
@@ -56,7 +62,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-/*
+import java.util.Locale
+
 
 object NewAchievementsDestination : NavigationDestination {
     override val route  = "new_chievements"
@@ -73,11 +80,22 @@ fun NewAchievements(
     modifier: Modifier = Modifier,
     onNavigateUp: () -> Unit,
     navigateToAchievementsDestination: () -> Unit,
+    googleAuthUiClient: GoogleAuthUiClient,
+    viewModel: UserViewModel = viewModel(),
     //viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    viewModelSports : AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    //viewModelSports : AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val sportsUiState by viewModelSports.allSportsUiState.collectAsState()
+    val email = googleAuthUiClient.getSignedInUser()?.email
+    var launchOnce by rememberSaveable { mutableStateOf(true) }
+    if(launchOnce){
+        viewModel.getSportsList()
+        launchOnce = false
+    }
+
+    val sportsList by remember { mutableStateOf(viewModel.sports) } //reservation to be edited
+
+    //val sportsUiState by viewModelSports.allSportsUiState.collectAsState()
 
 
     Scaffold(
@@ -97,16 +115,17 @@ fun NewAchievements(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(text = "Insert your achievement",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
 
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 NewAchievementsBody(
-                    sportsList = sportsUiState.sportsList,
+                    sportsList = sportsList,
                     modifier = modifier,
                     //viewModel = viewModel,
+                    email = email,
                     navigateToAchievementsDestination  =navigateToAchievementsDestination
                 )
             }
@@ -117,9 +136,12 @@ fun NewAchievements(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewAchievementsBody(
-    sportsList: List<String>,
+    sportsList: State<List<String>>,
     modifier: Modifier = Modifier,
+    email: String?,
     //viewModel: AchievementsViewModel,
+    viewModel: UserViewModel = viewModel(),
+
     navigateToAchievementsDestination: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -180,7 +202,7 @@ fun NewAchievementsBody(
                     modifier = Modifier
                 ) {
 
-                    sportsList.forEach { sport ->
+                    sportsList.value.forEach { sport ->
                         Log.d("sport", "$sport")
                         DropdownMenuItem(
                             modifier = Modifier.fillMaxWidth(),
@@ -271,16 +293,17 @@ fun NewAchievementsBody(
         )
         Button(
             onClick = {
-
+                val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+               // reservation.value = reservation.value.copy(date = Timestamp(format.parse(newDate)!!))
                 if(selectedSport!="" && date.toString()!="" && certificateName!=""){
                     coroutineScope.launch {
-                        {/*viewModel.addAchievement(
+                        viewModel.addAchievement(
+                            email,
                             selectedSport,
-                            1,
-                            date.toString(),
+                            Timestamp(format.parse(date.toString())!!),
                             certificateName,
                             additionalInfo
-                        )*/}
+                        )
                     }
                     navigateToAchievementsDestination()
                 }else{
@@ -323,6 +346,3 @@ fun NewAchievementsBody(
         }
     }
 }
-
-
- */

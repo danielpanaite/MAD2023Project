@@ -1,5 +1,5 @@
 package com.example.courtreservationapplicationjetpack.views.profile
-
+/*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +10,7 @@ import com.example.courtreservationapplicationjetpack.models.user.UserRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
 
 
 /**
@@ -26,7 +27,7 @@ class EditProfileViewModel(
     var profileUiState by mutableStateOf(ProfileUiState())
         private set
 
-    private val profileId: Int = checkNotNull(savedStateHandle[EditProfileDestination.profileIdArg])
+    private val profileId: Int = checkNotNull(savedStateHandle[EditProfileDestination.profileArg])
 
     init {
         viewModelScope.launch {
@@ -72,3 +73,4 @@ private fun validateEmail(email: String): Boolean {
     return email.matches(emailRegex)
 }
 
+*/

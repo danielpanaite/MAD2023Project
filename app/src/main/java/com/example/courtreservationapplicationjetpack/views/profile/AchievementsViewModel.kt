@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
+/*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.courtreservationapplicationjetpack.models.achievements.Achievements
@@ -93,3 +94,4 @@ fun AchievementDetails.toAchievements(): Achievements = Achievements(
 
 
 
+*/
