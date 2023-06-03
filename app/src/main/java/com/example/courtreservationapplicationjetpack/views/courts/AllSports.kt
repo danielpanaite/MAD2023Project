@@ -92,6 +92,7 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import okhttp3.internal.wait
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
@@ -287,9 +288,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                 .background(color = Color.White)
                 .padding(bottom = 50.dp)
         ) {
-            val viewModel2 = viewModel<AllSportsViewModel>()
-            val isLoading by viewModel2.isLoading.collectAsState()
-            val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
             println( firebaseCourtViewModel.courts.value.toString())
 
 
@@ -299,24 +297,18 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                     val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
 
                     LaunchedEffect(key1 = court.id, key2 = dateInTimeZone) {
-                        firebaseReservationViewModel.getCourtReservations(court.id, Timestamp(dateInTimeZone, 0))
+                        firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))
                     }
 
                     val slots by remember(court.id) {
                         derivedStateOf {
-                            firebaseReservationViewModel.courtres.value.map { reservation ->
-                                val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
-                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                                timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
-                                timeFormat.format(date)
-                            }
+                            firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))
                         }
                     }
 
                     LaunchedEffect(slots) {
                         Log.d("SLOTS", court.name + slots.toString())
                     }
-                    //var slotRiservato = remember { mutableStateOf(slots) }
 
 
                     Box(modifier = Modifier.aspectRatio(1.5f)) {
@@ -330,45 +322,45 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             sport = court.sport,
                             URL = court.URL ?: null,
                         )
-                                Text(
-                                    text = court.name,
-                                    style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 26.sp,
-                                    textAlign = TextAlign.Start,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(16.dp)
-                                )
-                            }
+                        Text(
+                            text = court.name,
+                            style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 26.sp,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp)
+                        )
+                    }
 
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(0.dp)
-                            ) {
-                                Column {
-                                    var isHoursListEmpy = remember {
-                                        mutableStateOf(false)
-                                    }
-                                    Text(
-                                        text = if (isHoursListEmpy.value) {
-                                            "Nessun orario disponibile per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
-                                        } else {
-                                            "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
-                                        },
-                                        fontSize = 14.sp,
-                                        color = Color.Gray,
-                                        modifier = Modifier.padding(16.dp)
-                                    )
-                                    HourButtons(
-                                        reservatedSlot = slots,
-                                        navigateToCourtsAvailable = { /* TODO() */ },
-                                        navController = navController,
-                                        courtID = court.id,
-                                        date = pickedDate.value,
-                                        isHoursListEmpy = isHoursListEmpy
-                                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp)
+                    ) {
+                        Column {
+                            var isHoursListEmpy = remember {
+                                mutableStateOf(false)
+                            }
+                            Text(
+                                text = if (isHoursListEmpy.value) {
+                                    "Nessun orario disponibile per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+                                } else {
+                                    "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+                                },
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                            HourButtons(
+                                reservatedSlot = slots,
+                                navigateToCourtsAvailable = { /* TODO() */ },
+                                navController = navController,
+                                courtID = court.id,
+                                date = pickedDate.value,
+                                isHoursListEmpy = isHoursListEmpy
+                            )
 
 
 //                                    /// TODO: get slot from firebase
