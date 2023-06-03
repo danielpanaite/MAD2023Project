@@ -158,6 +158,11 @@ fun CourtsAvailable(
     val email = googleAuthUiClient.getSignedInUser()?.email
 
 
+    LaunchedEffect(selectedDate.value){
+        pickedHour.value = pickedHour.value
+        Log.d("Pick", "Picked hour: ${pickedHour.value}")
+    }
+
     Scaffold(
         topBar = {
             //CourtTopAppBar(canNavigateBack = false)
@@ -613,11 +618,17 @@ fun Ciao(
                     Log.d("Oggi", LocalDate.now().toString())
                     Log.d("SelectedDate", selectedDate.value.toString())
 
-                    val filteredHoursForToday = if (LocalDate.now().toString() == selectedDate.value.toString()) {
-                        filteredHours.filter { LocalTime.parse(it) > currentTime }
-                    } else {
-                        filteredHours
+                    var filteredHoursForToday = filteredHours
+
+                    if(filteredHours.isNotEmpty()) {
+                        filteredHoursForToday =
+                            if (LocalDate.now().toString() == selectedDate.value.toString()) {
+                                filteredHours.filter { LocalTime.parse(it) > currentTime }
+                            } else {
+                                filteredHours
+                            }
                     }
+
                     if(courtState.value != null) {
                         TextGrid(
                             pickedHour,
@@ -664,18 +675,21 @@ fun Ciao(
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
                     }
 
+                    if(pickedHour.value.isNotEmpty()) {
+                        val dateInTimeZone =
+                            selectedDate.value.atTime(LocalTime.parse(pickedHour.value))
+                                .atZone(ZoneId.of("Europe/Rome")).toInstant().epochSecond
 
-                    val dateInTimeZone = selectedDate.value.atTime(LocalTime.parse(pickedHour.value)).atZone(ZoneId.of("Europe/Rome")).toInstant().epochSecond
-
-                    if(courtState.value != null && userEmail != null) {
-                        reservationDetails.value = reservationDetails.value.copy(
-                            id = courtID,
-                            date = Timestamp(dateInTimeZone, 0),
-                            user = userEmail!!,
-                            notes = additionsText,
-                            people = pickedPeople.toInt(),
-                            court = courtState.value!!.id
-                        )
+                        if (courtState.value != null && userEmail != null) {
+                            reservationDetails.value = reservationDetails.value.copy(
+                                id = courtID,
+                                date = Timestamp(dateInTimeZone, 0),
+                                user = userEmail!!,
+                                notes = additionsText,
+                                people = pickedPeople.toInt(),
+                                court = courtState.value!!.id
+                            )
+                        }
                     }
 
 
@@ -739,7 +753,10 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
 
 @Composable
 fun TextGrid(pickedHour: MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: String) {
-    //TODO: Se courtID è -1, dai errore
+
+    Log.d("pickedHour", pickedHour.value)
+
+
     val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
     if (courtID != null) {
         val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
