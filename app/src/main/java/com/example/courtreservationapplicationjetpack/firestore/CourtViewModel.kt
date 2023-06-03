@@ -5,7 +5,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -63,7 +62,6 @@ class CourtViewModel: ViewModel() {
     fun getReservationCourts(courts: List<String>) {
         // Creating a reference to document by id
         val docRef = db.collection("courts").whereIn(FieldPath.documentId(), courts)
-        val documentRefs: MutableList<DocumentReference> = mutableListOf()
 
         docRef.get().addOnSuccessListener {
             Log.d(TAG, "getReservationCourts")
