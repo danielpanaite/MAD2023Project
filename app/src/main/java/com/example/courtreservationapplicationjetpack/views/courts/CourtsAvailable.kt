@@ -151,7 +151,9 @@ fun CourtsAvailable(
     val showDialog = remember { mutableStateOf(false) }
     val firebaseReservationViewModel: ReservationViewModel = viewModel()
     val reservationDetails by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
-    val userEmail = googleAuthUiClient.getSignedInUser()?.email
+
+
+    //val userEmail = googleAuthUiClient.getSignedInUser()?.email
 
     Scaffold(
         topBar = {
