@@ -3,16 +3,21 @@ package com.example.courtreservationapplicationjetpack.views.profile
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
+import androidx.activity.result.launch
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -40,15 +43,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,10 +56,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -73,16 +72,13 @@ import com.example.courtreservationapplicationjetpack.BuildConfig
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
-import com.google.firebase.Timestamp
-import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Objects
@@ -118,16 +114,16 @@ fun EditProfile(
         launchOnce = false
     }
     val userDetails by remember { mutableStateOf(viewModel.user) } //reservation to be edited
+
+
     val profileImageUrl = remember { mutableStateOf("") }
 
-    val chosenPhotoUri = remember { mutableStateOf<Uri?>(null) }
-
-    Log.d("Edit prof use.v.ima", "${userDetails.value.imageUri}")
-    Log.d("Chosen phot edit", "${chosenPhotoUri}")
-    Log.d("profileimageUrl edit", "${profileImageUrl}")
+    val myImage: Bitmap = BitmapFactory.decodeResource(Resources.getSystem(), android.R.mipmap.sym_def_app_icon)
+    val chosenPhoto = remember { mutableStateOf<Bitmap>(myImage) }
 
 
 
+    //val chosenPhotoUri = remember { mutableStateOf<Uri?>(null) }
 
     // Recupera l'URL dell'immagine del profilo dall'oggetto UserDetails
     LaunchedEffect(userDetails) {
@@ -137,6 +133,16 @@ fun EditProfile(
         Log.d("dentro launch effect", "${userDetails.value.imageUri}")
         Log.d("profile imageUrl", "${profileImageUrl}")
 
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ){
+        if (it) {
+            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+
+        } else {
+            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
     }
 
     Scaffold(
@@ -152,29 +158,36 @@ fun EditProfile(
             user = userDetails,
             navigateToProfileDestination = navigateToProfileDestination,
             onSaveClick = {
-                viewModel.updateProfile(chosenPhotoUri.value)
-                Log.d("save click", "${chosenPhotoUri}")
-                Log.d("save click .value", "${chosenPhotoUri.value}")
+
+                val baos = ByteArrayOutputStream()
+                chosenPhoto.value.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+                val data = baos.toByteArray()
+                viewModel.updateProfile(data)
 
 
-                if(chosenPhotoUri.value!=null){
+                if(chosenPhoto.value!=null){
 
-                    viewModel.uploadImageToStorage(context, chosenPhotoUri.value)
+                    viewModel.uploadImageToStorage(context, data)
 
                 }
+
                 navigateToProfileDestination()
             },
-            chosenPhotoUri = chosenPhotoUri,
+            //chosenPhotoUri = chosenPhotoUri,
+            chosenPhoto = chosenPhoto,
             modifier = modifier.padding(innerPadding),
             profileImageUrl = profileImageUrl.value
         )
     }
+
+
 }
 
 @Composable
 fun ProfileEntryBody(
     user: MutableState<Users>,
-    chosenPhotoUri: MutableState<Uri?>,
+    //chosenPhotoUri: MutableState<Uri?>,
+    chosenPhoto: MutableState<Bitmap>,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
     navigateToProfileDestination: () -> Unit,
@@ -205,7 +218,7 @@ fun ProfileEntryBody(
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         item {
-            ProfileInputForm(user = user, chosenPhotoUri=chosenPhotoUri, onSaveClick = onSaveClick, profileImageUrl = profileImageUrl)
+            ProfileInputForm(user = user, chosenPhoto = chosenPhoto, onSaveClick = onSaveClick, profileImageUrl = profileImageUrl)
         }
         item {
             Button(
@@ -254,22 +267,49 @@ fun ProfileEntryBody(
 fun ProfileInputForm(
     user: MutableState<Users>,
     onSaveClick: () -> Unit,
-    chosenPhotoUri: MutableState<Uri?>,
+    //chosenPhotoUri: MutableState<Uri?>,
+    chosenPhoto: MutableState<Bitmap>,
     modifier: Modifier = Modifier,
     profileImageUrl: String, // URL dell'immagine del profilo
     enabled: Boolean = true
 ) {
 
-    val context = LocalContext.current
-    val file = context.createImageFile()
-    val uri = FileProvider.getUriForFile(
+    val imageChoosen = remember { mutableStateOf(false) }
+
+
+    //val context = LocalContext.current
+    //val file = context.createImageFile()
+    /*val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
         BuildConfig.APPLICATION_ID + ".provider", file
-    )
+    )*/
+    var nuova = false
+
+    val context = LocalContext.current
+    val loadImageCamera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        if (it != null) {
+            chosenPhoto.value = it
+            imageChoosen.value = true
+        }
+
+    }
+
+    val loadImageGal = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()){
+        if(Build.VERSION.SDK_INT<29){
+            chosenPhoto.value = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            imageChoosen.value = true
+        }else{
+            val source = it?.let { it1 -> ImageDecoder.createSource(context.contentResolver, it1) }
+            chosenPhoto.value = source?.let { it1 -> ImageDecoder.decodeBitmap(it1) }!!
+            imageChoosen.value = true
+        }
+    }
+
 
     //var photoUri by rememberSaveable { mutableStateOf<Uri?>(Uri.parse(user.value.imageUri)) }
     //var chosenPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
 
+    /*
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         chosenPhotoUri.value = uri
         user.value = user.value.copy(imageUri = uri.toString())
@@ -277,7 +317,9 @@ fun ProfileInputForm(
 
     }
 
+     */
 
+/*
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
         chosenPhotoUri.value  = uri
         user.value = user.value.copy(imageUri = uri.toString())
@@ -285,12 +327,14 @@ fun ProfileInputForm(
 
     }
 
+ */
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
         if (it) {
             Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
-            cameraLauncher.launch(uri)
+            loadImageCamera.launch()
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -301,11 +345,13 @@ fun ProfileInputForm(
     val showMenu = remember { mutableStateOf(false) }
 
 
-
+/*
     LaunchedEffect(chosenPhotoUri) {
         user.value = user.value.copy(imageUri = chosenPhotoUri.value.toString())
         Log.d("chosenPhoto launched Effec", "$chosenPhotoUri")
     }
+
+ */
 
 
 
@@ -324,24 +370,24 @@ fun ProfileInputForm(
                     .height(120.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = if (chosenPhotoUri.value != null) {
+                Log.d("imageChosen.value", "${imageChoosen.value}")
+
+                if(imageChoosen.value){
                         // Mostra l'immagine selezionata dall'utente
-                        Log.d("chosenPhoto !=null", "$chosenPhotoUri")
-                        rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(data = chosenPhotoUri.value)
-                                .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
-                                    crossfade(true)
-                                    placeholder(R.drawable.baseline_person_24)
-                                    transformations(CircleCropTransformation())
-                                }).build()
-                        )
+                        Log.d("chosenPhoto !=null", "${chosenPhoto.value}")
+                        Image(chosenPhoto.value.asImageBitmap(), contentDescription = "image",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape),
+                            colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                                ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                            } else {
+                                null
+                            })
+
                     } else if (profileImageUrl!==null && profileImageUrl !=="") {
                         // Mostra l'immagine del profilo esistente
-
-                        Log.d("user.value.imageUri!=null", "${profileImageUrl}")
-                        rememberAsyncImagePainter(
+                             Image(painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(LocalContext.current)
                                 .data(Uri.parse(profileImageUrl))
                                 .apply <ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
@@ -349,11 +395,21 @@ fun ProfileInputForm(
                                     placeholder(R.drawable.baseline_person_24)
                                     transformations(CircleCropTransformation())
                                 }).build()
+
                         )
+                             , contentDescription = "Selected Image",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape),
+                    colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                        ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                    } else {
+                        null
+                    })
                     } else {
                         // Mostra un'immagine di default
                         Log.d("non c'è nessuna foto", "${user.value.imageUri}")
-                        rememberAsyncImagePainter(
+                       Image(painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(LocalContext.current)
                                 .data(data = R.drawable.baseline_person_24)
                                 .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
@@ -362,18 +418,17 @@ fun ProfileInputForm(
                                     transformations(CircleCropTransformation())
                                 }).build(),
                         )
+                           , contentDescription = "Selected Image",
+                           modifier = Modifier
+                               .size(100.dp)
+                               .clip(CircleShape),
+                           colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                               ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                           } else {
+                               null
+                           })
 
-                    },
-                    contentDescription = "Selected Image",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape),
-                    colorFilter = if (chosenPhotoUri.toString() == "" && user.value.imageUri == null) {
-                        ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
-                    } else {
-                        null
                     }
-                )
                 IconButton(
                     onClick = { showMenu.value = true },
                     modifier = Modifier
@@ -397,7 +452,7 @@ fun ProfileInputForm(
                 onClick = {
 
                     showMenu.value = false
-                    launcher.launch("image/*")
+                    loadImageGal.launch("image/*")
 
                 },
                 text = { Text("Select Image from gallery", color = Color.Black) },
@@ -417,7 +472,7 @@ fun ProfileInputForm(
         Column(
             modifier = Modifier
                 .padding(8.dp)
-                .padding(top = 200.dp)
+                .padding(top = 180.dp)
                 .fillMaxWidth()
         ) {
             Row(
@@ -553,3 +608,39 @@ fun saveImageToStorage(context: Context, uri: Uri?) {
     }
 }
 */
+
+
+/* funziona con imageBitmap:
+val context = LocalContext.current
+    val myImage: Bitmap = BitmapFactory.decodeResource(Resources.getSystem(), android.R.mipmap.sym_def_app_icon)
+    val result = remember { mutableStateOf<Bitmap>(myImage) }
+    val loadImage = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        if (it != null) {
+            result.value = it
+        }
+
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(result.value.asImageBitmap(), contentDescription = "image",
+        modifier = Modifier
+            .size(300.dp)
+            .padding(10.dp))
+        OutlinedButton(onClick = {loadImage.launch()},
+        modifier = Modifier.fillMaxWidth()
+        ){
+            Text(text = "Click Image", fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primary)
+                    .fillMaxWidth()
+            )
+        }
+    }
+ */

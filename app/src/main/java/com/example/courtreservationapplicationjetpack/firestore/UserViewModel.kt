@@ -1,14 +1,12 @@
 package com.example.courtreservationapplicationjetpack.firestore
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -18,11 +16,11 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.io.File
 
 class UserViewModel: ViewModel(){
 
@@ -73,7 +71,7 @@ class UserViewModel: ViewModel(){
         }
     }
 
-    fun uploadImageToStorage(context: Context, imageUri: Uri?) {
+    fun uploadImageToStorage(context: Context, imageUri: ByteArray) {
         val storage = FirebaseStorage.getInstance()
         val storageRef: StorageReference = storage.reference
 
@@ -81,7 +79,8 @@ class UserViewModel: ViewModel(){
             val imageFileName = "profile_image_${user.value.email}.jpg"
             val imageRef = storageRef.child("profile-images").child(imageFileName)
 
-            val uploadTask = imageRef.putFile(imageUri)
+            var uploadTask = imageRef.putBytes(imageUri)
+            //val uploadTask = imageRef.putFile(Uri.parse(imageUri.toString()))
 
             uploadTask.continueWithTask { task ->
                 if (!task.isSuccessful) {
@@ -118,8 +117,11 @@ class UserViewModel: ViewModel(){
     }
 
 
-    fun updateProfile(imageUri: Uri?) {
-        val updatedUser = user.value.copy(imageUri = imageUri?.toString())
+    fun updateProfile(imageUri: ByteArray) {
+        var updatedUser = user.value
+        if(imageUri!=null){
+            updatedUser = user.value.copy(imageUri = imageUri?.toString())
+        }
         val docRef = db.document("users/${user.value.email}")
         docRef.set(updatedUser)
             .addOnSuccessListener {
