@@ -6,7 +6,7 @@ import java.util.Locale
 
 data class Reservation (
     var id: String = "",
-    val user: Int = 0,
+    val user: String = "",
     val court: String = "",
     val date: Timestamp = Timestamp.now(),
     val notes: String = "",

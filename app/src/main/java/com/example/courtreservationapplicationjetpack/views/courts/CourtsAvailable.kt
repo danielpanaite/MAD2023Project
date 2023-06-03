@@ -75,6 +75,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -91,6 +92,7 @@ import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
@@ -151,9 +153,10 @@ fun CourtsAvailable(
     val showDialog = remember { mutableStateOf(false) }
     val firebaseReservationViewModel: ReservationViewModel = viewModel()
     val reservationDetails by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
+    val userViewModel: UserViewModel = viewModel()
 
+    val email = googleAuthUiClient.getSignedInUser()?.email
 
-    //val userEmail = googleAuthUiClient.getSignedInUser()?.email
 
     Scaffold(
         topBar = {
@@ -275,7 +278,21 @@ fun CourtsAvailable(
             )
         }
 
-        Ciao(courtID = courtID, viewModel = viewModel, selectedDate = selectedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel, reservationDetails = reservationDetails)
+        Ciao(
+            courtID = courtID,
+            viewModel = viewModel,
+            selectedDate = selectedDate,
+            pickedHour = pickedHour,
+            setPickedPeople = setPickedPeople,
+            setAdditionsText = setAdditionsText,
+            additionsText = additionsText,
+            showDialog = showDialog,
+            navController = navController,
+            allSportViewModel = allSportViewModel,
+            reservationDetails = reservationDetails,
+            userEmail = email,
+            pickedPeople = pickedPeople
+        )
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -357,7 +374,21 @@ private fun CourtItem(
 //--------------------------------------------------------------------------------
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel, reservationDetails: MutableState<Reservation>) {
+fun Ciao(
+    courtID: String,
+    viewModel: CourtsAvailableViewModel,
+    selectedDate: MutableState<LocalDate>,
+    pickedHour: MutableState<String>,
+    setPickedPeople: (String) -> Unit,
+    setAdditionsText: (String) -> Unit,
+    additionsText: String,
+    showDialog: MutableState<Boolean>,
+    navController: NavController,
+    allSportViewModel: AllSportsViewModel,
+    reservationDetails: MutableState<Reservation>,
+    userEmail: String?,
+    pickedPeople: String
+) {
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
 
@@ -633,15 +664,16 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
                     }
 
-                    val dateInTimeZone = selectedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
 
-                    if(courtState.value != null) {
+                    val dateInTimeZone = selectedDate.value.atTime(LocalTime.parse(pickedHour.value)).atZone(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+
+                    if(courtState.value != null && userEmail != null) {
                         reservationDetails.value = reservationDetails.value.copy(
                             id = courtID,
                             date = Timestamp(dateInTimeZone, 0),
-                            user = 1,
-                            notes = "CIAO",
-                            people = 2,
+                            user = userEmail!!,
+                            notes = additionsText,
+                            people = pickedPeople.toInt(),
                             court = courtState.value!!.id
                         )
                     }
