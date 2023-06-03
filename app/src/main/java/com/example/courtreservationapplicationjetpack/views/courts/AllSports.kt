@@ -3,7 +3,6 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import OptionSample3
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -43,8 +42,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +63,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,32 +76,28 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
-import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.firebase.Timestamp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import okhttp3.internal.wait
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalQueries.localDate
-import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 
 object AllSportsDestination : NavigationDestination {
@@ -148,7 +144,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     var pickedDate = remember { mutableStateOf(LocalDate.now()) }
 
-    val (pickedSport, setPickedSport) = remember { mutableStateOf("calcio") }
+    var pickedSport = remember { mutableStateOf("tennis") }
     val calendarState = rememberUseCaseState()
     val now = LocalDate.now() // ottiene la data odierna
     val future = now.plusYears(5) // aggiunge 5 anni alla data odierna
@@ -157,15 +153,21 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     val optionState = rememberUseCaseState()
 
     //questo è il viewmodel firebase
-    val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val firebaseCourtViewModel: CourtViewModel = viewModel()
 
-    val firebaseReservationViewModel: ReservationViewModel = viewModel()
+    LaunchedEffect(pickedSport.value) {
+        firebaseCourtViewModel.getCourtsBySport(pickedSport.value)
+    }
+
+    val courtList by remember { firebaseCourtViewModel.courts }
 
 
 
-    OptionSample3(sportList = sportsList, optionState = optionState,pickedSport = pickedSport, setPickedSport = setPickedSport){}
-    courtsViewModel.setSport(pickedSport)
-    firebaseCourtViewModel.getCourtsBySport(pickedSport)
+
+
+    OptionSample3(sportList = sportsList, optionState = optionState, pickedSport = pickedSport, firebaseCourtViewModel = firebaseCourtViewModel)
+
+
 
 
     CalendarDialog(
@@ -217,24 +219,31 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                 ) {
                     // Bottone 1
                     OutlinedButton(
-                        onClick = {optionState.show()},
+                        onClick = { optionState.show() },
                         modifier = Modifier.weight(2f),
                         border = BorderStroke(1.dp, Color.Black),
                         shape = RoundedCornerShape(25),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black, containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        )) {
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.Black,
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        )
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Image(
-                                painter = painterResource(SportDrawables.getDrawable(pickedSport)),
+                                painter = painterResource(SportDrawables.getDrawable(pickedSport.value)),
                                 contentDescription = "Sport icon",
                                 colorFilter = ColorFilter.tint(Color.Black),
                                 modifier = Modifier.size(24.dp)
                             )
                             Text(
-                                text = pickedSport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+                                text = pickedSport.value.replaceFirstChar {
+                                    if (it.isLowerCase()) it.titlecase(
+                                        Locale.getDefault()
+                                    ) else it.toString()
+                                },
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Start,
@@ -254,8 +263,11 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         border = BorderStroke(1.dp, Color.Black),
                         shape = RoundedCornerShape(25), // = 50% percent
                         // or shape = CircleShape
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black, containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        )){
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.Black,
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.DateRange,
                             contentDescription = "Settings",
@@ -288,98 +300,116 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                 .background(color = Color.White)
                 .padding(bottom = 50.dp)
         ) {
-            println( firebaseCourtViewModel.courts.value.toString())
-
 
 
             LazyColumn {
-                itemsIndexed(firebaseCourtViewModel.courts.value) { index, court ->
-                    val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
-
-                    LaunchedEffect(key1 = court.id, key2 = dateInTimeZone) {
-                        firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))
-                    }
-
-                    val slots by remember(court.id) {
-                        derivedStateOf {
-                            firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))
-                        }
-                    }
-
-                    LaunchedEffect(slots) {
-                        Log.d("SLOTS", court.name + slots.toString())
-                    }
-
-
-                    Box(modifier = Modifier.aspectRatio(1.5f)) {
-                        println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
-                        CoilImage(
-                            modifier = Modifier
-                                .shadow(10.dp, RoundedCornerShape(0.dp))
-                                .fillMaxSize()
-                                .clickable { navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}") }
-                                .height(100.dp),
-                            sport = court.sport,
-                            URL = court.URL ?: null,
-                        )
-                        Text(
-                            text = court.name,
-                            style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 26.sp,
-                            textAlign = TextAlign.Start,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(16.dp)
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp)
-                    ) {
-                        Column {
-                            var isHoursListEmpy = remember {
-                                mutableStateOf(false)
-                            }
-                            Text(
-                                text = if (isHoursListEmpy.value) {
-                                    "Nessun orario disponibile per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
-                                } else {
-                                    "Orari disponibili per il giorno selezionato: ${pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
-                                },
-                                fontSize = 14.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                            HourButtons(
-                                reservatedSlot = slots,
-                                navigateToCourtsAvailable = { /* TODO() */ },
-                                navController = navController,
-                                courtID = court.id,
-                                date = pickedDate.value,
-                                isHoursListEmpy = isHoursListEmpy
-                            )
-
-
-//                                    /// TODO: get slot from firebase
-//                                    val slotRiservato = viewModel.getSlot(pickedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), 0).collectAsState(
-//                                        initial = emptyList<String>()
-//                                    )
-
-                                   // HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = court.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
-
-                                }
-                            }
-                        }
-                    }
+                itemsIndexed(courtList) { index, court ->
+                    CourtCard(
+                        pickedDate = pickedDate,
+                        pickedSport = pickedSport,
+                        court = court,
+                        navController = navController,
+                        key = index.toString() + court.toString() // Utilizza una combinazione di indici e valori di "court" come chiave
+                    )
                 }
-
-
+            }
 
         }
+    }
 }
+@Composable
+fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<String>, court: Court, navController: NavController, key: String) {
+    println(key)
+    val firebaseReservationViewModel: ReservationViewModel = viewModel()
+    val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+    val slots = remember { mutableStateOf(firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))) }
+
+
+
+//    LaunchedEffect(court){
+//        while (true) {
+//            delay(1000)
+//
+//            val reservationList: List<Reservation> = slots.value?.value ?: emptyList()
+//
+//            val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+//
+//            val timeStringList: List<String> = reservationList.map { reservation ->
+//                val localDateTime = LocalDateTime.ofInstant(reservation.date.toDate().toInstant(), ZoneId.systemDefault())
+//                localDateTime.format(timeFormat)
+//            }
+//            println(court.name)
+//            println("EEEEEEEEEEEEE" + court.name + slots.value.value)
+//            println(timeStringList)
+//        }
+//    }
+
+
+
+    Box(modifier = Modifier.aspectRatio(1.5f)) {
+        println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
+        CoilImage(
+            modifier = Modifier
+                .shadow(10.dp, RoundedCornerShape(0.dp))
+                .fillMaxSize()
+                .clickable { navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}") }
+                .height(100.dp),
+            sport = court.sport,
+            URL = court.URL ?: null,
+        )
+        Text(
+            text = court.name,
+            style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 26.sp,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        )
+    }
+
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(0.dp)
+        .clickable { navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}") }
+    )
+    {
+        Column {
+
+            Text(
+                text = "Premere per prenotare ${court.name}",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier.padding(16.dp),
+                style = androidx.compose.material.MaterialTheme.typography.body1
+            )
+            Text(
+                text = "${court.address}",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Text(
+                text = "${court.center}",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Text(
+                text = "${court.capacity} posti disponibili",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 16.dp).padding(bottom = 32.dp)
+            )
+        }
+    }
+}
+
+
+
+
 @Composable
 fun RatingBar(maxRating: Int = 5, onRatingChanged: (Int) -> Unit) {
     var rating by remember { mutableStateOf(0) }
@@ -445,7 +475,7 @@ fun HourButton(hour: String,navController: NavController, navigateToCourtsAvaila
 
 
 @Composable
-fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, navController: NavController, navigateToCourtsAvailable: (String) -> Unit, isHoursListEmpy: MutableState<Boolean>) {
+fun HourButtons(courtID: String, date: LocalDate, reservedSlot: List<String>, navController: NavController, navigateToCourtsAvailable: (String) -> Unit, isHoursListEmpty: MutableState<Boolean>) {
     val currentTime = LocalTime.now()
     val currentDate = LocalDate.now()
 
@@ -454,9 +484,9 @@ fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, 
             val hour = LocalTime.parse(time)
             date > currentDate || (date == currentDate && hour >= currentTime)
         }
-        .toSet() - reservatedSlot.toSet()
+        .toSet() - reservedSlot.toSet()
 
-    isHoursListEmpy.value = hours.isEmpty()
+    isHoursListEmpty.value = hours.isEmpty()
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -473,6 +503,7 @@ fun HourButtons(courtID: String, date: LocalDate, reservatedSlot: List<String>, 
         }
     }
 }
+
 
 
 @Composable

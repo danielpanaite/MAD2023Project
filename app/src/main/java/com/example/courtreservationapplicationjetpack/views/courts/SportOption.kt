@@ -1,7 +1,9 @@
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import com.example.courtreservationapplicationjetpack.R
+import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.maxkeppeker.sheets.core.models.base.IconSource
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeler.sheets.option.OptionDialog
@@ -16,8 +18,9 @@ import java.util.Locale
 internal fun OptionSample3(
     sportList: List<String>,
     optionState: UseCaseState,
-    pickedSport: String,
-    setPickedSport: (String) -> Unit, closeSelection: () -> Unit) {
+    pickedSport: MutableState<String>,
+    firebaseCourtViewModel: CourtViewModel
+    ) {
 
     val options = sportList.filter { sport ->
         when (sport) {
@@ -35,7 +38,7 @@ internal fun OptionSample3(
         Option(
             IconSource(getIconResourceForSport(sport)),
             titleText = sport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }.substringBefore(' '),
-            selected = sport == pickedSport,
+            selected = sport == pickedSport.value,
         )
     }
 
@@ -44,7 +47,8 @@ internal fun OptionSample3(
         selection = OptionSelection.Single(
             options = options
         ) { indices, _ ->
-            setPickedSport(sportList[indices])
+            pickedSport.value = sportList[indices]
+            firebaseCourtViewModel.getCourtsBySport(sportList[indices])
         },
         config = OptionConfig(
             mode = DisplayMode.GRID_VERTICAL,

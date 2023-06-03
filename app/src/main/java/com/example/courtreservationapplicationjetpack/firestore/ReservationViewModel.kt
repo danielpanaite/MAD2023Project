@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -30,6 +32,7 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
         get() = Dispatchers.Main + job
 
     private val courtReservationsMap = mutableMapOf<String, List<Reservation>>()
+    private val courtReservationsMap2: MutableMap<String, LiveData<List<Reservation>>> = mutableMapOf()
 
 
     private val db = Firebase.firestore
@@ -127,64 +130,45 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
         }
     }
 
-    @Synchronized
-    fun getCourtReservations2(court: String, date: Timestamp): List<String> {
+    fun getCourtReservations2(court: String, date: Timestamp): LiveData<List<Reservation>> {
+        val cacheKey = "$court-$date"
+
+        val cachedReservations = courtReservationsMap2[cacheKey]
+        if (cachedReservations != null) {
+            return cachedReservations
+        }
+
+        val reservationsLiveData = MutableLiveData<List<Reservation>>()
+        courtReservationsMap2[cacheKey] = reservationsLiveData
+
         val oldDate = date.toDate()
         val nextDate = oldDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(1)
         val newDate = Date.from(nextDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
 
-        // Creare una chiave univoca per identificare la combinazione di campo e data della corte
-        val cacheKey = "$court-$date"
+        val docRef = db.collection("reservations")
+            .whereEqualTo("court", court)
+            .whereGreaterThan("date", date)
+            .whereLessThan("date", Timestamp(newDate))
 
-        // Utilizzare un blocco sincronizzato per evitare sovrapposizioni tra diversi item
-        synchronized(this) {
-            // Verificare se le prenotazioni per la combinazione di corte e data sono già presenti nella mappa
-            val cachedReservations = courtReservationsMap[cacheKey]
-            if (cachedReservations != null) {
-                return formatSlots(cachedReservations)
-            }
-
-            // Creazione di un riferimento alla collezione
-            val docRef = db.collection("reservations")
-                .whereEqualTo("court", court)
-                .whereGreaterThan("date", date)
-                .whereLessThan("date", Timestamp(newDate))
-
-            // Utilizzo delle coroutine per eseguire la query Firestore in modo asincrono
-            viewModelScope.launch {
-                try {
-                    val snapshot = withContext(Dispatchers.IO) { docRef.get().await() }
-                    if (snapshot != null) {
-                        val resList = mutableListOf<Reservation>()
-                        for (document in snapshot.documents) {
-                            val res = document.toObject(Reservation::class.java)
-                            res?.id = document.id // Mappare l'ID del documento alla proprietà "id" dell'oggetto Reservation
-                            res?.let { resList.add(it) }
-                        }
-
-                        // Memorizzare le prenotazioni nella mappa
-                        courtReservationsMap[cacheKey] = resList
-
-                        // Aggiornare lo stato
-                        _courtres.value = resList
+        viewModelScope.launch {
+            try {
+                val snapshot = withContext(Dispatchers.IO) { docRef.get().await() }
+                if (snapshot != null) {
+                    val resList = mutableListOf<Reservation>()
+                    for (document in snapshot.documents) {
+                        val res = document.toObject(Reservation::class.java)
+                        res?.id = document.id
+                        res?.let { resList.add(it) }
                     }
-                } catch (e: Exception) {
-                    Log.d(TAG, "Error getting data", e)
+
+                    reservationsLiveData.value = resList
                 }
+            } catch (e: Exception) {
+                Log.d(TAG, "Error getting data", e)
             }
         }
 
-        return emptyList()
-    }
-
-    private fun formatSlots(reservations: List<Reservation>): List<String> {
-        val slots = reservations.map { reservation ->
-            val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
-            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-            timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
-            timeFormat.format(date)
-        }
-        return slots
+        return reservationsLiveData
     }
 
 
