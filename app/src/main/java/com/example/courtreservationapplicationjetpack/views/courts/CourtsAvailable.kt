@@ -89,9 +89,11 @@ import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
+import com.google.firebase.Timestamp
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.CoroutineScope
@@ -101,11 +103,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 object CourtsAvailableDestination : NavigationDestination {
     override val route  = "my_courts"
@@ -346,6 +352,7 @@ private fun CourtItem(
 fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
+    val slotList = remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         firebaseCourtViewModel.getCourtById(courtID)
@@ -355,7 +362,8 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
         courtState.value = firebaseCourtViewModel.court.value
     }
 
-    println(courtState.value)
+
+
 
 
     if(showDialog.value) {
@@ -572,9 +580,15 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                         filteredHours
                     }
 
-
-                    //Todo: risolvere errore di compilazione
-                    //TextGrid(pickedHour, filteredHoursForToday, selectedDate.value, allSportViewModel, court?.id ?: -1)
+                    if(courtState.value != null) {
+                        TextGrid(
+                            pickedHour,
+                            filteredHoursForToday,
+                            selectedDate.value,
+                            allSportViewModel,
+                            courtState.value!!.id,
+                        )
+                    }
 
 
                     Row(
@@ -670,23 +684,38 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
 
 
 @Composable
-fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: Int) {
+fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: String) {
     //TODO: Se courtID è -1, dai errore
+    val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
+    if (courtID != null) {
+        val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
+        val dateInTimeZone = selectedDate.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+        firebaseReservationViewModel.getCourtReservations(courtID, Timestamp(dateInTimeZone, 0))
 
+        val slots = firebaseReservationViewModel.courtres.value.map { reservation ->
+            val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
+
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
+
+            timeFormat.format(date)
+        }
+        slotsState.value = slots
+    }
 
     val rows = (textList.size + 4) / 5 // Calcola il numero di righe necessarie per visualizzare tutti gli elementi
     val selectedButtonIndex = remember {
         mutableStateOf(textList.indexOfFirst { it == pickedHour.value })
     }
 
-    val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
 
-    LaunchedEffect(selectedDate, courtID) {
-        val slots = allSportViewModel.getSlot(selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), courtID).collect { value ->
-            slotsState.value = value
-        }
-    }
+
+//    LaunchedEffect(selectedDate, courtID) {
+//        val slots = allSportViewModel.getSlot(selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), courtID).collect { value ->
+//            slotsState.value = value
+//        }
+//    }
 
     println("slotsState" + slotsState.value)
 
