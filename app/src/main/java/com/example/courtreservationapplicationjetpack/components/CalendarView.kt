@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.LocalContentColor
@@ -38,6 +38,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.courtreservationapplicationjetpack.R
+import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.toDate
@@ -82,6 +84,7 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 fun MonthCalendar(
     onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
     viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    courtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     googleAuthUiClient : GoogleAuthUiClient,
 ) {
     val email = googleAuthUiClient.getSignedInUser()?.email
@@ -101,6 +104,10 @@ fun MonthCalendar(
     val date = selection?.date
     val reservationsInSelectedDate =
         if (date == null) emptyList() else resList[date].orEmpty()
+    LaunchedEffect(selection){
+        if(reservationsInSelectedDate.isNotEmpty())
+            courtViewModel.getReservationCourts(reservationsInSelectedDate.map{ it.court })
+    }
     //main column that contains the whole page
     Column( modifier = Modifier
         .fillMaxSize()
@@ -136,7 +143,10 @@ fun MonthCalendar(
                 dayContent = { day ->
                     CompositionLocalProvider(LocalRippleTheme provides Example3RippleTheme) {
                         val events = if(resList[day.date] != null){
-                            resList[day.date]!!.count()
+                            if(resList[day.date]!!.count() >= 3)
+                                3
+                            else
+                                resList[day.date]!!.count()
                         } else {
                             0
                         }
@@ -174,9 +184,12 @@ fun MonthCalendar(
                             )
                         }
                     }else {
-                        items(items = reservationsInSelectedDate) { reservation ->
-                            ReservationInformation(reservation, reservation.court, onReservationClick, colors)
-                        }
+                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty() && (reservationsInSelectedDate.size == courtViewModel.reservationcourts.value.size))
+                            for( i in reservationsInSelectedDate.indices){
+                                item{
+                                    ReservationInformation(reservationsInSelectedDate[i], courtViewModel.reservationcourts.value[i], onReservationClick, colors)
+                                }
+                            }
                     }
                 }
             }
@@ -261,13 +274,10 @@ private fun MonthHeader(
 @Composable
 private fun LazyItemScope.ReservationInformation(
     reservation: com.example.courtreservationapplicationjetpack.firestore.Reservation,
-    court: String,
+    courtDetails: Court,
     onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
-    colors: List<Int>,
-    courtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    colors: List<Int>
 ) {
-    courtViewModel.getCourtById(court)
-    val courtDetails: com.example.courtreservationapplicationjetpack.firestore.Court = courtViewModel.court.value
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
@@ -296,12 +306,12 @@ private fun LazyItemScope.ReservationInformation(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSecondary
                     )
-                    if(sportIcon != null){
-                        Image(
-                            painter = painterResource(sportIcon),
-                            contentDescription = null
-                        )
-                    }
+                    Image(
+                        painter = painterResource(sportIcon),
+                        contentDescription = "Sport icon",
+                        colorFilter = ColorFilter.tint(Color.Black),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }

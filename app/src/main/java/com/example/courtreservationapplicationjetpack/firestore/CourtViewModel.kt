@@ -5,6 +5,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -19,8 +21,10 @@ class CourtViewModel: ViewModel() {
     //DATA
     private var _courts = mutableStateOf<List<Court>>(emptyList())
     private var _court = mutableStateOf(Court())
+    private var _reservationcourts = mutableStateOf<List<Court>>(emptyList())
     val courts: State<List<Court>> = _courts
     val court: MutableState<Court> = _court
+    val reservationcourts: State<List<Court>> = _reservationcourts
 
     //----------------------Methods----------------------
 
@@ -53,6 +57,26 @@ class CourtViewModel: ViewModel() {
             _court.value = court!!
         }.addOnFailureListener { exception ->
             Log.d(TAG, "Error getting data", exception)
+        }
+    }
+
+    fun getReservationCourts(courts: List<String>) {
+        // Creating a reference to document by id
+        val docRef = db.collection("courts").whereIn(FieldPath.documentId(), courts)
+        val documentRefs: MutableList<DocumentReference> = mutableListOf()
+
+        docRef.get().addOnSuccessListener {
+            Log.d(TAG, "getReservationCourts")
+            val list = mutableListOf<Court>()
+            for (document in it.documents) {
+                val res = document.toObject(Court::class.java)
+                res?.id = document.id // Map the document ID to the "id" property of the Reservation object
+                res?.let { r -> list.add(r) }
+            }
+            _reservationcourts.value = list
+            Log.d(TAG, _reservationcourts.value.toString())
+        }.addOnFailureListener {
+            Log.d(TAG, "Error getting data", it)
         }
     }
 
