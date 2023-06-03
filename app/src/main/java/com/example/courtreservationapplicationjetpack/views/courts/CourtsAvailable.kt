@@ -89,8 +89,10 @@ import coil.request.ImageRequest
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
@@ -135,7 +137,7 @@ fun CourtsAvailable(
     navController: NavController,
     modifier: Modifier = Modifier,
     navigateToCourtReservation: (Int) -> Unit,
-
+    googleAuthUiClient: GoogleAuthUiClient,
     viewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory),
     allSportViewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -147,6 +149,9 @@ fun CourtsAvailable(
     val (pickedPeople, setPickedPeople) = remember { mutableStateOf("1") }
     val (additionsText, setAdditionsText) = remember { mutableStateOf("") }
     val showDialog = remember { mutableStateOf(false) }
+    val firebaseReservationViewModel: ReservationViewModel = viewModel()
+    val reservationDetails by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
+    val userEmail = googleAuthUiClient.getSignedInUser()?.email
 
     Scaffold(
         topBar = {
@@ -163,16 +168,17 @@ fun CourtsAvailable(
                         if(pickedHour.value.isNotEmpty()) {
                             isMissingSomething.value = false
                             coroutineScope.launch {
-                                viewModel.addReservation(
-                                    null,
-                                    "1",
-                                    courtID,
-                                    selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                        .toString(),
-                                    pickedHour.value,
-                                    additionsText,
-                                    pickedPeople
-                                )
+//                                viewModel.addReservation(
+//                                    null,
+//                                    "1",
+//                                    courtID,
+//                                    selectedDate.value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+//                                        .toString(),
+//                                    pickedHour.value,
+//                                    additionsText,
+//                                    pickedPeople
+//                                )
+                                firebaseReservationViewModel.insertReservation(reservationDetails.value)
                                 showDialog.value = true
                             }
                         }
@@ -267,7 +273,7 @@ fun CourtsAvailable(
             )
         }
 
-        Ciao(courtID = courtID, viewModel = viewModel, selectedDate = selectedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel)
+        Ciao(courtID = courtID, viewModel = viewModel, selectedDate = selectedDate, pickedHour = pickedHour, setPickedPeople = setPickedPeople, setAdditionsText = setAdditionsText, showDialog = showDialog, navController = navController, allSportViewModel = allSportViewModel, reservationDetails = reservationDetails)
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
 //            modifier = modifier.padding(innerPadding),
@@ -349,10 +355,10 @@ private fun CourtItem(
 //--------------------------------------------------------------------------------
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @Composable
-fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel) {
+fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: MutableState<LocalDate>, pickedHour: MutableState<String>, setPickedPeople: (String) -> Unit, setAdditionsText: (String) -> Unit, showDialog: MutableState<Boolean>, navController: NavController, allSportViewModel: AllSportsViewModel, reservationDetails: MutableState<Reservation>) {
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
-    val slotList = remember { mutableStateOf<List<String>>(emptyList()) }
+
 
     LaunchedEffect(Unit) {
         firebaseCourtViewModel.getCourtById(courtID)
@@ -579,7 +585,6 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     } else {
                         filteredHours
                     }
-
                     if(courtState.value != null) {
                         TextGrid(
                             pickedHour,
@@ -625,6 +630,21 @@ fun Ciao(courtID: String, viewModel: CourtsAvailableViewModel, selectedDate: Mut
                     Row {
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
                     }
+
+                    val dateInTimeZone = selectedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+
+                    if(courtState.value != null) {
+                        reservationDetails.value = reservationDetails.value.copy(
+                            id = courtID,
+                            date = Timestamp(dateInTimeZone, 0),
+                            user = 1,
+                            notes = "CIAO",
+                            people = 2,
+                            court = courtState.value!!.id
+                        )
+                    }
+
+
                 }
             }
         }
@@ -684,7 +704,7 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
 
 
 @Composable
-fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: String) {
+fun TextGrid(pickedHour: MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: String) {
     //TODO: Se courtID è -1, dai errore
     val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
     if (courtID != null) {
@@ -709,17 +729,9 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
         mutableStateOf(textList.indexOfFirst { it == pickedHour.value })
     }
 
-
-
-//    LaunchedEffect(selectedDate, courtID) {
-//        val slots = allSportViewModel.getSlot(selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), courtID).collect { value ->
-//            slotsState.value = value
-//        }
-//    }
-
     println("slotsState" + slotsState.value)
 
-    val hoursList = if(slotsState.value.isNotEmpty()){
+    val hoursList = if (slotsState.value.isNotEmpty()) {
         textList - slotsState.value.toSet()
     } else {
         textList
@@ -734,7 +746,7 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
                 for (columnIndex in 0 until 5) {
                     val index = rowIndex * 5 + columnIndex
                     if (index < hoursList.size) {
-                        val isSelected = index == selectedButtonIndex.value
+                        val isSelected = hoursList[index] == pickedHour.value
 
                         Box(
                             modifier = Modifier
@@ -750,7 +762,6 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
                                     shape = MaterialTheme.shapes.small
                                 )
                                 .clickable {
-                                    selectedButtonIndex.value = index
                                     pickedHour.value = hoursList[index]
                                 },
                             contentAlignment = Alignment.Center
@@ -778,6 +789,7 @@ fun TextGrid(pickedHour:  MutableState<String>, textList: List<String>, selected
         }
     }
 }
+
 
 
 

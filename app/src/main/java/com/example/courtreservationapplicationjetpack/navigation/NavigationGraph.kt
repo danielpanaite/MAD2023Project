@@ -209,7 +209,8 @@ fun NavigationGraph(
                 pickedDate = dateArg,
                 hourOptArg = hourOptArg,
                 navController = navController,
-                navigateToCourtReservation = { navController.navigate("${route}/${it}") }
+                navigateToCourtReservation = { navController.navigate("${route}/${it}") },
+                googleAuthUiClient = googleAuthUiClient
             )
         }
 

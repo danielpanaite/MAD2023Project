@@ -224,6 +224,29 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
             Log.d(TAG, "Failed to update document ${reservation.value.id}")
         }
     }
+    fun insertReservation(reservation: Reservation) {
+        // Creating a reference to the collection "reservations" and generating a new document id
+        val docRef = db.collection("reservations").document()
+
+        // Adding the reservation data to a HashMap
+        val hash = hashMapOf<String, Any>(
+            "id" to docRef.id,
+            "user" to reservation.user,
+            "court" to reservation.court,
+            "date" to reservation.date,
+            "notes" to reservation.notes,
+            "people" to reservation.people
+        )
+
+        // Inserting the reservation data to Firestore
+        docRef.set(hash).addOnSuccessListener {
+            Log.d(TAG, "Reservation ${docRef.id} inserted successfully")
+        }.addOnFailureListener {
+            Log.d(TAG, "Failed to insert reservation ${docRef.id}")
+        }
+    }
+
+
 
     fun deleteReservation(){
         reg3.remove()
