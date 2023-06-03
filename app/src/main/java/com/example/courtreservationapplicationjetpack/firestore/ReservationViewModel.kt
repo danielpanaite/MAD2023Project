@@ -9,13 +9,27 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.coroutines.CoroutineContext
 
-class ReservationViewModel: ViewModel(){
+class ReservationViewModel: ViewModel(), CoroutineScope {
+
+    private val job = SupervisorJob()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    private val courtReservationsMap = mutableMapOf<String, List<Reservation>>()
+
 
     private val db = Firebase.firestore
     private lateinit var reg1: ListenerRegistration
@@ -63,30 +77,44 @@ class ReservationViewModel: ViewModel(){
         }
     }
 
-    fun getCourtReservations(court: String, date: Timestamp){
+    fun getCourtReservations(court: String, date: Timestamp) {
         val oldDate = date.toDate()
-        Log.d(TAG, oldDate.toString())
         val nextDate = oldDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(1)
         val newDate = Date.from(nextDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+
+        // Check if the reservations for the court and date combination are already in the map
+        val cachedReservations = courtReservationsMap["$court-$date"]
+        if (cachedReservations != null) {
+            _courtres.value = cachedReservations
+            return
+        }
+
         // Creating a reference to collection
         val docRef = db.collection("reservations")
             .whereEqualTo("court", court)
             .whereGreaterThan("date", date)
             .whereLessThan("date", Timestamp(newDate))
 
-        // Listen to data in real-time
-        reg2 = docRef.addSnapshotListener { snapshot, e ->
-            if (e != null)
-                Log.d(TAG, "Error getting data", e)
-            if (snapshot != null) {
-                Log.d(TAG, "getCourtReservations")
-                val resList = mutableListOf<Reservation>()
-                for (document in snapshot.documents) {
-                    val res = document.toObject(Reservation::class.java)
-                    res?.id = document.id // Map the document ID to the "id" property of the Reservation object
-                    res?.let { resList.add(it) }
+        // Use coroutines to perform the Firestore query asynchronously
+        launch {
+            try {
+                val snapshot = withContext(Dispatchers.IO) { docRef.get().await() }
+                if (snapshot != null) {
+                    val resList = mutableListOf<Reservation>()
+                    for (document in snapshot.documents) {
+                        val res = document.toObject(Reservation::class.java)
+                        res?.id = document.id // Map the document ID to the "id" property of the Reservation object
+                        res?.let { resList.add(it) }
+                    }
+
+                    // Store the reservations in the map
+                    courtReservationsMap["$court-$date"] = resList
+
+                    // Update the state
+                    _courtres.value = resList
                 }
-                _courtres.value = resList
+            } catch (e: Exception) {
+                Log.d(TAG, "Error getting data", e)
             }
         }
     }

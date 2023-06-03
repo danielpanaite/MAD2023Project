@@ -3,6 +3,7 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import OptionSample3
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -155,21 +156,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-    val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
-    val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
-    firebaseReservationViewModel.getCourtReservations("document1", Timestamp(dateInTimeZone, 0))
-
-    val slots = firebaseReservationViewModel.courtres.value.map {reservation ->
-        val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
-
-        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
-
-        timeFormat.format(date)
-    }
-
-    var slotRiservato = remember { mutableStateOf(slots) }
 
 
 
@@ -308,6 +295,25 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
             LazyColumn {
                 itemsIndexed(firebaseCourtViewModel.courts.value) { index, court ->
+                    val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                    val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
+
+                    LaunchedEffect(key1 = court.id, key2 = dateInTimeZone) {
+                        firebaseReservationViewModel.getCourtReservations(court.id, Timestamp(dateInTimeZone, 0))
+                    }
+
+                    val slots = remember(court.id) {
+                        firebaseReservationViewModel.courtres.value.map { reservation ->
+                            val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
+                            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                            timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
+                            timeFormat.format(date)
+                        }
+                    }
+                    Log.d("SLOTS", court.name + slots.toString())
+                    //var slotRiservato = remember { mutableStateOf(slots) }
+
+
                     Box(modifier = Modifier.aspectRatio(1.5f)) {
                         println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
                         CoilImage(
@@ -365,6 +371,14 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                         color = Color.Gray,
                                         modifier = Modifier.padding(16.dp)
                                     )
+                                    HourButtons(
+                                        reservatedSlot = slots,
+                                        navigateToCourtsAvailable = { /* TODO() */ },
+                                        navController = navController,
+                                        courtID = court.id,
+                                        date = pickedDate.value,
+                                        isHoursListEmpy = isHoursListEmpy
+                                    )
 
 
 //                                    /// TODO: get slot from firebase
@@ -372,7 +386,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 //                                        initial = emptyList<String>()
 //                                    )
 
-                                    HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = court.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
+                                   // HourButtons(reservatedSlot = slotRiservato.value, navigateToCourtsAvailable = { TODO() }, navController = navController, courtID = court.id, date = pickedDate.value, isHoursListEmpy = isHoursListEmpy)
 
                                 }
                             }
