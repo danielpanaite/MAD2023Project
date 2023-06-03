@@ -44,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -157,7 +158,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
-
+    val firebaseReservationViewModel: ReservationViewModel = viewModel()
 
 
 
@@ -295,22 +296,26 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
             LazyColumn {
                 itemsIndexed(firebaseCourtViewModel.courts.value) { index, court ->
-                    val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
                     val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
 
                     LaunchedEffect(key1 = court.id, key2 = dateInTimeZone) {
                         firebaseReservationViewModel.getCourtReservations(court.id, Timestamp(dateInTimeZone, 0))
                     }
 
-                    val slots = remember(court.id) {
-                        firebaseReservationViewModel.courtres.value.map { reservation ->
-                            val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
-                            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                            timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
-                            timeFormat.format(date)
+                    val slots by remember(court.id) {
+                        derivedStateOf {
+                            firebaseReservationViewModel.courtres.value.map { reservation ->
+                                val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
+                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                                timeFormat.timeZone = TimeZone.getTimeZone(ZoneId.of("Europe/Rome"))
+                                timeFormat.format(date)
+                            }
                         }
                     }
-                    Log.d("SLOTS", court.name + slots.toString())
+
+                    LaunchedEffect(slots) {
+                        Log.d("SLOTS", court.name + slots.toString())
+                    }
                     //var slotRiservato = remember { mutableStateOf(slots) }
 
 
@@ -325,21 +330,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             sport = court.sport,
                             URL = court.URL ?: null,
                         )
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(16.dp)
-                                ) {
-//                                    RatingBar(
-//                                        value = userReviews.find { r -> r.court == it.id }?.rating?.toFloat() ?: 0.toFloat(),
-//                                        config = RatingBarConfig()
-//                                            .style(RatingBarStyle.HighLighted)
-//                                            .size(18.dp)
-//                                            .activeColor(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)),
-//                                        onValueChange = {},
-//                                        onRatingChanged = {}
-//                                    )
-                                }
                                 Text(
                                     text = court.name,
                                     style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
