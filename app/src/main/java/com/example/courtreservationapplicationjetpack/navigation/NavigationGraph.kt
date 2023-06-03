@@ -171,7 +171,8 @@ fun NavigationGraph(
             ReviewMainPage(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() },
-                navigateToCreateReview = { navController.navigate("${ReviewCreatePageDestination.route}/$it") }
+                navigateToCreateReview = { navController.navigate("${ReviewCreatePageDestination.route}/$it") },
+                googleAuthUiClient = googleAuthUiClient
             )
         }
 

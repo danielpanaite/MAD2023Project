@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.reviews
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,20 +43,23 @@ import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.models.courts.Court
-import com.example.courtreservationapplicationjetpack.models.reservations.Reservation
-import com.example.courtreservationapplicationjetpack.models.reviews.Review
+import com.example.courtreservationapplicationjetpack.firestore.Court
+import com.example.courtreservationapplicationjetpack.firestore.CourtWithId
+import com.example.courtreservationapplicationjetpack.firestore.Reservation
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Review
+import com.example.courtreservationapplicationjetpack.firestore.ReviewViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.theme.Orange200
-import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsViewModel
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/*
+
 object ReviewMainPageDestination : NavigationDestination {
     override val route = "review_main_page"
     override val titleRes = "Reviews"
@@ -64,21 +69,49 @@ object ReviewMainPageDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun ReviewMainPage(
-    navigateToCreateReview: (Int) -> Unit,
+    navigateToCreateReview: (String) -> Unit,
     navController: NavController,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    //viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    //reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    googleAuthUiClient: GoogleAuthUiClient,
+    viewModel: ReviewViewModel = viewModel(),
+    //viewModelReservation: ReservationViewModel = viewModel()
+
 ) {
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val lifecycle = LocalLifecycleOwner.current
 
-    val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
+    val email = googleAuthUiClient.getSignedInUser()?.email
+
+    if (email != null) {
+        viewModel.getReviewByUser(email)
+        viewModel.getReservationByEmail(email)
+        viewModel.getCourtsWithId()
+    }
+
+    val reviewUiState by viewModel.myReviewsUiState.collectAsState()
+    Log.d("reviewUiState", "$reviewUiState")
+    val myReservationsUiState = viewModel.myReservationUiState
+    Log.d("myReservationsUiState", "$myReservationsUiState")
+
+    //val myReservationsUiState by viewModelReservation.reservations.collectAsState()
+
     val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
-    val reviewUiState by reviewViewModel.myReviewsUiState.collectAsState()
+    Log.d("reservationCourtsState", "$reservationCourtsState")
 
-    viewModel.setCourts(myReservationsUiState.reservationList.filter{ LocalDate.parse(it.date, reservationFormatter).isBefore(LocalDate.now()) }.map { it.courtId })
+
+    //val user = viewModel.user.value
+
+    //val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
+
+    //val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
+    //val reviewUiState by reviewViewModel.myReviewsUiState.collectAsState()
+
+    //viewModel.setCourts(myReservationsUiState.reservationList.filter{ LocalDate.parse(it.date, reservationFormatter).isBefore(
+     //   LocalDate.now()) }.map { it.courtId })
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Write your review") },
@@ -87,7 +120,7 @@ fun ReviewMainPage(
             innerPadding ->
         MyReviewsBody(
             modifier = modifier.padding(innerPadding),
-            reservationList = myReservationsUiState.reservationList,
+            reservationList = myReservationsUiState.value,
             reviewList = reviewUiState.reviewList,
             courtList = reservationCourtsState.courtList,
             onReviewClick = navigateToCreateReview
@@ -100,8 +133,8 @@ fun MyReviewsBody(
     modifier: Modifier = Modifier,
     reservationList: List<Reservation>,
     reviewList: List<Review>,
-    courtList: List<Court>,
-    onReviewClick: (Int) -> Unit
+    courtList: List<CourtWithId>,
+    onReviewClick: (String) -> Unit
 ){
     Column(
         modifier = modifier
@@ -118,7 +151,7 @@ fun MyReviewsBody(
             ReviewList(
                 courtList,
                 reviewList,
-                onReviewClick = { onReviewClick(it.id) }
+                //onReviewClick = { onReviewClick(it.id) }
             )
         }
     }
@@ -126,9 +159,9 @@ fun MyReviewsBody(
 
 @Composable
 fun ReviewList(
-    courtList: List<Court>,
+    courtList: List<CourtWithId>,
     reviewList: List<Review>,
-    onReviewClick: (Court) -> Unit,
+    //onReviewClick: (String) -> Unit,
 ){
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -168,12 +201,12 @@ fun ReviewList(
                             .align(Alignment.CenterVertically)
                             .padding(start = 8.dp)){
                             Text(
-                                text = courtList[ci].name,
+                                text = courtList[ci].court.name,
                                 textAlign = TextAlign.Start,
                                 fontWeight = FontWeight.Normal,
                             )
                             Text(
-                                text = courtList[ci].address,
+                                text = courtList[ci].court.address,
                                 textAlign = TextAlign.Start,
                                 fontWeight = FontWeight.ExtraLight,
                             )
@@ -186,14 +219,17 @@ fun ReviewList(
                         .padding(end = 16.dp)
                     ){
                         Button(onClick = {
-                            onReviewClick(courtList[ci])
+                           // onReviewClick(courtList[ci].idCourt)
                         },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp)
                                 .align(Alignment.CenterVertically)
                         ) {
-                            if(!reviewList.none { it.court == courtList[ci].id }) {
+                            Log.d("reviewList", "$reviewList")
+                            Log.d("reviewList", "${reviewList}")
+
+                            if(!reviewList.none { it.court == courtList[ci].idCourt }) {
                                 Text(text = "Edit")
                             }else{
                                 Text(text = "Review")
@@ -201,7 +237,10 @@ fun ReviewList(
                         }
                     }
                 }
-                if(!reviewList.none { it.court == courtList[ci].id }){
+                if(!reviewList.none { it.court == courtList[ci].idCourt }){
+                    val review = reviewList.filter { it.court == courtList[ci].idCourt }[0]
+                    val reviewDate = review.date?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                    val formattedDate = reviewDate?.let { reservationFormatter.format(it) }
                     Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
                     Surface(color = Color.White){
                         Column(modifier = Modifier
@@ -211,29 +250,38 @@ fun ReviewList(
                                 .fillMaxWidth()
                                 .padding(16.dp)
                             ){
-                                RatingBar(
-                                    value = reviewList.filter { it.court == courtList[ci].id }[0].rating.toFloat(),
-                                    config = RatingBarConfig()
-                                        .style(RatingBarStyle.HighLighted)
-                                        .size(18.dp)
-                                        .activeColor(Orange200),
-                                    onValueChange = {},
-                                    onRatingChanged = {},
-                                    modifier = Modifier.fillMaxWidth().weight(3f)
-                                )
+                                reviewList.filter { it.court == courtList[ci].idCourt }[0].rating?.let {
+                                    RatingBar(
+                                        value = it.toFloat(),
+                                        config = RatingBarConfig()
+                                            .style(RatingBarStyle.HighLighted)
+                                            .size(18.dp)
+                                            .activeColor(Orange200),
+                                        onValueChange = {},
+                                        onRatingChanged = {},
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .weight(3f)
+                                    )
+                                }
                                 Text(
-                                    text = LocalDate.parse(reviewList.filter { it.court == courtList[ci].id }[0].date, reservationFormatter).format(toReservationFormatter),
-                                    modifier = Modifier.fillMaxWidth().weight(1f).offset(y = (-1).dp),
+                                    text = formattedDate ?: "",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .offset(y = (-1).dp),
                                     fontWeight = FontWeight.ExtraLight,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
-                            Text(
-                                text = reviewList.filter { it.court == courtList[ci].id }[0].review,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
-                            )
+                            reviewList.filter { it.court == courtList[ci].idCourt }[0].review?.let {
+                                Text(
+                                    text = it,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -241,4 +289,3 @@ fun ReviewList(
         }
     }
 }
-*/
