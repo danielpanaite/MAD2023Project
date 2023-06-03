@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack
 
 import android.app.ActionBar
+import android.media.MediaPlayer
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +34,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.courtreservationapplicationjetpack.signIn.SignInDestination
+import kotlinx.coroutines.delay
 
 
 sealed class Screen(val route: String) {
@@ -51,6 +54,20 @@ fun SplashScreen(navController: NavHostController) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_splash))
         val logoAnimationState =
             animateLottieCompositionAsState(composition = composition)
+        val context = LocalContext.current
+        val mediaPlayer = remember { MediaPlayer.create(context, R.raw.splash_sound) }
+        DisposableEffect(Unit) {
+            onDispose {
+                mediaPlayer.release()
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            delay(1000)
+            mediaPlayer.start()
+            delay(1000)
+            mediaPlayer.stop()
+        }
 
         LottieAnimation(
             modifier = Modifier

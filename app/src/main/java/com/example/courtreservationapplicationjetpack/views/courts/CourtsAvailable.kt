@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.courts
 
 import android.annotation.SuppressLint
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -49,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -87,6 +89,11 @@ import androidx.compose.ui.unit.sp
 import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
@@ -95,6 +102,7 @@ import com.example.courtreservationapplicationjetpack.firestore.ReservationViewM
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.example.courtreservationapplicationjetpack.signIn.SignInDestination
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
@@ -230,16 +238,53 @@ fun CourtsAvailable(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+//                        Box(
+//                            contentAlignment = Alignment.Center,
+//                            modifier = Modifier
+//                                .size(64.dp)
+//                                .padding(top = 4.dp)
+//                        ) {
+//                            Icon(
+//                                painter = painterResource(R.drawable.ic_error),
+//                                contentDescription = "Error Icon",
+//                                tint = Color.Red
+//                            )
+//                        }
                         Box(
-                            contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(64.dp)
-                                .padding(top = 4.dp)
+                                .height(200.dp)
+                                .padding(bottom = 8.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = Color.Gray,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .background(Color.Red.copy(alpha = 0.1f))
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_error),
-                                contentDescription = "Error Icon",
-                                tint = Color.Red
+                            val context = LocalContext.current
+                            val mediaPlayer = remember { MediaPlayer.create(context, R.raw.fail_sound) }
+
+                            DisposableEffect(Unit) {
+                                onDispose {
+                                    mediaPlayer.release()
+                                }
+                            }
+
+                            LaunchedEffect(Unit) {
+                                mediaPlayer.setVolume(0.3f, 0.3f)
+                                mediaPlayer.start()
+                            }
+                            val composition = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.save_failure))
+                            val progress by animateLottieCompositionAsState(
+                                composition = composition.value,
+                                iterations = LottieConstants.IterateForever
+                            )
+                            LottieAnimation(
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.FillBounds,
+                                composition = composition.value,
+                                progress = { progress },
+                                maintainOriginalImageBounds = true
                             )
                         }
                         Text(
@@ -407,6 +452,11 @@ fun Ciao(
     }
 
 
+    val composition = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.save_success))
+    val progress by animateLottieCompositionAsState(
+        composition = composition.value,
+        iterations = LottieConstants.IterateForever
+    )
 
 
 
@@ -426,17 +476,51 @@ fun Ciao(
                 )
             },
             text = {
-                Box(
-                    contentAlignment = Alignment.Center,
+                Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_success),
-                        contentDescription = "Success Icon",
-                        tint = Color(0xFF02913C),
+                    Box(
                         modifier = Modifier
-                            .size(64.dp)
-                            .padding(top = 4.dp)
+                            .height(200.dp)
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .border(
+                                width = 2.dp,
+                                color = Color.Gray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .background(Color.Green.copy(alpha = 0.1f))
+                    ) {
+                        val context = LocalContext.current
+                        val mediaPlayer = remember { MediaPlayer.create(context, R.raw.success_sound) }
+
+                        DisposableEffect(Unit) {
+                            onDispose {
+                                mediaPlayer.release()
+                            }
+                        }
+
+                        LaunchedEffect(Unit) {
+                            mediaPlayer.start()
+                        }
+
+                        LottieAnimation(
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds,
+                            composition = composition.value,
+                            progress = { progress },
+                            maintainOriginalImageBounds = true
+                        )
+                    }
+                    Text(
+                        text = "Hai salvato correttamente la tua prenotazione",
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
@@ -450,7 +534,6 @@ fun Ciao(
                 }
             },
             dismissButton = {
-
                 Button(
                     onClick = {
                         navController.popBackStack()
@@ -460,6 +543,10 @@ fun Ciao(
                 }
             }
         )
+
+
+
+
     }
 
 //    LaunchedEffect(Unit) {
