@@ -55,7 +55,7 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
 
     //----------------------Methods----------------------
 
-    fun getUserReservations(user: Int) {
+    fun getUserReservations(user: String) {
         // Creating a reference to collection
         val docRef = db.collection("reservations")
             .whereEqualTo("user", user)

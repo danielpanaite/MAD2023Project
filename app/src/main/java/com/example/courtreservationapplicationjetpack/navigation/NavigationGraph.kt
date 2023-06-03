@@ -115,6 +115,7 @@ fun NavigationGraph(
             MyReservations(
                 navController = navController,
                 navigateToEditReservation = { navController.navigate("${EditReservationDestination.route}/$it") },
+                googleAuthUiClient = googleAuthUiClient
             )
         }
         composable(

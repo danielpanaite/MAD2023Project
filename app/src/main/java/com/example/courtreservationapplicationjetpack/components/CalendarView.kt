@@ -51,6 +51,7 @@ import com.example.courtreservationapplicationjetpack.firestore.ReservationViewM
 import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.firestore.toTime
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.theme.GreyItemInactive
 import com.kizitonwose.calendar.compose.CalendarLayoutInfo
 import com.kizitonwose.calendar.compose.CalendarState
@@ -80,9 +81,12 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 @Composable
 fun MonthCalendar(
     onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
-    viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    googleAuthUiClient : GoogleAuthUiClient,
 ) {
-    viewModel.getUserReservations(1)
+    val email = googleAuthUiClient.getSignedInUser()?.email
+    if(email != null)
+        viewModel.getUserReservations(email)
     val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val resList = viewModel.reservations.value
 //        .filter { LocalDate.parse(it.toDate(), reservationFormatter) >= LocalDate.now() }

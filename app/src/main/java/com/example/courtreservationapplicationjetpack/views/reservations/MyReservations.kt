@@ -16,6 +16,7 @@ import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.components.MonthCalendar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 
 object MyReservationsDestination : NavigationDestination {
     override val route = "my_reservation"
@@ -28,7 +29,8 @@ object MyReservationsDestination : NavigationDestination {
 fun MyReservations(
     navigateToEditReservation: (String) -> Unit,
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    googleAuthUiClient : GoogleAuthUiClient,
 ) {
 
     Scaffold(
@@ -38,6 +40,7 @@ fun MyReservations(
         MyReservationsBody(
             modifier = modifier.padding(innerPadding),
             onReservationClick = navigateToEditReservation,
+            googleAuthUiClient = googleAuthUiClient,
         )
     }
 
@@ -47,6 +50,7 @@ fun MyReservations(
 fun MyReservationsBody(
     modifier: Modifier = Modifier,
     onReservationClick: (String) -> Unit,
+    googleAuthUiClient : GoogleAuthUiClient,
     ){
     Column(
         modifier = modifier
@@ -54,7 +58,8 @@ fun MyReservationsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         MonthCalendar(
-            onReservationClick = { onReservationClick(it.id) }
+            onReservationClick = { onReservationClick(it.id) },
+            googleAuthUiClient = googleAuthUiClient
         )
     }
 }
