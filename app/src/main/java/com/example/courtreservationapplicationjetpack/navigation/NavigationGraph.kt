@@ -58,7 +58,7 @@ fun NavigationGraph(
 ){
     NavHost(
         navController = navController,
-        startDestination = MainScreenDestination.route,
+        startDestination = Screen.Splash.route,
         modifier = modifier
     ){
         composable(route = Screen.Splash.route) {

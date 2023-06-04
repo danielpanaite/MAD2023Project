@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,13 +31,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
+import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.firestore.Notification
 import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
@@ -160,6 +167,41 @@ fun NotificationItem(
             }
         }
         Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
+        Surface(color = Color.White){
+            Row(modifier = Modifier
+                .padding(16.dp)
+                .height(80.dp)){
+                Card(modifier = Modifier
+                    .fillMaxSize()
+                    .weight(2f)){
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                            .crossfade(true)
+                            .build(),
+                        placeholder = painterResource(R.drawable.placeholder),
+                        contentDescription = "Court Image",
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(6f)
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 8.dp)){
+                    Text(
+                        text = "Campo Stella",
+                        textAlign = TextAlign.Start,
+                        fontWeight = FontWeight.Normal,
+                    )
+                    Text(
+                        text = "c.so Peschiera 151",
+                        textAlign = TextAlign.Start,
+                        fontWeight = FontWeight.ExtraLight,
+                    )
+                }
+            }
+        }
         Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
         Surface(color = Color.White){
             Row(modifier = Modifier

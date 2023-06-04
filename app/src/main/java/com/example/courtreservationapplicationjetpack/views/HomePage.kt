@@ -1,20 +1,14 @@
 package com.example.courtreservationapplicationjetpack.views
 
-import android.app.Activity
-import android.view.WindowManager
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -73,12 +67,9 @@ private fun HomeBody(
             onClick = navigateToAllSports,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
-                .border(BorderStroke(1.dp, Color.Gray), MaterialTheme.shapes.medium),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-
-                ),
+                .padding(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation( 8.dp )
         ) {
             Image(
                 painter = rememberAsyncImagePainter
@@ -114,12 +105,9 @@ private fun HomeBody(
             onClick = navigateToReviews,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
-                .border(BorderStroke(1.dp, Color.Gray), MaterialTheme.shapes.medium),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-
-                ),
+                .padding(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation( 8.dp )
         ) {
             Image(
                 painter = rememberAsyncImagePainter
@@ -127,7 +115,6 @@ private fun HomeBody(
                     model ="https://media.istockphoto.com/id/1208411337/photo/consumer-reviews-concepts-with-bubble-people-review-comments-and-smartphone-rating-or.jpg?s=612x612&w=0&k=20&c=Rs8wAo4zS3FBEs4N_4a76zTSukulfrS6AErBKHZVJ9c=",
 
                     ), contentDescription = null,
-
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.medium)
                     .fillMaxWidth()
