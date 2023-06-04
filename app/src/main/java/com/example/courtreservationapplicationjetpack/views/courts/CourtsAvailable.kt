@@ -735,7 +735,7 @@ fun Ciao(
                         var pickerValue by remember { mutableStateOf(1) }
                         setPickedPeople(pickerValue.toString())
                         Text(
-                            text = "Numero di persone coinvolte: $pickerValue",
+                            text = "Number of people involved $pickerValue",
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.Gray,
                             modifier = Modifier
@@ -748,7 +748,7 @@ fun Ciao(
                                 .width(120.dp)
                                 .align(Alignment.CenterVertically),
                             value = pickerValue,
-                            range = 0..10,
+                            range = 1..10,
                             onValueChange = {
                                 pickerValue = it
                                 setPickedPeople(it.toString())
@@ -823,7 +823,7 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
             modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
         ) {
             Text(
-                text = "Timeslot disponibili per il giorno ${
+                text = "Timeslot available for the day ${
                     selectedDate.value.format(
                         DateTimeFormatter.ofPattern("dd/MM/yyyy")
                     )
