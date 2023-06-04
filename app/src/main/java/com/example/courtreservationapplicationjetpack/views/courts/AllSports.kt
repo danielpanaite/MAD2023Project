@@ -398,7 +398,7 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 modifier = Modifier.padding(start = 16.dp)
             )
             Text(
-                text = "${court.capacity} places available",
+                text = "${court.capacity} reservations available",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 16.dp).padding(bottom = 32.dp)
