@@ -10,6 +10,7 @@ data class Notification(
     val sender: String = "",
     val status: String = "",
     val type: String = "",
+    val court: String = "",
     val date: Timestamp = Timestamp.now()
 )
 

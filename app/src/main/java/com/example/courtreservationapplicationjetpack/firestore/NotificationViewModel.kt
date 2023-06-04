@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -22,7 +23,7 @@ class NotificationViewModel: ViewModel() {
     val notifications: State<List<Notification>> = _notifications
 
     fun getUserNotifications(user: String) {
-        val docRef = db.collection("notifications").whereEqualTo("receiver", user)
+        val docRef = db.collection("notifications").whereEqualTo("receiver", user).whereEqualTo("status", "pending").orderBy("date", Query.Direction.DESCENDING)
 
         reg1 = docRef.addSnapshotListener { snapshot, e ->
             if (e != null)

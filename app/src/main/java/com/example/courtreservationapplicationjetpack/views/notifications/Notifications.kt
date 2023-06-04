@@ -1,6 +1,8 @@
 package com.example.courtreservationapplicationjetpack.views.notifications
 
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +19,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,12 +47,15 @@ import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.Court
+import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Notification
 import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
 import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.firestore.toTime
+import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.theme.ClearRed
@@ -90,13 +95,18 @@ fun NotificationsBody(
     modifier: Modifier = Modifier,
     googleAuthUiClient : GoogleAuthUiClient,
     viewModel: NotificationViewModel = viewModel(),
-    userViewModel: UserViewModel = viewModel()
+    userViewModel: UserViewModel = viewModel(),
+    courtViewModel: CourtViewModel = viewModel(),
 ){
     val email = googleAuthUiClient.getSignedInUser()?.email
     if(email != null)
         viewModel.getUserNotifications(email)
-    if(viewModel.notifications.value.isNotEmpty())
-        userViewModel.getUserListByEmails(viewModel.notifications.value.map { it.sender })
+    if(viewModel.notifications.value.isNotEmpty()) {
+        val courts = viewModel.notifications.value.filter { it.court != "" }.map { it.court }
+        courtViewModel.getReservationCourts(courts)
+        val users = viewModel.notifications.value.map { it.sender }
+        userViewModel.getUserListByEmails(users)
+    }
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -104,15 +114,18 @@ fun NotificationsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
     ) {
-        if(viewModel.notifications.value.isNotEmpty() && userViewModel.users.value.isNotEmpty())
+        // TODO: Refresh user list when new notifications appear
+        if(viewModel.notifications.value.isNotEmpty() && userViewModel.users.value.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty())
             for( i in viewModel.notifications.value.indices){
-                if(viewModel.notifications.value[i].status == "pending")
-                    item{
-                        NotificationItem(
-                            notification = viewModel.notifications.value[i],
-                            sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender }
-                        )
-                    }
+                item{
+                    Log.d("COURT", courtViewModel.reservationcourts.value.toString())
+                    Log.d("USER", userViewModel.users.value.toString())
+                    NotificationItem(
+                        notification = viewModel.notifications.value[i],
+                        sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender },
+                        court = courtViewModel.reservationcourts.value.firstOrNull { it.id == viewModel.notifications.value[i].court }
+                    )
+                }
             }
     }
 }
@@ -121,6 +134,7 @@ fun NotificationsBody(
 fun NotificationItem(
     notification: Notification,
     sender: Users,
+    court: Court?,
     viewModel: NotificationViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel()
 ){
@@ -141,8 +155,14 @@ fun NotificationItem(
                 ){
                     if(notification.type == "friend")
                         Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp))
-                    else
-                        Icon(Icons.Default.Star, contentDescription = "Play", modifier = Modifier.size(40.dp))
+                    else if(court != null)
+                        Image(
+                            painter = painterResource(SportDrawables.getDrawable(court.sport)),
+                            contentDescription = "Sport icon",
+                            colorFilter = ColorFilter.tint(Color.Black),
+                            modifier = Modifier.size(40.dp)
+                        )
+                        //Icon(Icons.Default.Star, contentDescription = "Play", modifier = Modifier.size(40.dp))
                 }
                 Column(modifier = Modifier
                     .fillMaxSize()
@@ -166,39 +186,47 @@ fun NotificationItem(
                 }
             }
         }
-        Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
-        Surface(color = Color.White){
-            Row(modifier = Modifier
-                .padding(16.dp)
-                .height(80.dp)){
-                Card(modifier = Modifier
-                    .fillMaxSize()
-                    .weight(2f)){
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
-                            .crossfade(true)
-                            .build(),
-                        placeholder = painterResource(R.drawable.placeholder),
-                        contentDescription = "Court Image",
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(6f)
-                    .align(Alignment.CenterVertically)
-                    .padding(start = 8.dp)){
-                    Text(
-                        text = "Campo Stella",
-                        textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.Normal,
-                    )
-                    Text(
-                        text = "c.so Peschiera 151",
-                        textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.ExtraLight,
-                    )
+        if(court != null) {
+            Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
+            Surface(color = Color.White) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .height(80.dp)
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(2f)
+                    ) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(court.URL)
+                                .crossfade(true)
+                                .build(),
+                            placeholder = painterResource(R.drawable.placeholder),
+                            contentDescription = "Court Image",
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(6f)
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 8.dp)
+                    ) {
+                        Text(
+                            text = court.name,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Normal,
+                        )
+                        Text(
+                            text = court.address,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.ExtraLight,
+                        )
+                    }
                 }
             }
         }
