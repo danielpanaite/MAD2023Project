@@ -331,6 +331,18 @@ class ReviewViewModel: ViewModel() {
 
 
     }
+
+    fun deleteReview(){
+        //reg3.remove()
+        // Creating a reference to document by id
+        val docRef = db.document("reviews/${reviewUiState.value.review.id}")
+
+        docRef.delete().addOnSuccessListener {
+            Log.d(ReservationViewModel.TAG, "Document ${reviewUiState.value.review.id} deleted successfully")
+        }.addOnFailureListener {
+            Log.d(ReservationViewModel.TAG, "Failed to delete document ${reviewUiState.value.review.id}")
+        }
+    }
 }
 
 

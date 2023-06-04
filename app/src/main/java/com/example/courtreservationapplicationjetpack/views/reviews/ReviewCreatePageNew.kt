@@ -112,7 +112,7 @@ fun ReviewCreatePage(
                 onDeleteClick = {
                     CoroutineScope(Dispatchers.IO).launch {
                         println(reviewUiState.review)
-                        //viewModel.deleteReview()
+                        viewModel.deleteReview()
                     }
                     toastDelete.show()
                     navController.popBackStack()
