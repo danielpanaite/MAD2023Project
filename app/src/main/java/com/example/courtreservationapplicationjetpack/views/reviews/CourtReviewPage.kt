@@ -38,7 +38,7 @@ import com.example.courtreservationapplicationjetpack.ui.theme.Orange200
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
-
+/*
 object CourtReviewPageDestination : NavigationDestination {
     override val route = "court_review_page"
     const val courtIdArg = "courtId"
@@ -152,3 +152,4 @@ fun CourtReviewList(
         }
     }
 }
+ */

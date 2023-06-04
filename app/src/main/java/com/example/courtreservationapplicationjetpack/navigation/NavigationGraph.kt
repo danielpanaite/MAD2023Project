@@ -42,8 +42,6 @@ import com.example.courtreservationapplicationjetpack.views.reservations.MyReser
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
-import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPage
-import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePage
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPage
@@ -165,12 +163,15 @@ fun NavigationGraph(
         composable(
             route = ReviewCreatePageDestination.routeWithArgs,
             arguments = listOf(navArgument(ReviewCreatePageDestination.courtIdArg) {
-                type = NavType.IntType
+                type = NavType.StringType
             })
         ){
             ReviewCreatePage(
                 navController = navController,
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                courtIdArg = it.arguments?.getString("courtIdArg"),
+
+                        googleAuthUiClient = googleAuthUiClient
             )
         }
 
@@ -180,14 +181,16 @@ fun NavigationGraph(
             ReviewMainPage(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() },
-                navigateToCreateReview = { navController.navigate("${ReviewCreatePageDestination.route}/$it") }
+                navigateToCreateReview = { navController.navigate("${ReviewCreatePageDestination.route}/$it") },
+                googleAuthUiClient = googleAuthUiClient
             )
         }
 
+        /*
         composable(
             route = CourtReviewPageDestination.routeWithArgs,
             arguments = listOf(navArgument(CourtReviewPageDestination.courtIdArg) {
-                type = NavType.IntType
+                type = NavType.StringType
             })
         ){
             CourtReviewPage(
@@ -195,7 +198,7 @@ fun NavigationGraph(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
-
+*/
         composable(
             route = CourtsAvailableDestination.routeWithArgs,
             arguments = listOf(
