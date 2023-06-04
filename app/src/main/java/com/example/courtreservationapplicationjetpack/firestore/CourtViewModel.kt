@@ -72,7 +72,6 @@ class CourtViewModel: ViewModel() {
                 res?.let { r -> list.add(r) }
             }
             _reservationcourts.value = list
-            Log.d(TAG, _reservationcourts.value.toString())
         }.addOnFailureListener {
             Log.d(TAG, "Error getting data", it)
         }

@@ -18,11 +18,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import kotlin.coroutines.CoroutineContext
 
 class ReservationViewModel: ViewModel(), CoroutineScope {
@@ -51,10 +48,6 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
     val reservations: State<List<Reservation>> = _reservations
     val reservation: MutableState<Reservation> = _reservation
     val courtres: State<List<Reservation>> = _courtres
-
-//    init { //executed when the viewModel is called
-//        getUserReservations(1) //TODO: integrate with logged user
-//    }
 
     //----------------------Methods----------------------
 

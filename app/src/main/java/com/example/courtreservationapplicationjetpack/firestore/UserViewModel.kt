@@ -1,8 +1,5 @@
 package com.example.courtreservationapplicationjetpack.firestore
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -10,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
@@ -20,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.io.File
 
 class UserViewModel: ViewModel(){
 
@@ -42,15 +39,14 @@ class UserViewModel: ViewModel(){
     private var _sports = mutableStateOf<List<String>>(emptyList())
     val sports: State<List<String>> = _sports
 
-
-    private val _sportsPreferencesUiState = MutableStateFlow<SportsPreferencesUiState>(SportsPreferencesUiState(isLoading = true))
+    private val _sportsPreferencesUiState = MutableStateFlow(SportsPreferencesUiState(isLoading = true))
     val sportsPreferencesUiState: StateFlow<SportsPreferencesUiState> = _sportsPreferencesUiState
 
-    private val _achievements = MutableStateFlow<AchievementsUi>(AchievementsUi(isLoading = true))
+    private val _achievements = MutableStateFlow(AchievementsUi(isLoading = true))
     val achievements: StateFlow<AchievementsUi> = _achievements
 
-
-
+    private var _friends = mutableStateOf<List<String>>(emptyList())
+    val friends: State<List<String>> = _friends
 
     //----------------------Methods----------------------
 
@@ -71,15 +67,32 @@ class UserViewModel: ViewModel(){
         }
     }
 
-    fun uploadImageToStorage(context: Context, imageUri: ByteArray) {
+    fun getUserListByEmails(emails: List<String>){
+        val docRef = db.collection("users").whereIn(FieldPath.documentId(), emails)
+
+        docRef.get().addOnSuccessListener {
+            Log.d(TAG, "getUserListByEmails")
+            val list = mutableListOf<Users>()
+            for (document in it.documents) {
+                val res = document.toObject(Users::class.java)
+                res?.id = document.id // Map the document ID to the "id" property of the Reservation object
+                res?.let { r -> list.add(r) }
+            }
+            _users.value = list
+        }.addOnFailureListener {
+            Log.d(TAG, "Error getting data", it)
+        }
+    }
+
+    fun uploadImageToStorage(imageUri: ByteArray) {
         val storage = FirebaseStorage.getInstance()
         val storageRef: StorageReference = storage.reference
 
-        imageUri?.let {
+        imageUri.let {
             val imageFileName = "profile_image_${user.value.email}.jpg"
             val imageRef = storageRef.child("profile-images").child(imageFileName)
 
-            var uploadTask = imageRef.putBytes(imageUri)
+            val uploadTask = imageRef.putBytes(imageUri)
             //val uploadTask = imageRef.putFile(Uri.parse(imageUri.toString()))
 
             uploadTask.continueWithTask { task ->
@@ -105,7 +118,7 @@ class UserViewModel: ViewModel(){
 
 
 
-    fun updateImageUrlInFirebaseDatabase(imageUrl: String) {
+    private fun updateImageUrlInFirebaseDatabase(imageUrl: String) {
         val docRef = db.collection("users").document(user.value.email)
         docRef.update("imageUri", imageUrl)
             .addOnSuccessListener {
@@ -118,10 +131,7 @@ class UserViewModel: ViewModel(){
 
 
     fun updateProfile(imageUri: ByteArray) {
-        var updatedUser = user.value
-        if(imageUri!=null){
-            updatedUser = user.value.copy(imageUri = imageUri?.toString())
-        }
+        val updatedUser = user.value.copy(imageUri = imageUri.toString())
         val docRef = db.document("users/${user.value.email}")
         docRef.set(updatedUser)
             .addOnSuccessListener {
@@ -131,6 +141,7 @@ class UserViewModel: ViewModel(){
                 Log.d(TAG, "Failed to update document ${user.value.id}")
             }
     }
+
     fun getSportsWithLevels(email: String) {
         val docRef = db.collection("users").document(email)
         docRef.get().addOnSuccessListener { documentSnapshot ->
@@ -171,6 +182,17 @@ class UserViewModel: ViewModel(){
         }
     }
 
+    fun addFriend(email: String, friend: String) {
+        val docRef = db.collection("users").document(email)
+        docRef.update("friends", FieldValue.arrayUnion(friend))
+            .addOnSuccessListener {
+                Log.d(TAG, "Friend added successfully")
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to add friend")
+            }
+    }
+
     fun addAchievement(
         email: String?,
         selectedSport: String,
@@ -185,18 +207,14 @@ class UserViewModel: ViewModel(){
             date = date, // Assumi che dateString sia nel formato "yyyy-MM-dd"
             description = additionalInfo
         )
-        if (userRef != null) {
-            userRef.update("achievements", FieldValue.arrayUnion(achievement))
-                .addOnSuccessListener {
-                    // L'achievement è stato aggiunto con successo
-                    Log.d(TAG, "New achievement inserted correctly")
+        userRef?.update("achievements", FieldValue.arrayUnion(achievement))?.addOnSuccessListener {
+            // L'achievement è stato aggiunto con successo
+            Log.d(TAG, "New achievement inserted correctly")
 
-                }
-                .addOnFailureListener { e ->
-                    // Gestisci eventuali errori durante l'aggiunta dell'achievement
-                    Log.d(TAG, "Error inserting new achievement")
+        }?.addOnFailureListener { e ->
+            // Gestisci eventuali errori durante l'aggiunta dell'achievement
+            Log.d(TAG, "Error inserting new achievement", e)
 
-                }
         }
     }
 
@@ -210,7 +228,7 @@ class UserViewModel: ViewModel(){
             }
             .addOnFailureListener { e ->
                 // Handle failure to delete achievement
-                Log.d(TAG, "Error deleting achievement")
+                Log.d(TAG, "Error deleting achievement", e)
             }
     }
 
@@ -245,7 +263,7 @@ class UserViewModel: ViewModel(){
                 if (user != null) {
                     val updatedSports = user.sportPreferences.toMutableList()
 
-                    Log.d("updateUser", "${sports}")
+                    Log.d("updateUser", "$sports")
 
                     // Aggiorna le preferenze sportive per ogni sport nella lista
                     sports.forEach { sport ->
@@ -259,7 +277,7 @@ class UserViewModel: ViewModel(){
                             val existingSport = updatedSports[existingSportIndex]
                             val updatedSport = existingSport.copy(masteryLevel = sport.masteryLevel)
                             updatedSports[existingSportIndex] = updatedSport
-                            Log.d("updatedSports", "${updatedSport}")
+                            Log.d("updatedSports", "$updatedSport")
 
                         } else {
                             // Lo sport non esiste ancora, aggiungilo alla lista delle preferenze
@@ -286,7 +304,7 @@ class UserViewModel: ViewModel(){
         val docRef = db.collection("courts")
 
         docRef.get().addOnSuccessListener {
-            Log.d(UserViewModel.TAG, "getListSport")
+            Log.d(TAG, "getListSport")
             val list = mutableListOf<String>()
             for (document in it.documents) {
                 val res = document.toObject(Court::class.java)

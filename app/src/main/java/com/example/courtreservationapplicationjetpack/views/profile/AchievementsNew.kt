@@ -64,10 +64,8 @@ import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Locale
 
 object AchievementsDestination : NavigationDestination {
@@ -89,9 +87,7 @@ fun Achievements(
     navigateToNewAchievementsDestination: () -> Unit,
     viewModel: UserViewModel = viewModel(),
 
-    //viewModelVecchio: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    //val achievementsUi by viewModelVecchio.achievements.collectAsState()
 
     val email = googleAuthUiClient.getSignedInUser()?.email
     var launchOnce by rememberSaveable { mutableStateOf(true) }
@@ -206,11 +202,11 @@ fun AchievementsItem(
     achievement: Achievements,
     onDeleteClick: () -> Unit
 ) {
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
     val showDialog = remember { mutableStateOf(false) }
 
     Log.d("achievement", "$achievement")
-    Log.d("achievement.toData", "${achievement.toDate()}")
+    Log.d("achievement.toData", achievement.toDate())
 
 
     Box(
@@ -257,17 +253,9 @@ fun AchievementsItem(
                     contentDescription = "Court Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .height(128.dp)
+                        .height(150.dp)
                         .blur(radius = 8.dp)
                 )
-//                Image(
-//                    painter = painterResource(R.drawable.placeholder), // Sostituisci con la tua immagine drawable
-//                    contentDescription = "Background Image",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .height(128.dp)
-//                        .blur(radius = 8.dp)
-//                )
 
                 Column(
                     modifier = Modifier
@@ -282,14 +270,14 @@ fun AchievementsItem(
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier
                                 .background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))
-                                .padding(2.dp)
+                                .padding(4.dp)
                         )
 
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             text = "Date: ${achievement.toDate()}",
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(2.dp)
+                            modifier = Modifier.background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(4.dp)
                         )
 
                         Box(
@@ -337,12 +325,12 @@ fun AchievementsItem(
                     Text(
                         text = "Title: ${achievement.title}",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(vertical = 8.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))
+                        modifier = Modifier.padding(vertical = 8.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(4.dp)
                     )
                     Text(
                         text = "Description: ${achievement.description}",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))
+                        modifier = Modifier.padding(bottom = 16.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(4.dp)
                     )
                 }
             }

@@ -22,3 +22,6 @@ val DarkBG = Color(0xFF2B2B2B)
 val GreyItemBG = Color(0xFFDFDFDF)
 val GreyReservationBG = Color(0xFFEEEEEE)
 val GreyItemInactive = Color(0xFF808080)
+
+val ConfirmGreen = Color(0xFF00BE1F)
+val ClearRed = Color(0xFFCC0000)

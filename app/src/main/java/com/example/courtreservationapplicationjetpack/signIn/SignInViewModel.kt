@@ -1,15 +1,9 @@
 package com.example.courtreservationapplicationjetpack.signIn
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Achievements
 import com.example.courtreservationapplicationjetpack.firestore.Sport
-import com.example.courtreservationapplicationjetpack.firestore.Users
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
@@ -92,7 +86,8 @@ class SignInViewModel(
                                     "phone" to "",
                                     "imageUri" to (UserData?.profilePictureUrl ?: ""),
                                     "sportPreferences" to emptyList<Sport>(),
-                                    "achievements" to emptyList<Achievements>() // probabilmente da cambiare dovrebbe essere un array vuoto
+                                    "achievements" to emptyList<Achievements>(), // probabilmente da cambiare dovrebbe essere un array vuoto
+                                    "friends" to emptyList<String>()
                                 )
 
                                 UserData?.email?.let {

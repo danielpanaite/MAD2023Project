@@ -1,26 +1,21 @@
 package com.example.courtreservationapplicationjetpack.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
-import com.example.courtreservationapplicationjetpack.signIn.ProfileGoogleDestination
-import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
+import com.example.courtreservationapplicationjetpack.views.MainScreenDestination
+import com.example.courtreservationapplicationjetpack.views.notifications.NotificationScreenDestination
 import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
+import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 
 /*
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -43,7 +38,7 @@ fun BottomBar(navController: NavHostController){
     val screens = listOf(
         MainScreenDestination,
         ProfileDestination,
-        //ProfileGoogleDestination,
+        NotificationScreenDestination,
         MyReservationsDestination
     )
 

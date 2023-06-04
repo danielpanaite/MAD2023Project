@@ -18,19 +18,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,28 +37,21 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
-import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 object ProfileDestination : NavigationDestination {
@@ -94,14 +85,11 @@ fun Profile(
     }
     val user = viewModel.user.value
 
-    //val uiState = viewModel.uiState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            CourtTopAppBar(canNavigateBack = false)
+            CourtTopAppBar(canNavigateBack = false, text = "Profile")
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
-
     ) {
             innerPadding ->
         ProfileBody(
@@ -137,16 +125,12 @@ fun ProfileBody(
     navigateToAchievementsDestination: () -> Unit,
     onSignOut: () -> Unit
 
-
 ){
 
     Box() {
-
-
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .padding(top = 60.dp)
         ) {
             item {
                 // User's image, name, email and edit button
@@ -167,12 +151,11 @@ fun ProfileBody(
         Button(
             onClick = onSignOut, modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 80.dp)
+                .padding(bottom = 100.dp)
         ) {
             Text(text = "Sign out")
         }
     }
-
 
 }
 
@@ -188,12 +171,9 @@ navController: NavController
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            //.clickable {navController.navigate("home")}
-            //.clickable { navigateToEditProfileDestination(user.email); Log.d("email dentro click", "${user.email}") },
-        //verticalAlignment = Alignment.CenterVertically,
 
         ) {
-        Log.d("email", "${user.email}")
+        Log.d("email", user.email)
 
 
         // User's image

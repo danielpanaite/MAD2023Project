@@ -24,6 +24,8 @@ import com.example.courtreservationapplicationjetpack.views.courts.AllSports
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailable
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
+import com.example.courtreservationapplicationjetpack.views.notifications.NotificationScreenDestination
+import com.example.courtreservationapplicationjetpack.views.notifications.Notifications
 import com.example.courtreservationapplicationjetpack.views.profile.Achievements
 import com.example.courtreservationapplicationjetpack.views.profile.AchievementsDestination
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
@@ -58,21 +60,29 @@ fun NavigationGraph(
 ){
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route,
+        startDestination = MainScreenDestination.route,
         modifier = modifier
     ){
         composable(route = Screen.Splash.route) {
             SplashScreen(navController = navController)
         }
+
         composable(
             route = MainScreenDestination.route
-
         ){
             MainScreen(
                 navController = navController,
-                //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
                 navigateToAllSports = {navController.navigate(AllSportsDestination.route)},
                 navigateToReviews = {navController.navigate(ReviewMainPageDestination.route)}
+            )
+        }
+
+        composable(
+            route = NotificationScreenDestination.route
+        ){
+            Notifications(
+                navController = navController,
+                googleAuthUiClient = googleAuthUiClient
             )
         }
 
@@ -148,7 +158,6 @@ fun NavigationGraph(
         ){
             AllSports(
                 navController = navController,
-//                navigateToCourtsAvailable = { navController.navigate("${CourtsAvailableDestination.route}/${it}" ) },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
@@ -198,8 +207,8 @@ fun NavigationGraph(
                 },
                 navArgument("hourOptArg") {
                     type = NavType.StringType
-                    defaultValue = null // Valore predefinito per l'argomento opzionale
-                    nullable = true // L'argomento è opzionale
+                    defaultValue = null // Default value for optional argument
+                    nullable = true // Optional
                 }
             )
         ) { backStackEntry ->
@@ -275,7 +284,6 @@ fun NavigationGraph(
                 navController = navController,
                 context = context,
                 googleAuthUiClient = googleAuthUiClient
-                //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
             )
         }
 
@@ -287,7 +295,6 @@ fun NavigationGraph(
                 navController = navController,
                 context = context,
                 googleAuthUiClient = googleAuthUiClient
-                //navigateToReserveACourt = { navController.navigate(ReserveACourtDestination.route) }
             )
         }
     }

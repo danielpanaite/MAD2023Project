@@ -20,7 +20,7 @@ import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 
 object MyReservationsDestination : NavigationDestination {
     override val route = "my_reservation"
-    override val titleRes = "My Reservations"
+    override val titleRes = "Reservations"
     override val icon = Icons.Default.Star
 }
 

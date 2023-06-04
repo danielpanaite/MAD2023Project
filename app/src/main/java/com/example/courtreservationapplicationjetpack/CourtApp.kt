@@ -96,7 +96,7 @@ fun CourtTopAppBar(
     } else {
         CenterAlignedTopAppBar(title = {
             Text(
-                "Time to play",
+                text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

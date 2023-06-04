@@ -2,18 +2,15 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
@@ -60,15 +57,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import com.example.courtreservationapplicationjetpack.BuildConfig
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
@@ -78,10 +72,8 @@ import com.example.courtreservationapplicationjetpack.navigation.NavigationDesti
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Objects
 
 
 object EditProfileDestination : NavigationDestination {
@@ -164,12 +156,7 @@ fun EditProfile(
                 val data = baos.toByteArray()
                 viewModel.updateProfile(data)
 
-
-                if(chosenPhoto.value!=null){
-
-                    viewModel.uploadImageToStorage(context, data)
-
-                }
+                viewModel.uploadImageToStorage(data)
 
                 navigateToProfileDestination()
             },

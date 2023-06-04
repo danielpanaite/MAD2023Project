@@ -1,10 +1,7 @@
 package com.example.courtreservationapplicationjetpack.firestore
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 
@@ -18,7 +15,8 @@ data class Users(
     val phone: String? = "",
     val imageUri: String? = "",
     val sportPreferences: MutableList<Sport> = mutableListOf(),
-    val achievements: MutableList<Achievements> = mutableListOf()
+    val achievements: MutableList<Achievements> = mutableListOf(),
+    val friends: MutableList<String> = mutableListOf()
 
 )
 
