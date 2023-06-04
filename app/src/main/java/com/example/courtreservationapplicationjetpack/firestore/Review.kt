@@ -6,14 +6,14 @@ import java.util.Locale
 
 data class Review(
     var id: String = "",
-    val user: String? = "",
-    val court: String? = "",
+    var user: String = "",
+    var court: String = "",
 
-    val date: Timestamp = Timestamp.now(),
-    val review: String? = "",
-    val rating: Int? = 0,
+    var date: Timestamp = Timestamp.now(),
+    val review: String = "",
+    val rating: Int = 0,
 
-)
+    )
 
 
 fun Review.toDate(): String{

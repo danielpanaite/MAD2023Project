@@ -3,9 +3,12 @@ package com.example.courtreservationapplicationjetpack.firestore
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreateViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
@@ -30,35 +33,41 @@ class ReviewViewModel: ViewModel() {
 
     private val db = Firebase.firestore
 
-    companion object{
+    companion object {
         const val TAG = "ReviewViewModel"
     }
 
-    //DATA
-    private var _reviews = mutableStateOf<List<Review>>(emptyList())
-    private var _review = mutableStateOf(Review())
-    val reviews: State<List<Review>> = _reviews
-    val review: MutableState<Review> = _review
-
-    private val _myReviewsUiState = MutableStateFlow<MyReviewsUiState>(MyReviewsUiState(isLoading = true))
+    private val _myReviewsUiState =
+        MutableStateFlow<MyReviewsUiState>(MyReviewsUiState(isLoading = true))
     val myReviewsUiState: StateFlow<MyReviewsUiState> = _myReviewsUiState
-
-    private val _courts = mutableStateOf<List<String>?>(emptyList())
-    val courts: MutableState<List<String>?> = _courts
 
     private var _myReservationUiState = mutableStateOf<List<Reservation>>(emptyList())
     val myReservationUiState: State<List<Reservation>> = _myReservationUiState
 
-    private val _reservationCourtsState = MutableStateFlow<ReservationCourtsState>(ReservationCourtsState())
+
+    private var _review = mutableStateOf(Review())
+    val review: MutableState<Review> = _review
+
+
+    private val _reservationCourtsState =
+        MutableStateFlow<ReservationCourtsState>(ReservationCourtsState())
     val reservationCourtsState: StateFlow<ReservationCourtsState> = _reservationCourtsState
+
+
+    private val _courtUiState = MutableStateFlow<List<ReviewCourtState>>(emptyList())
+    val courtUiState: StateFlow<List<ReviewCourtState>> = _courtUiState
 
 
     private lateinit var reg1: ListenerRegistration
 
 
+    private val _reviewUiState = MutableStateFlow<ReviewUiState>(ReviewUiState())
+    var reviewUiState: StateFlow<ReviewUiState> = _reviewUiState
 
-    val dateFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+    //var reviewsUiState by mutableStateOf(ReviewUiState())
+    //     private set
+
     //----------------------Methods----------------------
 
     fun getReviewByUser(email: String) {
@@ -70,7 +79,8 @@ class ReviewViewModel: ViewModel() {
             val list = mutableListOf<Review>()
             for (document in it.documents) {
                 val res = document.toObject(Review::class.java)
-                res?.id = document.id // Map the document ID to the "id" property of the Review object
+                res?.id =
+                    document.id // Map the document ID to the "id" property of the Review object
                 res?.let { r -> list.add(r) }
             }
             _myReviewsUiState.value = MyReviewsUiState(list, isLoading = false)
@@ -79,10 +89,6 @@ class ReviewViewModel: ViewModel() {
         }
     }
 
-
-    fun setCourts(courts: List<String>) {
-        this.courts.value = courts
-    }
 
     fun getReservationByEmail(user: String) {
         // Creating a reference to collection
@@ -93,7 +99,8 @@ class ReviewViewModel: ViewModel() {
             val list = mutableListOf<Reservation>()
             for (document in it.documents) {
                 val res = document.toObject(Reservation::class.java)
-                res?.id = document.id // Map the document ID to the "id" property of the Review object
+                res?.id =
+                    document.id // Map the document ID to the "id" property of the Review object
                 res?.let { r -> list.add(r) }
             }
             _myReservationUiState.value = list
@@ -154,8 +161,10 @@ class ReviewViewModel: ViewModel() {
             val filteredReservations = myReservationUiState.value
                 .filter { reservation ->
                     val oldDate = reservation.date.toDate()
-                    val nextDate = oldDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().minusDays(1)
-                    val newDate = Date.from(nextDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    val nextDate = oldDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                        .minusDays(1)
+                    val newDate =
+                        Date.from(nextDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
                     Log.d("reservationDate", "$newDate")
                     Log.d("now", "${Timestamp.now().toDate()}")
 
@@ -174,23 +183,155 @@ class ReviewViewModel: ViewModel() {
         }
     }
 
+    fun getReviewByEmailCourtId(email: String, courtId: String) {
+        // Creating a reference to collection
+        val docRef =
+            db.collection("reviews").whereEqualTo("user", email).whereEqualTo("court", courtId)
+
+        var rev = Review()
+        docRef.get().addOnSuccessListener {
+            Log.d(TAG, "getReviewByUser")
+            //val list = mutableListOf<ReviewUiState>()
+            for (document in it.documents) {
+                val res = document.toObject(Review::class.java)
+                res?.id =
+                    document.id // Map the document ID to the "id" property of the Review object
+                //res?.let { r -> list.add(r) }
+                if (res != null) {
+                    rev = res
+                }
+            }
+            _reviewUiState.value = ReviewUiState(rev, isEntryValid = false)
+        }.addOnFailureListener {
+            Log.d(TAG, "Error getting data", it)
+        }
+    }
+
+    private fun Review.toReviewsUiState(isEntryValid: Boolean = false): ReviewUiState =
+        ReviewUiState(
+            review = this,
+            isEntryValid = isEntryValid
+        )
+
+    private fun validateInput(uiState: Review = reviewUiState.value.review): Boolean {
+        return with(uiState) {
+            (user != "" && court != "" && date != null && review != "" && rating != 0)
+        }
+    }
 
 
+    fun courtUiState(courtId: String) {
+        // Creating a reference to collection
+        //val docRef = db.collection("courts").whereEqualTo("court", courtId)
+        Log.d("courtId", "$courtId")
+        val docRef = db.document("courts/$courtId")
+        val courtList = mutableListOf<ReviewCourtState>()
+
+        docRef.get().addOnSuccessListener { documentSnapshot ->
+            Log.d(TAG, "getcourt")
+            val res = documentSnapshot.toObject(Court::class.java)
+            res?.let { courtList.add(ReviewCourtState(CourtWithId(courtId, it))) }
+
+            _courtUiState.value = courtList
+            Log.d("courtListinvewModel", "$courtList")
+        }.addOnFailureListener { exception ->
+            Log.d(TAG, "Error getting data", exception)
+        }
+
+    }
+
+    fun updateUiState(review: Review) {
+        _reviewUiState.value = ReviewUiState(
+            review = review,
+            isEntryValid = validateInput(review)
+        )
+    }
+
+    fun createReview() {
+        if (validateInput(reviewUiState.value.review)) {
+
+            val esisteRef =
+                db.collection("reviews").whereEqualTo("user", reviewUiState.value.review.user)
+                    .whereEqualTo("court", reviewUiState.value.review.court)
+
+            Log.d("user esiseRef", "${reviewUiState.value.review.user}")
+            Log.d("esisteRef.court", "${reviewUiState.value.review.court}")
+
+            Log.d("esisteRef.get().isSucc", "${esisteRef.get().isSuccessful}")
+            esisteRef.get().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("task.isSuccessful", "${task.isSuccessful}")
+                    val querySnapshot = task.result
+                    if (!querySnapshot.isEmpty) {
+                        // Recensione esistente, esegui l'aggiornamento
+                        var review = reviewUiState.value.review
+                        val docRef = db.document("reviews/${reviewUiState.value.review.id}")
+                        docRef.set(review)
+                            .addOnSuccessListener {
+                                Log.d(
+                                    UserViewModel.TAG,
+                                    "Document ${reviewUiState.value.review.id} updated successfully"
+                                )
+                            }
+                            .addOnFailureListener {
+                                Log.d(
+                                    UserViewModel.TAG,
+                                    "Failed to update document ${reviewUiState.value.review.id}"
+                                )
+                            }
+                    } else {
+                        // Nessuna recensione esistente, aggiungi un nuovo documento
+                        val docRef = db.collection("reviews").document()
+                        // Adding the reservation data to a HashMap
+                        val hash = hashMapOf<String, Any>(
+                            "id" to docRef.id,
+                            "user" to reviewUiState.value.review.user,
+                            "court" to reviewUiState.value.review.court,
+                            "date" to reviewUiState.value.review.date,
+                            "review" to reviewUiState.value.review.review,
+                            "rating" to reviewUiState.value.review.rating,
+                        )
+                        Log.d("id", "${docRef.id}")
+                        Log.d("user", "${reviewUiState.value.review.user}")
+                        Log.d("court", "${reviewUiState.value.review.court}")
+                        Log.d("date", "${reviewUiState.value.review.date}")
+                        Log.d("review", "${reviewUiState.value.review.review}")
+                        Log.d("rating", "${reviewUiState.value.review.rating}")
 
 
+                        // Inserting the review data to Firestore
+                        docRef.set(hash).addOnSuccessListener {
+                            Log.d(
+                                ReservationViewModel.TAG,
+                                "Review ${docRef.id} inserted successfully"
+                            )
+                        }.addOnFailureListener {
+                            Log.d(ReservationViewModel.TAG, "Failed to insert review ${docRef.id}")
+                        }
+
+                    }
+                    // ... il resto del tuo codice per aggiungere la recensione
+
+                } else {
+                    // Errore nella query, gestisci l'errore
+                    Log.d(
+                        UserViewModel.TAG,
+                        "Failed to query reviews collection: ${task.exception}"
+                    )
+                }
+            }
+        }
+
+        /*
+    suspend fun deleteReview(){
+        reviewRepository.delete(reviewsUiState.review)
+    }
+
+     */
 
 
-
-
-    val reservationFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-
-
-
-
+    }
 }
-
 
 
 data class MyReviewsUiState(val reviewList: List<Review> = listOf(),  val isLoading: Boolean = false) // Add the isLoading property)
@@ -202,3 +343,18 @@ data class MyReservationsUiState(val reservationList: List<Reservation> = listOf
 data class ReservationCourtsState(val courtList: List<CourtWithId> = listOf())
 
 data class CourtWithId(val idCourt: String, val court: Court)
+
+data class ReviewUiState(
+    val review: Review = Review(
+        "",
+        "",
+        "",
+        Timestamp.now(),
+        "",
+        0
+    ),
+    val isEntryValid: Boolean = false
+)
+
+
+data class ReviewCourtState(val court: CourtWithId? = null)

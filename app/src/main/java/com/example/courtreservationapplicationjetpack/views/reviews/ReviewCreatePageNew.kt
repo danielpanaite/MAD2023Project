@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.reviews
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -21,6 +23,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,10 +35,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
-import com.example.courtreservationapplicationjetpack.models.courts.Court
-import com.example.courtreservationapplicationjetpack.models.reviews.Review
+import com.example.courtreservationapplicationjetpack.firestore.CourtWithId
+import com.example.courtreservationapplicationjetpack.firestore.Review
+import com.example.courtreservationapplicationjetpack.firestore.ReviewUiState
+import com.example.courtreservationapplicationjetpack.firestore.ReviewViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.google.firebase.Timestamp
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
@@ -44,61 +51,85 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
-/*
 object ReviewCreatePageDestination : NavigationDestination {
     override val route = "review_create_page"
-    const val courtIdArg = "courtId"
+    const val courtIdArg = "courtIdArg"
     val routeWithArgs = "$route/{$courtIdArg}"
     override val titleRes = "Reviews"
     override val icon = Icons.Default.Star
 }
 
+
 @Composable
 fun ReviewCreatePage(
     navController: NavController,
     onNavigateUp: () -> Unit,
-    viewModel: ReviewCreateViewModel = viewModel(factory = AppViewModelProvider.Factory),
-) {
+    courtIdArg: String?,
+    googleAuthUiClient: GoogleAuthUiClient,
+    viewModel: ReviewViewModel = viewModel(),
+    ) {
+    val email = googleAuthUiClient.getSignedInUser()?.email
+    Log.d("courtIdArg", "$courtIdArg")
+
+    var launchOnce by rememberSaveable { mutableStateOf(true) }
+    if (launchOnce) {
+        if (email != null) {
+            Log.d("courtIdArg", "$courtIdArg")
+            viewModel.getReviewByEmailCourtId(email, courtIdArg!!)
+            viewModel.courtUiState(courtIdArg)
+            Log.d("courtUiState", "${viewModel.courtUiState}")
+        }
+        launchOnce = false
+    }
+
+
     val courtUiState by viewModel.courtUiState.collectAsState()
+    val reviewUiState by viewModel.reviewUiState.collectAsState()
+
+
     val toastCreate = Toast.makeText(LocalContext.current, "Review sent!", Toast.LENGTH_SHORT)
     val toastDelete = Toast.makeText(LocalContext.current, "Review deleted!", Toast.LENGTH_SHORT)
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Write your review") },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-        innerPadding ->
-        CreateForm(
-            reviewUiState = viewModel.reviewsUiState,
-            onReviewValueChange = viewModel::updateUiState,
-            court = courtUiState.court,
-            onSaveClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    println(viewModel.reviewsUiState.review)
-                    viewModel.createReview()
-                }
-                toastCreate.show()
-                navController.popBackStack()
-            },
-            onDeleteClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    println(viewModel.reviewsUiState.review)
-                    viewModel.deleteReview()
-                }
-                toastDelete.show()
-                navController.popBackStack()
-            },
-            modifier = Modifier.padding(innerPadding)
-        )
+            innerPadding ->
+        if (email != null && courtUiState.isNotEmpty()) {
+            Log.d("courtUiState", "${courtUiState[0].court}")
+            CreateForm(
+                email = email,
+                reviewUiState = reviewUiState,
+                onReviewValueChange = viewModel::updateUiState,
+                court = courtUiState[0].court,
+                onSaveClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        println(reviewUiState.review)
+                        viewModel.createReview()
+                    }
+                    toastCreate.show()
+                    navController.popBackStack()
+                },
+                onDeleteClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        println(reviewUiState.review)
+                        //viewModel.deleteReview()
+                    }
+                    toastDelete.show()
+                    navController.popBackStack()
+                },
+                modifier = Modifier.padding(innerPadding)
+            )
+        }
     }
 
 }
 
 @Composable
 fun CreateForm(
-    reviewUiState: ReviewCreateViewModel.ReviewUiState,
+    email: String,
+    reviewUiState: ReviewUiState,
     onReviewValueChange: (Review) -> Unit,
-    court: Court?,
+    court: CourtWithId?,
     onSaveClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -115,24 +146,28 @@ fun CreateForm(
                     .fillMaxSize()
                     .padding(16.dp)
             ){
-                if(reviewUiState.review.id == null && court != null){
-                    reviewUiState.review.user = 1
-                    reviewUiState.review.court = court.id
-                    reviewUiState.review.date = LocalDate.now().format(reservationFormatter)
-                }else{
-                    println(reviewUiState.review)
-                    rating.value = reviewUiState.review.rating
+                if (court != null) {
+                    if(reviewUiState.review.id == "" && court.idCourt != ""){
+                        reviewUiState.review.user = email
+                        reviewUiState.review.court = court.idCourt
+                        reviewUiState.review.date = Timestamp.now()
+                    }else{
+                        println(reviewUiState.review)
+                        rating.value = reviewUiState.review.rating!!
+                    }
                 }
                 Column(modifier = Modifier.fillMaxSize()){
-                    OutlinedTextField(
-                        value = reviewUiState.review.review ,
-                        onValueChange = {onReviewValueChange(reviewUiState.review.copy(review = it))},
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        label = {Text(text = "Review")},
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        singleLine = false
-                    )
+                    reviewUiState.review.review?.let { it ->
+                        OutlinedTextField(
+                            value = it,
+                            onValueChange = { onReviewValueChange(reviewUiState.review.copy(review = it))},
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            label = { Text(text = "Review") },
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            singleLine = false
+                        )
+                    }
                     RatingBar(
                         value = rating.value.toFloat(),
                         config = RatingBarConfig()
@@ -157,7 +192,7 @@ fun CreateForm(
                     {
                         Text(text = "Submit")
                     }
-                    if(reviewUiState.review.id != null) {
+                    if(reviewUiState.review.id != "") {
                         OutlinedButton(
                             onClick = onDeleteClick,
                             modifier = Modifier
@@ -173,5 +208,3 @@ fun CreateForm(
         }
     }
 }
-
- */

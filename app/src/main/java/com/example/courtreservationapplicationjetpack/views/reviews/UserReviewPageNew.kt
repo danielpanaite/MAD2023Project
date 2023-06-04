@@ -151,7 +151,7 @@ fun MyReviewsBody(
             ReviewList(
                 courtList,
                 reviewList,
-                //onReviewClick = { onReviewClick(it.id) }
+                onReviewClick = { onReviewClick(it); Log.d("it", "$it") }
             )
         }
     }
@@ -161,7 +161,7 @@ fun MyReviewsBody(
 fun ReviewList(
     courtList: List<CourtWithId>,
     reviewList: List<Review>,
-    //onReviewClick: (String) -> Unit,
+    onReviewClick: (String) -> Unit,
 ){
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -219,7 +219,8 @@ fun ReviewList(
                         .padding(end = 16.dp)
                     ){
                         Button(onClick = {
-                           // onReviewClick(courtList[ci].idCourt)
+                            onReviewClick(courtList[ci].idCourt)
+                            Log.d("courtList[ci].idCourt", "${courtList[ci].idCourt}")
                         },
                             modifier = Modifier
                                 .fillMaxWidth()
