@@ -378,7 +378,7 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
         Column {
 
             Text(
-                text = "Press to reserve ${court.name}",
+                text = "Press to reserve ${court.name} on ${pickedDate.value}",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 fontStyle = FontStyle.Italic,
