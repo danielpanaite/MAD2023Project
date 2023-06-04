@@ -191,7 +191,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             TopAppBar(
                 title = {
                     Text(
-                        text = "Prenotazioni",
+                        text = "Reserve a court",
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -378,7 +378,7 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
         Column {
 
             Text(
-                text = "Premere per prenotare ${court.name}",
+                text = "Press to reserve ${court.name}",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 fontStyle = FontStyle.Italic,
@@ -398,7 +398,7 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 modifier = Modifier.padding(start = 16.dp)
             )
             Text(
-                text = "${court.capacity} posti disponibili",
+                text = "${court.capacity} places available",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 16.dp).padding(bottom = 32.dp)

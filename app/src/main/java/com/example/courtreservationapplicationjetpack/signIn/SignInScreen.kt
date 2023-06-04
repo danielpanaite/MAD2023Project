@@ -218,18 +218,18 @@ fun SignInScreen(
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                 fontWeight = FontWeight.Normal
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                onClick = { navController.navigate(MainScreenDestination.route) },
-                shape = CircleShape,
-                colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 1f))
-            ) {
-                Text(
-                    text = "Log-in!",
-                    color = Color.Black
-                )
-            }
+//            Spacer(modifier = Modifier.height(24.dp))
+//            Button(
+//                modifier = Modifier.fillMaxWidth().height(54.dp),
+//                onClick = { navController.navigate(MainScreenDestination.route) },
+//                shape = CircleShape,
+//                colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 1f))
+//            ) {
+//                Text(
+//                    text = "Log-in!",
+//                    color = Color.Black
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(16.dp))
             androidx.compose.material3.Button(
