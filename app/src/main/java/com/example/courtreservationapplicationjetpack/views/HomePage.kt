@@ -1,5 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views
 
+import android.app.Activity
+import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -9,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -34,6 +37,9 @@ fun MainScreen(
     modifier: Modifier = Modifier,
 ) {
 
+// Dentro il componibile
+    val activity = LocalContext.current as? Activity
+    activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
     Scaffold(
         topBar = {
