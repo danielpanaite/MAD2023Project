@@ -3,6 +3,7 @@ package com.example.courtreservationapplicationjetpack.views.courts
 import OptionSample3
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -25,23 +26,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -170,27 +177,31 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
 
 
+        OptionSample3(
+            sportList = sportsList,
+            optionState = optionState,
+            pickedSport = pickedSport,
+            firebaseCourtViewModel = firebaseCourtViewModel
+        )
 
 
-    OptionSample3(sportList = sportsList, optionState = optionState, pickedSport = pickedSport, firebaseCourtViewModel = firebaseCourtViewModel)
 
 
+        CalendarDialog(
+            state = calendarState,
+            config = CalendarConfig(
+                monthSelection = true,
+                yearSelection = true,
+                style = CalendarStyle.MONTH,
+                boundary = dateRange
+            ),
+            selection = CalendarSelection.Date(
+                selectedDate = pickedDate.value
+            ) { date ->
+                pickedDate.value = date
+            }
+        )
 
-
-    CalendarDialog(
-        state = calendarState,
-        config = CalendarConfig(
-            monthSelection = true,
-            yearSelection = true,
-            style = CalendarStyle.MONTH,
-            boundary = dateRange
-        ),
-        selection = CalendarSelection.Date(
-            selectedDate = pickedDate.value
-        ) { date ->
-            pickedDate.value = date
-        }
-    )
 
 
     Column() {
@@ -212,76 +223,85 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.White)
-                .padding(horizontal = 16.dp)
-        ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Bottone 1
-                    OutlinedButton(
-                        onClick = { optionState.show() },
-                        modifier = Modifier.weight(2f),
-                        border = BorderStroke(1.dp, Color.Black),
-                        shape = RoundedCornerShape(25),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.Black,
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        )
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.White)
+            ) {
+                CityPicker(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.White)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Image(
-                                painter = painterResource(SportDrawables.getDrawable(pickedSport.value)),
-                                contentDescription = "Sport icon",
-                                colorFilter = ColorFilter.tint(Color.Black),
-                                modifier = Modifier.size(24.dp)
+                        // Bottone 1
+                        OutlinedButton(
+                            onClick = { optionState.show() },
+                            modifier = Modifier.weight(2f),
+                            border = BorderStroke(1.dp, Color.Black),
+                            shape = RoundedCornerShape(25),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color.Black,
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                             )
-                            Text(
-                                text = pickedSport.value.replaceFirstChar {
-                                    if (it.isLowerCase()) it.titlecase(
-                                        Locale.getDefault()
-                                    ) else it.toString()
-                                },
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                textAlign = TextAlign.Start,
-                                modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .weight(1f)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Image(
+                                    painter = painterResource(SportDrawables.getDrawable(pickedSport.value)),
+                                    contentDescription = "Sport icon",
+                                    colorFilter = ColorFilter.tint(Color.Black),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = pickedSport.value.replaceFirstChar {
+                                        if (it.isLowerCase()) it.titlecase(
+                                            Locale.getDefault()
+                                        ) else it.toString()
+                                    },
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .weight(1f)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+                        // Bottone 2
+                        OutlinedButton(
+                            onClick = {
+                                calendarState.show()
+                            },
+                            border = BorderStroke(1.dp, Color.Black),
+                            shape = RoundedCornerShape(25), // = 50% percent
+                            // or shape = CircleShape
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color.Black,
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.DateRange,
+                                contentDescription = "Settings",
+                                tint = Color.Black,
                             )
                         }
-                    }
 
-                    Spacer(modifier = Modifier.width(16.dp))
-                    // Bottone 2
-                    OutlinedButton(
-                        onClick = {
-                            calendarState.show()
-                        },
-                        border = BorderStroke(1.dp, Color.Black),
-                        shape = RoundedCornerShape(25), // = 50% percent
-                        // or shape = CircleShape
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.Black,
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.DateRange,
-                            contentDescription = "Settings",
-                            tint = Color.Black,
-                        )
                     }
-
                 }
             }
         }
@@ -322,8 +342,11 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             }
 
         }
+
     }
 }
+
+
 @Composable
 fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<String>, court: Court, navController: NavController, key: String) {
     println(key)
@@ -377,7 +400,9 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 26.sp,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.weight(3f).padding(16.dp)
+                    modifier = Modifier
+                        .weight(3f)
+                        .padding(16.dp)
                 )
                 Text(
                     text = "${court.prezzo}$",
@@ -570,6 +595,68 @@ fun HourButtons(courtID: String, date: LocalDate, reservedSlot: List<String>, na
     }
 }
 
+@Composable
+fun CityPicker(modifier: Modifier) {
+    val cityList = listOf<String>("Torino", "Milano", "Roma", "Napoli", "Palermo", "Bologna", "Firenze", "Bari")
+    var isMenuExpanded by remember { mutableStateOf(false) }
+    var selectedCity by remember { mutableStateOf("") }
+
+    Box(modifier = modifier) {
+        OutlinedButton(
+            onClick = { isMenuExpanded = true },
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, Color.Black),
+            shape = RoundedCornerShape(25),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.Black,
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (selectedCity.isEmpty()) "Choose the city" else selectedCity,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    color = if (selectedCity.isEmpty()) Color.Gray else Color.Black
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        DropdownMenu(
+            expanded = isMenuExpanded,
+            onDismissRequest = { isMenuExpanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(Color.White)
+                .padding(vertical = 4.dp)
+                .align(Alignment.Center)
+        ) {
+            cityList.forEach { city ->
+                androidx.compose.material3.DropdownMenuItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = { Text(city, color = Color.Black) },
+                    onClick = {
+                        selectedCity = city
+                        isMenuExpanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
 
 
 @Composable
@@ -614,11 +701,6 @@ fun CoilImage(modifier: Modifier = Modifier, sport: String, URL: String? = null)
         )
     }
 }
-
-
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun CourtPreview(){
