@@ -46,6 +46,8 @@ import com.example.courtreservationapplicationjetpack.views.reservations.MyReser
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetails
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPage
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePage
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPage
@@ -223,19 +225,22 @@ fun NavigationGraph(
             )
         }
 
-        /*
+
         composable(
             route = CourtReviewPageDestination.routeWithArgs,
             arguments = listOf(navArgument(CourtReviewPageDestination.courtIdArg) {
                 type = NavType.StringType
             })
         ){
-            CourtReviewPage(
-                navController = navController,
-                onNavigateUp = { navController.navigateUp() }
-            )
+            it.arguments?.getString("courtIdArg")?.let { it1 ->
+                CourtReviewPage(
+                    navController = navController,
+                    onNavigateUp = { navController.navigateUp() },
+                    courtIdArg = it1,
+                )
+            }
         }
-*/
+
         composable(
             route = CourtsAvailableDestination.routeWithArgs,
             arguments = listOf(

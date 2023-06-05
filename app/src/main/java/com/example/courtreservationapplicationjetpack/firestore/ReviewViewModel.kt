@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -52,6 +54,9 @@ class ReviewViewModel: ViewModel() {
     val _avg = MutableStateFlow<Float>(0F)
     var avg: MutableStateFlow<Float> = _avg
 
+    private val _courtReviewsState = MutableStateFlow<MyReviewsUiState>(MyReviewsUiState(isLoading = false))
+    val courtReviewsState: StateFlow<MyReviewsUiState> = _courtReviewsState
+
 
 
     //----------------------Methods----------------------
@@ -80,6 +85,25 @@ class ReviewViewModel: ViewModel() {
             _avg.value = averageRating
             Log.d(TAG, "The average rating for court $courtId is $averageRating")
 
+        }.addOnFailureListener {
+            Log.d(TAG, "Error getting data", it)
+        }
+    }
+
+    fun getReviewsByCourt(courtId: String) {
+        // Creating a reference to collection
+        val docRef = db.collection("reviews").whereEqualTo("court", courtId)
+        docRef.get().addOnSuccessListener {
+            Log.d(TAG, "getReviewsByCourt")
+            val list = mutableListOf<Review>()
+            for (document in it.documents) {
+                val res = document.toObject(Review::class.java)
+                res?.id =
+                    document.id // Map the document ID to the "id" property of the Review object
+                res?.let { r -> list.add(r) }
+            }
+            // Update your state with the list of reviews for the specified court
+            _courtReviewsState.value = MyReviewsUiState(list, isLoading = false)
         }.addOnFailureListener {
             Log.d(TAG, "Error getting data", it)
         }
