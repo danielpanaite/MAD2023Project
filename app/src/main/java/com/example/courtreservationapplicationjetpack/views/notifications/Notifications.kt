@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +52,7 @@ import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Notification
 import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
 import com.example.courtreservationapplicationjetpack.firestore.toDate
@@ -99,12 +101,15 @@ fun NotificationsBody(
     courtViewModel: CourtViewModel = viewModel(),
 ){
     val email = googleAuthUiClient.getSignedInUser()?.email
+    var courts = emptyList<String>()
     if(email != null)
         viewModel.getUserNotifications(email)
-    if(viewModel.notifications.value.isNotEmpty()) {
-        val courts = viewModel.notifications.value.filter { it.court != "" }.map { it.court }
+    if(viewModel.notifications.value.isNotEmpty() && viewModel.notifications.value.filter { it.court != "" }.distinctBy{it.court}.isNotEmpty()) {
+        courts = viewModel.notifications.value.filter { it.court != "" }.distinctBy{it.court}.map { it.court }
         courtViewModel.getReservationCourts(courts)
-        val users = viewModel.notifications.value.map { it.sender }
+    }
+    if(viewModel.notifications.value.isNotEmpty() && viewModel.notifications.value.distinctBy{it.sender}.isNotEmpty()) {
+        val users = viewModel.notifications.value.distinctBy { it.sender }.map { it.sender }
         userViewModel.getUserListByEmails(users)
     }
     LazyColumn(
@@ -114,19 +119,40 @@ fun NotificationsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
     ) {
-        // TODO: Refresh user list when new notifications appear
-        if(viewModel.notifications.value.isNotEmpty() && userViewModel.users.value.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty())
-            for( i in viewModel.notifications.value.indices){
-                item{
-                    Log.d("COURT", courtViewModel.reservationcourts.value.toString())
-                    Log.d("USER", userViewModel.users.value.toString())
-                    NotificationItem(
-                        notification = viewModel.notifications.value[i],
-                        sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender },
-                        court = courtViewModel.reservationcourts.value.firstOrNull { it.id == viewModel.notifications.value[i].court }
-                    )
+        Log.d("COURTS", courts.toString())
+        if(courts.isNotEmpty()) {
+            if (viewModel.notifications.value.isNotEmpty() &&
+                userViewModel.users.value.isNotEmpty() &&
+                courtViewModel.reservationcourts.value.isNotEmpty() &&
+                (viewModel.notifications.value.distinctBy { it.sender }.size == userViewModel.users.value.size) &&
+                (viewModel.notifications.value.filter { it.court != "" }
+                    .distinctBy { it.court }.size == courtViewModel.reservationcourts.value.size)
+            )
+                for (i in viewModel.notifications.value.indices) {
+                    item {
+                        NotificationItem(
+                            notification = viewModel.notifications.value[i],
+                            sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender },
+                            court = courtViewModel.reservationcourts.value.firstOrNull { it.id == viewModel.notifications.value[i].court }
+                        )
+                    }
                 }
-            }
+        }
+        else {
+            if (viewModel.notifications.value.isNotEmpty() &&
+                userViewModel.users.value.isNotEmpty() &&
+                (viewModel.notifications.value.distinctBy { it.sender }.size == userViewModel.users.value.size)
+            )
+                for (i in viewModel.notifications.value.indices) {
+                    item {
+                        NotificationItem(
+                            notification = viewModel.notifications.value[i],
+                            sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender },
+                            court = null
+                        )
+                    }
+                }
+        }
     }
 }
 
@@ -136,9 +162,11 @@ fun NotificationItem(
     sender: Users,
     court: Court?,
     viewModel: NotificationViewModel = viewModel(),
-    userViewModel: UserViewModel = viewModel()
+    userViewModel: UserViewModel = viewModel(),
+    reservationViewModel: ReservationViewModel = viewModel()
 ){
     val toastFriend = Toast.makeText(LocalContext.current, "Friend added!", Toast.LENGTH_SHORT)
+    val toastInvite = Toast.makeText(LocalContext.current, "Invitation accepted!", Toast.LENGTH_SHORT)
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(start = 16.dp, end = 16.dp),
@@ -162,7 +190,6 @@ fun NotificationItem(
                             colorFilter = ColorFilter.tint(Color.Black),
                             modifier = Modifier.size(40.dp)
                         )
-                        //Icon(Icons.Default.Star, contentDescription = "Play", modifier = Modifier.size(40.dp))
                 }
                 Column(modifier = Modifier
                     .fillMaxSize()
@@ -238,8 +265,13 @@ fun NotificationItem(
             ) {
                 IconButton(onClick = {
                     viewModel.updateNotificationStatus(notification.id, "confirmed")
-                    userViewModel.addFriend(notification.receiver, notification.sender)
-                    toastFriend.show()
+                    if(notification.type == "friend") {
+                        userViewModel.addFriend(notification.receiver, notification.sender)
+                        toastFriend.show()
+                    }else{
+                        reservationViewModel.acceptInvitation(notification.reservation, notification.receiver)
+                        toastInvite.show()
+                    }
                                      }, modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)) {

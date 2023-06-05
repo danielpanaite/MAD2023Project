@@ -10,7 +10,8 @@ data class Reservation (
     val court: String = "",
     val date: Timestamp = Timestamp.now(),
     val notes: String = "",
-    val people: Int = 0
+    val people: Int = 0,
+    val invites: List<String> = listOf()
 )
 
 fun Reservation.toDate(): String{
