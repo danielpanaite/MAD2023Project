@@ -36,10 +36,13 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -84,6 +87,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
@@ -93,12 +97,18 @@ import com.example.courtreservationapplicationjetpack.firestore.Notification
 import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.ReviewViewModel
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
-import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
+import com.example.courtreservationapplicationjetpack.ui.theme.Orange200
+import com.example.courtreservationapplicationjetpack.views.reviews.CourtReviewPageDestination
+import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
+//import com.example.courtreservationapplicationjetpack.views.reviews.ReviewViewModel
 import com.google.firebase.Timestamp
+import com.gowtham.ratingbar.RatingBarConfig
+import com.gowtham.ratingbar.RatingBarStyle
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -133,11 +143,13 @@ fun AllSports(
 
     viewModel: AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     courtsViewModel: CourtsAvailableViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    //reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
+    reviewNewViewModel: ReviewViewModel = viewModel()
 
 ) {
     val allSportsUiState by viewModel.allSportsUiState.collectAsState()
-    val userReviews by reviewViewModel.myReviewsUiState.collectAsState()
+    //val userReviews by reviewViewModel.myReviewsUiState.collectAsState()
 
 
     Scaffold(
@@ -151,7 +163,8 @@ fun AllSports(
         courtsViewModel = courtsViewModel,
         viewModel = viewModel,
         navController = navController,
-        userReviews = userReviews.reviewList,
+        //userReviews = userReviews.reviewList,
+        reviewViewModel = reviewNewViewModel
     )
     }
 }
@@ -159,7 +172,7 @@ fun AllSports(
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController, userReviews: List<Review>) {
+fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewModel, viewModel: AllSportsViewModel, navController: NavController,  reviewViewModel: ReviewViewModel) {
 
     var pickedDate = remember { mutableStateOf(LocalDate.now()) }
 
@@ -349,7 +362,8 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         modifier = Modifier
                             .fillMaxWidth()
                             //.aspectRatio(1f)
-                            .padding(horizontal = 16.dp).padding(top = 16.dp)
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp)
                             .background(color = Color.Transparent)
                     )
                     Text(
@@ -361,12 +375,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                 }
             }
         }
-
-
-
-
-
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -381,6 +389,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             pickedSport = pickedSport,
                             court = court,
                             navController = navController,
+                            reviewViewModel = reviewViewModel,
                             key = index.toString() + court.toString() // Utilizza una combinazione di indici e valori di "court" come chiave
                         )
                 }
@@ -393,12 +402,16 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
 
 @Composable
-fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<String>, court: Court, navController: NavController, key: String) {
+fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<String>, court: Court, navController: NavController, key: String,
+              reviewViewModel: ReviewViewModel) {
     println(key)
     val firebaseReservationViewModel: ReservationViewModel = viewModel()
     val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
     val slots = remember { mutableStateOf(firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))) }
 
+    reviewViewModel.getAverageRatingForCourt(courtId = court.id)
+    val reviewCourtAvg by reviewViewModel.avg.collectAsState()
+    Log.d("reviewCourt", "$reviewCourtAvg")
 
 
 //    LaunchedEffect(court){
@@ -484,6 +497,37 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                     modifier = Modifier.size(24.dp)
                 )
             }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                com.gowtham.ratingbar.RatingBar(
+                    value = reviewCourtAvg,
+                    config = RatingBarConfig()
+                        .style(RatingBarStyle.HighLighted)
+                        .size(18.dp)
+                        .inactiveColor(Color(0xffffecb3))
+                        .activeColor(Orange200),
+                    onValueChange = {},
+                    onRatingChanged = {},
+                    modifier = Modifier
+                        .background(Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+
+                )
+                Icon(
+                    painter = rememberVectorPainter(Icons.Default.ArrowForward),
+                    contentDescription = "see reviews",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                        .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
+
+                        .clickable{
+                        navController.navigate("${CourtReviewPageDestination.route}/${court.id}")
+                    },
+                )
+            }
         }
     }
 
@@ -542,8 +586,6 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
         }
     }
 }
-
-
 
 
 @Composable

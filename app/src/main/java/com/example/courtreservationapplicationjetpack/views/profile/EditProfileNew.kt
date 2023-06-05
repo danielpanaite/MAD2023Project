@@ -492,7 +492,8 @@ fun ProfileInputForm(
                     )
                 }
             }
-            Row(
+
+            /*Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
@@ -507,6 +508,7 @@ fun ProfileInputForm(
                     singleLine = true
                 )
             }
+            */
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
