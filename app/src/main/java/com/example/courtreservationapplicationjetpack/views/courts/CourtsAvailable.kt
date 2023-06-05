@@ -34,8 +34,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -45,6 +47,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -838,14 +841,17 @@ fun Ciao(
                                                                     Text(text = f.nickname.toString())
                                                                 }
                                                             }
-                                                            Checkbox(
-                                                                checked = isSelected.value,
-                                                                onCheckedChange = { isSelected.value = it },
-                                                                modifier = Modifier
-                                                                    .size(24.dp) // Imposta la dimensione della checkbox come desiderato
-                                                                    .padding(end = 20.dp)
-                                                                    .align(Alignment.CenterVertically)
-                                                            )
+//                                                            Checkbox(
+//                                                                checked = isSelected.value,
+//                                                                onCheckedChange = { isSelected.value = it },
+//                                                                modifier = Modifier
+//                                                                    .size(24.dp) // Imposta la dimensione della checkbox come desiderato
+//                                                                    .padding(end = 20.dp)
+//                                                                    .align(Alignment.CenterVertically)
+//                                                            )
+                                                            CircleCheckbox(isSelected.value, true) {
+                                                                isSelected.value = !isSelected.value
+                                                            }
                                                         }
                                                     }
 
@@ -885,89 +891,6 @@ fun Ciao(
                             }
                             }
                     }
-
-                    //val showAddFriendDialog = remember { mutableStateOf(true)}
-//                    if(showAddFriendDialog.value) {
-//                        Dialog(
-//                            onDismissRequest = { showDialog.value = false },
-//                            properties = DialogProperties(
-//                                dismissOnBackPress = true,
-//                                dismissOnClickOutside = true
-//                            )
-//                        ) {
-//                            Box(
-//                                modifier = Modifier
-//                                    .fillMaxSize()
-//                                    .background(Color.White, RoundedCornerShape(16.dp))
-//                                    .padding(vertical = 50.dp, horizontal = 50.dp),
-//                                contentAlignment = Alignment.Center
-//                            ) {
-//                                firebaseUserViewModel.getUserByEmail(email = userEmail!!)
-//                                val friends = firebaseUserViewModel.user
-//
-//                                if (friends.value.friends.isNotEmpty()) {
-//                                    val selectedFriends = remember { mutableStateListOf<String>() }
-//
-//                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-//                                        items(friends.value.friends) { friend ->
-//                                            val isSelected = remember { mutableStateOf(false) }
-//
-//                                            Row(
-//                                                verticalAlignment = Alignment.CenterVertically,
-//                                                modifier = Modifier
-//                                                    .fillMaxWidth()
-//                                                    .clickable {
-//                                                        isSelected.value = !isSelected.value
-//                                                    }
-//                                                    .padding(vertical = 8.dp)
-//                                            ) {
-//                                                Checkbox(
-//                                                    checked = isSelected.value,
-//                                                    onCheckedChange = { isSelected.value = it }
-//                                                )
-//                                                Text(
-//                                                    text = friend,
-//                                                    modifier = Modifier.padding(start = 8.dp)
-//                                                )
-//                                            }
-//                                            Divider(color = Color.Gray, thickness = 1.dp)
-//
-//                                            if (isSelected.value) {
-//                                                selectedFriends.add(friend)
-//                                            }
-//                                        }
-//                                        item {
-//                                            Column(
-//                                                verticalArrangement = Arrangement.Center,
-//                                                horizontalAlignment = Alignment.CenterHorizontally,
-//                                                modifier = Modifier.fillMaxWidth()
-//                                            ) {
-//                                                Button(onClick = {
-//                                                    // Stampa gli amici selezionati
-//                                                    selectedFriends.forEach { friend ->
-//                                                        val notifica = Notification(
-//                                                            date = Timestamp.now(),
-//                                                            sender = userEmail!!,
-//                                                            receiver = friend,
-//                                                            type = "play",
-//                                                            status = "pending",
-//                                                            court = courtState.value!!.id,
-//                                                            reservation = ""
-//                                                        )
-//                                                        friendsNotificationArray.value.add(notifica)
-//                                                    }
-//                                                    showAddFriendDialog.value = false
-//                                                }) {
-//                                                    Text(text = "Confirm")
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-
                     Row {
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
                     }
@@ -993,6 +916,24 @@ fun Ciao(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CircleCheckbox(selected: Boolean, enabled: Boolean = true, onChecked: () -> Unit) {
+
+    val color = MaterialTheme.colorScheme
+    val imageVector = if (selected) Icons.Filled.CheckCircle else  Icons.Outlined.CheckCircle
+    val tint = if (selected) color.primary.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f)
+    val background = if (selected) Color.Transparent else Color.White
+
+    IconButton(onClick = { onChecked() },
+        modifier = Modifier.offset(x = 4.dp, y = 4.dp),
+        enabled = enabled) {
+
+        Icon(imageVector = imageVector, tint = tint,
+            modifier = Modifier.background(background, shape = CircleShape),
+            contentDescription = "checkbox")
     }
 }
 @Composable
