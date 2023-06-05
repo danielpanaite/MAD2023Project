@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -54,10 +55,10 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
 
     fun getUserReservations(user: String) {
         // Creating a reference to collection
-        val docRef = db.collection("reservations")
-            .whereEqualTo("user", user)
-            .whereGreaterThan("date", Timestamp.now())
-
+        val docRef = db.collection("reservations").where(Filter.or(
+            Filter.equalTo("user", user),
+            Filter.arrayContains("invites", user)
+        )).whereGreaterThan("date", Timestamp.now())
         // Listen to data in real-time
         reg1 = docRef.addSnapshotListener { snapshot, e ->
             if (e != null)
