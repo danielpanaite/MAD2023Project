@@ -803,11 +803,15 @@ fun Ciao(
 
 
                     val modalBottomSheetState = rememberModalBottomSheetState()
+                    val selectedFriends = remember { mutableStateOf(mutableListOf<String>()) }
                     if (showSheet) {
                         ModalBottomSheet(
                             modifier = Modifier
                                 .background(Color.Transparent),
-                            onDismissRequest = { showSheet = false },
+                            onDismissRequest = {
+                                showSheet = false
+                                selectedFriends.value.clear()
+                            },
                             sheetState = modalBottomSheetState,
                             dragHandle = { BottomSheetDefaults.DragHandle() },
                         ) {
@@ -822,7 +826,7 @@ fun Ciao(
                                 val friends = firebaseUserViewModel.user
 
                                 if (friends.value.friends.isNotEmpty()) {
-                                    val selectedFriends = remember { mutableStateOf(mutableListOf<String>()) }
+
                                     if(friends.value.friends.isNotEmpty())
                                         firebaseUserViewModel.getUserListByEmails(friends.value.friends)
                                     LazyColumn(modifier = Modifier
@@ -893,14 +897,6 @@ fun Ciao(
                                                                     Text(text = f.nickname.toString())
                                                                 }
                                                             }
-//                                                            Checkbox(
-//                                                                checked = isSelected.value,
-//                                                                onCheckedChange = { isSelected.value = it },
-//                                                                modifier = Modifier
-//                                                                    .size(24.dp) // Imposta la dimensione della checkbox come desiderato
-//                                                                    .padding(end = 20.dp)
-//                                                                    .align(Alignment.CenterVertically)
-//                                                            )
                                                             CircleCheckbox(isSelected.value, true) {
                                                                 isSelected.value = !isSelected.value
                                                             }
@@ -942,12 +938,7 @@ fun Ciao(
                                                     }
                                                     //showAddFriendDialog.value = false
                                                 }) {
-                                                    val text = if (selectedFriends.value.isEmpty()) {
-                                                        "Close"
-                                                    } else {
-                                                        "Confirm"
-                                                    }
-                                                    Text(text = text)
+                                                    Text(text = "Save changes")
 
                                                 }
                                             }
