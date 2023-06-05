@@ -451,7 +451,7 @@ fun Ciao(
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
 
     val firebaseUserViewModel: UserViewModel = viewModel()
-
+    var showSheet by remember { mutableStateOf(false) }
 
 
 
@@ -598,7 +598,7 @@ fun Ciao(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .background(Color.Red)
+                        .background(Color.Gray)
                         .align(Alignment.TopCenter)
                 )
                 var imageUrl = when (courtState.value?.sport) {
@@ -629,15 +629,39 @@ fun Ciao(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.0001f to Color.Transparent,
-                                1f to Color.Black
-                            )
-                        )
+//                        .background(
+//                            brush = Brush.verticalGradient(
+//                                0f to Color.Transparent,
+//                                0.0001f to Color.Transparent,
+//                                1f to Color.Black
+//                            )
+//                        )
                     //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                )
+                ){
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), shape = CircleShape)
+                                .clickable {
+                                           showSheet = true
+                                }
+                            ,
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.add_friend_svgrepo_com),
+                                contentDescription = "Add friends",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+
+                }
             }
         }
 
@@ -772,7 +796,7 @@ fun Ciao(
                     }
 
 
-                    var showSheet by remember { mutableStateOf(true) }
+
                     val modalBottomSheetState = rememberModalBottomSheetState()
                     if (showSheet) {
                         ModalBottomSheet(
@@ -796,7 +820,9 @@ fun Ciao(
                                     val selectedFriends = remember { mutableStateListOf<String>() }
                                     if(friends.value.friends.isNotEmpty())
                                         firebaseUserViewModel.getUserListByEmails(friends.value.friends)
-                                    LazyColumn(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+                                    LazyColumn(modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Transparent)) {
                                         if(firebaseUserViewModel.users.value.isNotEmpty())
 
                                             items(firebaseUserViewModel.users.value){f ->
@@ -805,39 +831,59 @@ fun Ciao(
 
                                                     Surface(color = Color.Transparent){
                                                         Row(modifier = Modifier
-                                                            .padding(start = 0.dp, top = 8.dp, bottom = 8.dp).background(Color.Transparent)
-                                                            .clickable { isSelected.value = !isSelected.value }
+                                                            .padding(
+                                                                start = 0.dp,
+                                                                top = 8.dp,
+                                                                bottom = 8.dp
+                                                            )
+                                                            .background(Color.Transparent)
+                                                            .clickable {
+                                                                isSelected.value = !isSelected.value
+                                                            }
                                                         ){
                                                             Column(modifier = Modifier
                                                                 .fillMaxSize()
                                                                 .align(Alignment.CenterVertically)
-                                                                .weight(2f).background(Color.Transparent)
+                                                                .weight(2f)
+                                                                .background(Color.Transparent)
                                                             ){
                                                                 if(f.imageUri != "")
                                                                     Image(
                                                                         modifier = Modifier
                                                                             .size(48.dp)
-                                                                            .clip(shape = CircleShape).background(Color.Transparent),
+                                                                            .clip(shape = CircleShape)
+                                                                            .background(Color.Transparent),
                                                                         painter = rememberAsyncImagePainter(model = Uri.parse(f.imageUri)),
                                                                         contentDescription = "Profile Image",
                                                                         contentScale = ContentScale.Crop
                                                                     )
                                                                 else
-                                                                    Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp).background(Color.Transparent))
+                                                                    Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier
+                                                                        .size(40.dp)
+                                                                        .background(Color.Transparent))
                                                             }
                                                             Column(modifier = Modifier
                                                                 .fillMaxSize()
-                                                                .weight(6f).background(Color.Transparent)
+                                                                .weight(6f)
+                                                                .background(Color.Transparent)
                                                             ){
                                                                 Row(modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(top = 0.dp, bottom = 0.dp).background(Color.Transparent)
+                                                                    .padding(
+                                                                        top = 0.dp,
+                                                                        bottom = 0.dp
+                                                                    )
+                                                                    .background(Color.Transparent)
                                                                 ){
                                                                     Text(text = f.name.toString(), fontWeight = FontWeight.ExtraLight)
                                                                 }
                                                                 Row(modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(top = 0.dp, bottom = 0.dp).background(Color.Transparent)
+                                                                    .padding(
+                                                                        top = 0.dp,
+                                                                        bottom = 0.dp
+                                                                    )
+                                                                    .background(Color.Transparent)
                                                                 ){
                                                                     Text(text = f.nickname.toString())
                                                                 }
@@ -890,7 +936,7 @@ fun Ciao(
                                     }
                                 }
                             }
-                            }
+                        }
                     }
                     Row {
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
