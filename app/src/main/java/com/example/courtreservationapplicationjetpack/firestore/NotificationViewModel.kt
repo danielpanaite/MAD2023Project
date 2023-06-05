@@ -56,7 +56,7 @@ class NotificationViewModel: ViewModel() {
     }
 
     fun createNotification(notification: Notification) {
-        val docRef = db.collection("notifications")
+        val docRef = db.collection("notifications").document()
         val hash = hashMapOf<String, Any>(
             "receiver" to notification.receiver,
             "sender" to notification.sender,
@@ -66,7 +66,7 @@ class NotificationViewModel: ViewModel() {
             "reservation" to notification.reservation,
             "date" to notification.date
         )
-        docRef.document(docRef.id).set(hash)
+        docRef.set(hash)
             .addOnSuccessListener {
                 Log.d(TAG, "Notification ${docRef.id} created successfully")
             }
