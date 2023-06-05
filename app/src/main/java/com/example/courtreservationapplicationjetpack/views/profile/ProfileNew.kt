@@ -185,7 +185,7 @@ navController: NavController
             painter = if(user.imageUri!=="" && user.imageUri!==null){
                 rememberAsyncImagePainter(model = Uri.parse(user.imageUri)?: R.drawable.ic_person_new)
             }else{
-                painterResource(id = R.drawable.ic_person_new)
+                painterResource(id = R.drawable.ic_bottom_profile)
             },
             contentDescription = "Profile Image"
 
@@ -230,7 +230,6 @@ navController: NavController
                 modifier = Modifier
                     .weight(weight = 1f, fill = false),
                 onClick = {
-                    //navController.navigate("home")
                    navigateToEditProfileDestination(user.email!!)
                 }) {
                 Icon(
@@ -244,7 +243,6 @@ navController: NavController
     }
 }
 
-// Row style for options
 @Composable
 private fun OptionsItemStyle(
     navigateToSportPreferencesDestination: () -> Unit,

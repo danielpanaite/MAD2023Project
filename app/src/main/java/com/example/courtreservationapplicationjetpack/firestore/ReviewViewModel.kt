@@ -65,11 +65,10 @@ class ReviewViewModel: ViewModel() {
     var reviewUiState: StateFlow<ReviewUiState> = _reviewUiState
 
 
-    //var reviewsUiState by mutableStateOf(ReviewUiState())
-    //     private set
-
     //----------------------Methods----------------------
 
+
+    // prende le review dell'utente
     fun getReviewByUser(email: String) {
         // Creating a reference to collection
         val docRef = db.collection("reviews").whereEqualTo("user", email)
@@ -84,18 +83,20 @@ class ReviewViewModel: ViewModel() {
                 res?.let { r -> list.add(r) }
             }
             _myReviewsUiState.value = MyReviewsUiState(list, isLoading = false)
+            Log.d("review list", "$list")
         }.addOnFailureListener {
             Log.d(TAG, "Error getting data", it)
         }
     }
 
 
+    // get all reservation of the user
     fun getReservationByEmail(user: String) {
         // Creating a reference to collection
-        val docRef = db.collection("reservations").whereEqualTo("user", user)
+        val docRef = db.collection("reservations").whereEqualTo("user", user).whereLessThan("date", Timestamp.now())
 
         docRef.get().addOnSuccessListener {
-            Log.d(TAG, "getReviewByUser")
+            Log.d(TAG, "getReservationByEmail")
             val list = mutableListOf<Reservation>()
             for (document in it.documents) {
                 val res = document.toObject(Reservation::class.java)
@@ -104,50 +105,12 @@ class ReviewViewModel: ViewModel() {
                 res?.let { r -> list.add(r) }
             }
             _myReservationUiState.value = list
+            Log.d("reservation ui state", "$list")
+
         }.addOnFailureListener {
             Log.d(TAG, "Error getting data", it)
+            // forse far aprire un popup che ti dice che qualcosa è andato storto
         }
-    }
-
-    fun getReviewById(id: String) {
-        // Creating a reference to document by id
-        val docRef = db.document("reviews/$id")
-
-        docRef.get().addOnSuccessListener { documentSnapshot ->
-            Log.d(TAG, "getReviewById")
-            val review = documentSnapshot.toObject(Review::class.java)
-            review?.id = documentSnapshot.id
-            _review.value = review!!
-        }.addOnFailureListener { exception ->
-            Log.d(TAG, "Error getting data", exception)
-        }
-    }
-
-    fun getCourtsWithIds(courts: List<String>): Flow<List<CourtWithId>> = callbackFlow {
-        val courtCollection = db.collection("courts")
-
-        val courtList = mutableListOf<CourtWithId>()
-
-        for (courtId in courts) {
-            Log.d("courtId in courts", "$courtId")
-
-            val courtDoc = courtCollection.document(courtId)
-            val courtSnapshot = courtDoc.get().await()
-
-            if (courtSnapshot.exists()) {
-                val court = courtSnapshot.toObject(Court::class.java)
-                court?.let { courtList.add(CourtWithId(courtId, it)) }
-                Log.d("court", "$court")
-            }
-        }
-
-        try {
-            trySend(courtList).isSuccess
-        } catch (e: Exception) {
-            close(e)
-        }
-
-        awaitClose { /* Non è necessaria alcuna operazione di pulizia */ }
     }
 
     fun getCourtsWithId() {
@@ -156,17 +119,17 @@ class ReviewViewModel: ViewModel() {
 
             val currentTimestamp = Timestamp.now()
             val currentDateString = dateFormat.format(currentTimestamp.toDate())
-            Log.d("currentTimeStamp", currentDateString)
+            Log.d("current Time Stamp getCourtsWithId", currentDateString)
 
             val filteredReservations = myReservationUiState.value
                 .filter { reservation ->
                     val oldDate = reservation.date.toDate()
                     val nextDate = oldDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
                         .minusDays(1)
-                    val newDate =
-                        Date.from(nextDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
-                    Log.d("reservationDate", "$newDate")
+                    val newDate = Date.from(nextDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    Log.d("reservationDate NEWDATe", "$newDate")
                     Log.d("now", "${Timestamp.now().toDate()}")
+                    Log.d("nonewDate < Timestamp.now().toDate()w", "${newDate < Timestamp.now().toDate()}")
 
                     newDate < Timestamp.now().toDate()
                 }
@@ -182,6 +145,36 @@ class ReviewViewModel: ViewModel() {
                 }
         }
     }
+
+
+    fun getCourtsWithIds(courts: List<String>): Flow<List<CourtWithId>> = callbackFlow {
+        val courtCollection = db.collection("courts")
+
+        val courtList = mutableListOf<CourtWithId>()
+
+        for (courtId in courts) {
+            Log.d("courtId in courts getCourtsWithIds", "$courtId")
+
+            val courtDoc = courtCollection.document(courtId)
+            val courtSnapshot = courtDoc.get().await()
+
+            if (courtSnapshot.exists()) {
+                val court = courtSnapshot.toObject(Court::class.java)
+                court?.let { courtList.add(CourtWithId(courtId, it)) }
+                Log.d("court getCourtsWithIds", "$court")
+            }
+        }
+
+        try {
+            trySend(courtList).isSuccess
+        } catch (e: Exception) {
+            close(e)
+        }
+
+        awaitClose { /* Non è necessaria alcuna operazione di pulizia */ }
+    }
+
+
 
     fun getReviewByEmailCourtId(email: String, courtId: String) {
         // Creating a reference to collection
@@ -207,11 +200,6 @@ class ReviewViewModel: ViewModel() {
         }
     }
 
-    private fun Review.toReviewsUiState(isEntryValid: Boolean = false): ReviewUiState =
-        ReviewUiState(
-            review = this,
-            isEntryValid = isEntryValid
-        )
 
     private fun validateInput(uiState: Review = reviewUiState.value.review): Boolean {
         return with(uiState) {
@@ -321,22 +309,10 @@ class ReviewViewModel: ViewModel() {
                 }
             }
         }
-
-        /*
-    suspend fun deleteReview(){
-        reviewRepository.delete(reviewsUiState.review)
-    }
-
-     */
-
-
     }
 
     fun deleteReview(){
-        //reg3.remove()
-        // Creating a reference to document by id
         val docRef = db.document("reviews/${reviewUiState.value.review.id}")
-
         docRef.delete().addOnSuccessListener {
             Log.d(ReservationViewModel.TAG, "Document ${reviewUiState.value.review.id} deleted successfully")
         }.addOnFailureListener {

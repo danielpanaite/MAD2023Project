@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -166,8 +167,8 @@ fun AchievementsBody(
                     text = "You don't have any achievements saved, click on the add button to insert a new one",
 
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
+                    textAlign = TextAlign.Center
+
 
                 )
 

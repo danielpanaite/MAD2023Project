@@ -32,9 +32,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -73,12 +77,8 @@ fun ReviewMainPage(
     navController: NavController,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    //viewModel: MyReservationsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    //reviewViewModel: ReviewViewModel = viewModel(factory = AppViewModelProvider.Factory),
     googleAuthUiClient: GoogleAuthUiClient,
     viewModel: ReviewViewModel = viewModel(),
-    //viewModelReservation: ReservationViewModel = viewModel()
-
 ) {
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -97,21 +97,9 @@ fun ReviewMainPage(
     val myReservationsUiState = viewModel.myReservationUiState
     Log.d("myReservationsUiState", "$myReservationsUiState")
 
-    //val myReservationsUiState by viewModelReservation.reservations.collectAsState()
-
     val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
     Log.d("reservationCourtsState", "$reservationCourtsState")
 
-
-    //val user = viewModel.user.value
-
-    //val myReservationsUiState by viewModel.myReservationsUiState.collectAsState()
-
-    //val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
-    //val reviewUiState by reviewViewModel.myReviewsUiState.collectAsState()
-
-    //viewModel.setCourts(myReservationsUiState.reservationList.filter{ LocalDate.parse(it.date, reservationFormatter).isBefore(
-     //   LocalDate.now()) }.map { it.courtId })
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Write your review") },
@@ -136,6 +124,15 @@ fun MyReviewsBody(
     courtList: List<CourtWithId>,
     onReviewClick: (String) -> Unit
 ){
+    val text = buildAnnotatedString {
+        withStyle(style = SpanStyle(fontSize = 16.sp)) {
+            append("No courts available to review!")
+        }
+        append("\n") // Aggiungi un carattere di nuova linea per andare a capo
+        withStyle(style = SpanStyle(fontSize = 14.sp)) {
+            append("You can review a court after playing in it")
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize(),
@@ -143,9 +140,10 @@ fun MyReviewsBody(
     ) {
         if (reservationList.isEmpty() && courtList.isEmpty() && reviewList.isEmpty()) {
             Text(
-                text = "No courts available to review",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = modifier.align(Alignment.CenterHorizontally)
             )
         } else {
             ReviewList(

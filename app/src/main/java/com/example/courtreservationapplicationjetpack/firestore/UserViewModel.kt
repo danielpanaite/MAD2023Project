@@ -131,7 +131,10 @@ class UserViewModel: ViewModel(){
 
 
     fun updateProfile(imageUri: ByteArray) {
-        val updatedUser = user.value.copy(imageUri = imageUri.toString())
+        var updatedUser = user.value
+        if(imageUri.isNotEmpty()){
+            updatedUser = user.value.copy(imageUri = imageUri?.toString())
+        }
         val docRef = db.document("users/${user.value.email}")
         docRef.set(updatedUser)
             .addOnSuccessListener {
