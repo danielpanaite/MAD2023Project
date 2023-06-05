@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack.views.reviews
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -23,8 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,6 +66,7 @@ import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailab
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -81,26 +88,35 @@ fun ReviewMainPage(
     googleAuthUiClient: GoogleAuthUiClient,
     viewModel: ReviewViewModel = viewModel(),
 ) {
-    val reservationFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val lifecycle = LocalLifecycleOwner.current
-
     val email = googleAuthUiClient.getSignedInUser()?.email
-
     if (email != null) {
         viewModel.getReviewByUser(email)
         viewModel.getReservationByEmail(email)
         viewModel.getCourtsWithId()
     }
-
     val reviewUiState by viewModel.myReviewsUiState.collectAsState()
-    Log.d("reviewUiState", "$reviewUiState")
     val myReservationsUiState = viewModel.myReservationUiState
-    Log.d("myReservationsUiState", "$myReservationsUiState")
-
     val reservationCourtsState by viewModel.reservationCourtsState.collectAsState()
-    Log.d("reservationCourtsState", "$reservationCourtsState")
+    var isLoading by remember { mutableStateOf(true) } // Add flag to track loading state
 
+    LaunchedEffect(reviewUiState.isLoading || reservationCourtsState.isLoading) {
+        if (reviewUiState.isLoading || reservationCourtsState.isLoading) {
+            //delay(1000L) // Show progress indicator for at least 2 seconds
+            isLoading = true
+        } else {
+            isLoading = false // Data has loaded, hide progress indicator
+        }
+    }
+
+
+    if (isLoading) { // Show circular progress indicator while loading
+        Box(modifier = Modifier.fillMaxSize()){
+            CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))
+        }
+        return
+    }
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Write your review") },
@@ -196,7 +212,8 @@ fun ReviewList(
                         ) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
-                                    .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                                    //.data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                                    .data(courtList[ci].court.URL)
                                     .crossfade(true)
                                     .build(),
                                 placeholder = painterResource(R.drawable.placeholder),
@@ -225,14 +242,8 @@ fun ReviewList(
                     }
                 }
                 if (!reservationList.none { it.court == courtList[ci].idCourt }) {
-                    Log.d("reservationList", "${reservationList}")
-
                     val reservation = reservationList.filter { it.court == courtList[ci].idCourt }
-                    Log.d("reservation", "${reservation}")
-
                     for(reservation in reservation) {
-                        Log.d("reservation", "${reservation}")
-                    // mettere che itera su un altra lista che sono le reservation per quel campo
                     Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
                     Surface(color = Color.White) {
                         Row(
@@ -246,10 +257,7 @@ fun ReviewList(
                             )
                             Button(
                                 onClick = {
-                                    val daPassare = arrayOf(courtList[ci].idCourt, reservation.id)
-                                    //navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}"
                                     navController.navigate("${ReviewCreatePageDestination.route}/${courtList[ci].idCourt}/${reservation.id}")
-                                    Log.d("courtList[ci].idCourt", "${courtList[ci].idCourt}")
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
