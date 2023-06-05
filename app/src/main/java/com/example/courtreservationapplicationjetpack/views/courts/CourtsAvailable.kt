@@ -40,6 +40,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonDefaults.textButtonColors
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,6 +66,7 @@ import com.example.courtreservationapplicationjetpack.navigation.NavigationDesti
 import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -85,6 +87,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
@@ -422,7 +426,9 @@ private fun CourtItem(
 }
 
 //--------------------------------------------------------------------------------
-@SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
+@SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState",
+    "SuspiciousIndentation", "RememberReturnType"
+)
 @Composable
 fun Ciao(
     courtID: String,
@@ -441,6 +447,8 @@ fun Ciao(
 ) {
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
+
+    val firebaseUserViewModel: UserViewModel = viewModel()
 
 
     LaunchedEffect(Unit) {
@@ -758,6 +766,74 @@ fun Ciao(
 
 
                     }
+                    Dialog(
+                        onDismissRequest = { showDialog.value = false },
+                        properties = DialogProperties(
+                            dismissOnBackPress = true,
+                            dismissOnClickOutside = true
+                        )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White, RoundedCornerShape(16.dp))
+                                .padding(vertical = 50.dp, horizontal = 50.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            firebaseUserViewModel.getUserByEmail(email = "gabriele.iannace@gmail.com")
+                            val friends = firebaseUserViewModel.user
+
+                            if (friends.value.friends.isNotEmpty()) {
+                                val selectedFriends = remember { mutableStateListOf<String>() }
+
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(friends.value.friends) { friend ->
+                                        val isSelected = remember { mutableStateOf(false) }
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { isSelected.value = !isSelected.value }
+                                                .padding(vertical = 8.dp)
+                                        ) {
+                                            Checkbox(
+                                                checked = isSelected.value,
+                                                onCheckedChange = { isSelected.value = it }
+                                            )
+                                            Text(text = friend, modifier = Modifier.padding(start = 8.dp))
+                                        }
+                                        Divider(color = Color.Gray, thickness = 1.dp)
+
+                                        if (isSelected.value) {
+                                            selectedFriends.add(friend)
+                                        }
+                                    }
+                                    item {
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Button(onClick = { showDialog.value = false }) {
+                                                Text(text = "Chiudi")
+                                            }
+                                            Button(onClick = {
+                                                showDialog.value = false
+                                                // Stampa gli amici selezionati
+                                                selectedFriends.forEach { friend ->
+                                                    println(friend)
+                                                }
+                                            }) {
+                                                Text(text = "Invia")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Row {
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
                     }
@@ -847,6 +923,7 @@ fun TextGrid(pickedHour: MutableState<String>, textList: List<String>, selectedD
     val slotsState: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
     if (courtID != null) {
         val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
 
         val dateInTimeZone = selectedDate.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
         firebaseReservationViewModel.getCourtReservations(courtID, Timestamp(dateInTimeZone, 0))
