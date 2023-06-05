@@ -37,9 +37,9 @@ fun BarNavigation(
 fun BottomBar(navController: NavHostController){
     val screens = listOf(
         MainScreenDestination,
-        ProfileDestination,
+        MyReservationsDestination,
         NotificationScreenDestination,
-        MyReservationsDestination
+        ProfileDestination,
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
