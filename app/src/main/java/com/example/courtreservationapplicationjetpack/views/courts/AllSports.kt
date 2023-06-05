@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.DateRange
@@ -59,6 +60,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -346,27 +348,53 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
 
 
 
-    Box(modifier = Modifier.aspectRatio(1.5f)) {
-        println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
-        CoilImage(
-            modifier = Modifier
-                .shadow(10.dp, RoundedCornerShape(0.dp))
-                .fillMaxSize()
-                .clickable { navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}") }
-                .height(100.dp),
-            sport = court.sport,
-            URL = court.URL ?: null,
-        )
-        Text(
-            text = court.name,
-            style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 26.sp,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp)
-        )
+    Row(
+        modifier = Modifier.padding(start = 0.dp, bottom = 0.dp)
+    ) {
+        Box(
+            modifier = Modifier.aspectRatio(1.5f)
+        ) {
+            println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
+            CoilImage(
+                modifier = Modifier
+                    .shadow(10.dp, RoundedCornerShape(0.dp))
+                    .fillMaxSize()
+                    .clickable { navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}") }
+                    .height(100.dp),
+                sport = court.sport,
+                URL = court.URL ?: null
+            )
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${court.capacity}",
+                    fontSize = 18.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Icon(
+                    painter = rememberVectorPainter(Icons.Default.Person),
+                    contentDescription = "reservation available",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Text(
+                text = court.name,
+                style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+            )
+        }
     }
 
     Box(modifier = Modifier
@@ -397,12 +425,21 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 16.dp)
             )
-            Text(
-                text = "${court.capacity} reservations available",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(start = 16.dp).padding(bottom = 32.dp)
-            )
+            Row(
+                modifier = Modifier.padding(start = 16.dp, bottom = 32.dp)
+            ) {
+                Text(
+                    text = "${court.capacity}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Icon(
+                    painter = rememberVectorPainter(Icons.Default.Person),
+                    contentDescription = "reservation available"
+                )
+            }
+
+
         }
     }
 }

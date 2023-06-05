@@ -513,7 +513,7 @@ fun Ciao(
                         )
                     }
                     Text(
-                        text = "Hai salvato correttamente la tua prenotazione",
+                        text = "Reservation correctly saved",
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         style = androidx.compose.ui.text.TextStyle(
@@ -742,13 +742,13 @@ fun Ciao(
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
                         )
-
+                        if(firebaseCourtViewModel.court.value.capacity != 0)
                         NumberPicker(
                             modifier = Modifier
                                 .width(120.dp)
                                 .align(Alignment.CenterVertically),
                             value = pickerValue,
-                            range = 1..10,
+                            range = 1.. firebaseCourtViewModel.court.value.capacity,
                             onValueChange = {
                                 pickerValue = it
                                 setPickedPeople(it.toString())
