@@ -12,6 +12,7 @@ data class Review(
     var date: Timestamp = Timestamp.now(),
     val review: String = "",
     val rating: Int = 0,
+    var idReservation: String = ""
 
     )
 

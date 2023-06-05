@@ -56,6 +56,7 @@ import com.example.courtreservationapplicationjetpack.firestore.ReviewViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.theme.Orange200
+import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
@@ -73,7 +74,7 @@ object ReviewMainPageDestination : NavigationDestination {
 @ExperimentalMaterial3Api
 @Composable
 fun ReviewMainPage(
-    navigateToCreateReview: (String) -> Unit,
+    navigateToCreateReview: (Array<String>) -> Unit,
     navController: NavController,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
@@ -111,7 +112,8 @@ fun ReviewMainPage(
             reservationList = myReservationsUiState.value,
             reviewList = reviewUiState.reviewList,
             courtList = reservationCourtsState.courtList,
-            onReviewClick = navigateToCreateReview
+            onReviewClick = navigateToCreateReview,
+            navController = navController
         )
     }
 }
@@ -122,7 +124,8 @@ fun MyReviewsBody(
     reservationList: List<Reservation>,
     reviewList: List<Review>,
     courtList: List<CourtWithId>,
-    onReviewClick: (String) -> Unit
+    navController: NavController,
+    onReviewClick: (Array<String>) -> Unit
 ){
     val text = buildAnnotatedString {
         withStyle(style = SpanStyle(fontSize = 16.sp)) {
@@ -149,6 +152,8 @@ fun MyReviewsBody(
             ReviewList(
                 courtList,
                 reviewList,
+                reservationList,
+                navController,
                 onReviewClick = { onReviewClick(it); Log.d("it", "$it") }
             )
         }
@@ -159,7 +164,9 @@ fun MyReviewsBody(
 fun ReviewList(
     courtList: List<CourtWithId>,
     reviewList: List<Review>,
-    onReviewClick: (String) -> Unit,
+    reservationList: List<Reservation>,
+    navController: NavController,
+    onReviewClick: (Array<String>) -> Unit,
 ){
     val reservationFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -175,14 +182,18 @@ fun ReviewList(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp),
                 elevation = CardDefaults.cardElevation( 8.dp )
-            ){
-                Surface(color = Color.White){
-                    Row(modifier = Modifier
-                        .padding(16.dp)
-                        .height(80.dp)){
-                        Card(modifier = Modifier
-                            .fillMaxSize()
-                            .weight(2f)){
+            ) {
+                Surface(color = Color.White) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .height(80.dp)
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(2f)
+                        ) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
@@ -193,11 +204,13 @@ fun ReviewList(
                                 contentScale = ContentScale.Crop,
                             )
                         }
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(6f)
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 8.dp)){
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(6f)
+                                .align(Alignment.CenterVertically)
+                                .padding(start = 8.dp)
+                        ) {
                             Text(
                                 text = courtList[ci].court.name,
                                 textAlign = TextAlign.Start,
@@ -211,78 +224,113 @@ fun ReviewList(
                         }
                     }
                 }
-                Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
-                Surface(color = Color.White){
-                    Row(modifier = Modifier
-                        .padding(end = 16.dp)
-                    ){
-                        Button(onClick = {
-                            onReviewClick(courtList[ci].idCourt)
-                            Log.d("courtList[ci].idCourt", "${courtList[ci].idCourt}")
-                        },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp)
-                                .align(Alignment.CenterVertically)
-                        ) {
-                            Log.d("reviewList", "$reviewList")
-                            Log.d("reviewList", "${reviewList}")
+                if (!reservationList.none { it.court == courtList[ci].idCourt }) {
+                    Log.d("reservationList", "${reservationList}")
 
-                            if(!reviewList.none { it.court == courtList[ci].idCourt }) {
-                                Text(text = "Edit")
-                            }else{
-                                Text(text = "Review")
-                            }
-                        }
-                    }
-                }
-                if(!reviewList.none { it.court == courtList[ci].idCourt }){
-                    val review = reviewList.filter { it.court == courtList[ci].idCourt }[0]
-                    val reviewDate = review.date?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-                    val formattedDate = reviewDate?.let { reservationFormatter.format(it) }
+                    val reservation = reservationList.filter { it.court == courtList[ci].idCourt }
+                    Log.d("reservation", "${reservation}")
+
+                    for(reservation in reservation) {
+                        Log.d("reservation", "${reservation}")
+                    // mettere che itera su un altra lista che sono le reservation per quel campo
                     Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
-                    Surface(color = Color.White){
-                        Column(modifier = Modifier
-                            .padding(end = 16.dp)
-                        ){
-                            Row(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                            ){
-                                reviewList.filter { it.court == courtList[ci].idCourt }[0].rating?.let {
-                                    RatingBar(
-                                        value = it.toFloat(),
-                                        config = RatingBarConfig()
-                                            .style(RatingBarStyle.HighLighted)
-                                            .size(18.dp)
-                                            .activeColor(Orange200),
-                                        onValueChange = {},
-                                        onRatingChanged = {},
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(3f)
-                                    )
+                    Surface(color = Color.White) {
+                        Row(
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    val daPassare = arrayOf(courtList[ci].idCourt, reservation.id)
+                                    //navController.navigate("${CourtsAvailableDestination.route}/${court.id}/${pickedDate.value}"
+                                    navController.navigate("${ReviewCreatePageDestination.route}/${courtList[ci].idCourt}/${reservation.id}")
+                                    Log.d("courtList[ci].idCourt", "${courtList[ci].idCourt}")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp)
+                                    .align(Alignment.CenterVertically)
+                            ) {
+                                Log.d("reviewList", "$reviewList")
+
+                                if (!reviewList.none { it.court == courtList[ci].idCourt && it.idReservation == reservation.id}) {
+                                    Text(text = "Edit")
+                                } else {
+                                    Text(text = "Review")
                                 }
-                                Text(
-                                    text = formattedDate ?: "",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                        .offset(y = (-1).dp),
-                                    fontWeight = FontWeight.ExtraLight,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                            reviewList.filter { it.court == courtList[ci].idCourt }[0].review?.let {
-                                Text(
-                                    text = it,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
-                                )
                             }
                         }
                     }
+
+
+
+                            if (!reviewList.none { it.court == courtList[ci].idCourt && it.idReservation == reservation.id }) {
+                                Log.d("reviewList", "${reviewList}")
+
+                                val review = reviewList.filter { it.court == courtList[ci].idCourt }
+                                    .filter { it.idReservation == reservation.id }
+                                Log.d("review", "${review}")
+                                if (!review.isEmpty()) {
+                                    val reviewDate = review[0].date?.toDate()?.toInstant()
+                                        ?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                                    val formattedDate =
+                                        reviewDate?.let { reservationFormatter.format(it) }
+                                    Divider(
+                                        thickness = 1.dp,
+                                        color = MaterialTheme.colorScheme.primaryContainer
+                                    )
+                                    Surface(color = Color.White) {
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(end = 16.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp)
+                                            ) {
+                                                review[0].rating?.let {
+                                                    RatingBar(
+                                                        value = it.toFloat(),
+                                                        config = RatingBarConfig()
+                                                            .style(RatingBarStyle.HighLighted)
+                                                            .size(18.dp)
+                                                            .activeColor(Orange200),
+                                                        onValueChange = {},
+                                                        onRatingChanged = {},
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .weight(3f)
+                                                    )
+                                                }
+                                                Text(
+                                                    text = formattedDate ?: "",
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .weight(1f)
+                                                        .offset(y = (-1).dp),
+                                                    fontWeight = FontWeight.ExtraLight,
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                            review[0].review?.let {
+                                                Text(
+                                                    text = it,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(
+                                                            start = 16.dp,
+                                                            bottom = 16.dp,
+                                                            end = 16.dp
+                                                        )
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                 }
             }
         }

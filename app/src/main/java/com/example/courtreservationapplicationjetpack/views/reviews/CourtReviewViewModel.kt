@@ -16,8 +16,8 @@ class CourtReviewViewModel(
     reviewRepository: ReviewRepository
 ): ViewModel() {
 
-    private val courtId: Int = checkNotNull(savedStateHandle[ReviewCreatePageDestination.courtIdArg])
-
+    //private val courtId: Int = checkNotNull(savedStateHandle[ReviewCreatePageDestination.courtIdArg])
+    private val courtId: Int = 1
     val courtReviewsState: StateFlow<CourtReviewsState> =
         reviewRepository.getAllCourtReviews(courtId)
             .filterNotNull()

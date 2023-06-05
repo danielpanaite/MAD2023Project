@@ -25,8 +25,8 @@ class ReviewCreateViewModel(
     courtRepository: CourtRepository
 ) : ViewModel() {
 
-    private val courtId: Int = checkNotNull(savedStateHandle[ReviewCreatePageDestination.courtIdArg])
-
+    //private val courtId: Int = checkNotNull(savedStateHandle[ReviewCreatePageDestination.courtIdArg])
+    private val courtId: Int = 1
     data class ReviewUiState(
         val review: Review = Review(null, 0, 0, "", "", 0),
         val isEntryValid: Boolean = false

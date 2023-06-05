@@ -162,16 +162,27 @@ fun NavigationGraph(
 
         composable(
             route = ReviewCreatePageDestination.routeWithArgs,
-            arguments = listOf(navArgument(ReviewCreatePageDestination.courtIdArg) {
-                type = NavType.StringType
-            })
+            arguments = listOf(
+                navArgument("courtIdArg") {
+                    type = NavType.StringType
+                },
+                navArgument("reservationIdArg") {
+                    type = NavType.StringType
+                },
+            )
         ){
+                backStackEntry ->
+            val courtIdArg = backStackEntry.arguments?.getString("courtIdArg").orEmpty()
+            val reservationIdArg = backStackEntry.arguments?.getString("reservationIdArg").orEmpty()
+
+            Log.d("courtIdArg", courtIdArg)
+            Log.d("reservationIdArg", reservationIdArg)
             ReviewCreatePage(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() },
-                courtIdArg = it.arguments?.getString("courtIdArg"),
-
-                        googleAuthUiClient = googleAuthUiClient
+                courtIdArg = courtIdArg,
+                reservationIdArg = reservationIdArg,
+                googleAuthUiClient = googleAuthUiClient
             )
         }
 

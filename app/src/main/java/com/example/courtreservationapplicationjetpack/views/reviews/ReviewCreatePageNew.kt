@@ -53,10 +53,13 @@ import java.time.format.DateTimeFormatter
 
 object ReviewCreatePageDestination : NavigationDestination {
     override val route = "review_create_page"
-    const val courtIdArg = "courtIdArg"
-    val routeWithArgs = "$route/{$courtIdArg}"
     override val titleRes = "Reviews"
     override val icon = Icons.Default.Star
+    private const val courtIdArg = "courtIdArg"
+    private const val reservationIdArg = "reservationIdArg"
+
+    val routeWithArgs = "$route/{$courtIdArg}/{$reservationIdArg}"
+
 }
 
 
@@ -64,18 +67,21 @@ object ReviewCreatePageDestination : NavigationDestination {
 fun ReviewCreatePage(
     navController: NavController,
     onNavigateUp: () -> Unit,
-    courtIdArg: String?,
+    courtIdArg: String,
+    reservationIdArg: String,
     googleAuthUiClient: GoogleAuthUiClient,
     viewModel: ReviewViewModel = viewModel(),
     ) {
     val email = googleAuthUiClient.getSignedInUser()?.email
-    Log.d("courtIdArg", "$courtIdArg")
+    Log.d("courtIdArg", "${courtIdArg}")
+    Log.d("reservationArg", "${reservationIdArg}")
+
 
     var launchOnce by rememberSaveable { mutableStateOf(true) }
     if (launchOnce) {
         if (email != null) {
             Log.d("courtIdArg", "$courtIdArg")
-            viewModel.getReviewByEmailCourtId(email, courtIdArg!!)
+            viewModel.getReviewByEmailCourtId(email, courtIdArg!!, reservationIdArg)
             viewModel.courtUiState(courtIdArg)
             Log.d("courtUiState", "${viewModel.courtUiState}")
         }
@@ -101,6 +107,7 @@ fun ReviewCreatePage(
                 reviewUiState = reviewUiState,
                 onReviewValueChange = viewModel::updateUiState,
                 court = courtUiState[0].court,
+                reservationIdArg = reservationIdArg,
                 onSaveClick = {
                     CoroutineScope(Dispatchers.IO).launch {
                         println(reviewUiState.review)
@@ -130,6 +137,7 @@ fun CreateForm(
     reviewUiState: ReviewUiState,
     onReviewValueChange: (Review) -> Unit,
     court: CourtWithId?,
+    reservationIdArg: String,
     onSaveClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -151,6 +159,9 @@ fun CreateForm(
                         reviewUiState.review.user = email
                         reviewUiState.review.court = court.idCourt
                         reviewUiState.review.date = Timestamp.now()
+                        reviewUiState.review.idReservation = reservationIdArg
+                        Log.d("reservationIdArg in card", "$reservationIdArg")
+
                     }else{
                         println(reviewUiState.review)
                         rating.value = reviewUiState.review.rating!!
