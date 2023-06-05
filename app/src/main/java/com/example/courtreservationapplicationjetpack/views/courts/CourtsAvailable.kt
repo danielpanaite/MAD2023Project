@@ -772,6 +772,8 @@ fun Ciao(
                     val modalBottomSheetState = rememberModalBottomSheetState()
                     if (showSheet) {
                         ModalBottomSheet(
+                            modifier = Modifier
+                                .background(Color.Transparent),
                             onDismissRequest = { showSheet = false },
                             sheetState = modalBottomSheetState,
                             dragHandle = { BottomSheetDefaults.DragHandle() },
@@ -779,8 +781,8 @@ fun Ciao(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Transparent, RoundedCornerShape(16.dp))
-                                    .padding(vertical = 50.dp, horizontal = 50.dp),
+                                    .background(Color.Transparent)
+                                    .padding(horizontal = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 firebaseUserViewModel.getUserByEmail(email = userEmail!!)
@@ -790,57 +792,63 @@ fun Ciao(
                                     val selectedFriends = remember { mutableStateListOf<String>() }
                                     if(friends.value.friends.isNotEmpty())
                                         firebaseUserViewModel.getUserListByEmails(friends.value.friends)
-                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    LazyColumn(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
                                         if(firebaseUserViewModel.users.value.isNotEmpty())
+
                                             items(firebaseUserViewModel.users.value){f ->
+
                                                 val isSelected = remember { mutableStateOf(false) }
                                                 Card(modifier = Modifier
-                                                    .fillMaxWidth()
+                                                    .fillMaxWidth().background(Color.Transparent)
                                                     .padding(start = 0.dp, end = 0.dp),
                                                     elevation = CardDefaults.cardElevation( 8.dp )
                                                 ){
                                                     Surface(color = Color.Transparent){
                                                         Row(modifier = Modifier
-                                                            .padding(start = 0.dp, top = 8.dp, bottom = 8.dp)
+                                                            .padding(start = 0.dp, top = 8.dp, bottom = 8.dp).background(Color.Transparent)
                                                             .clickable { isSelected.value = !isSelected.value }
                                                         ){
                                                             Column(modifier = Modifier
                                                                 .fillMaxSize()
                                                                 .align(Alignment.CenterVertically)
-                                                                .weight(2f)
+                                                                .weight(2f).background(Color.Transparent)
                                                             ){
                                                                 if(f.imageUri != "")
                                                                     Image(
                                                                         modifier = Modifier
                                                                             .size(48.dp)
-                                                                            .clip(shape = CircleShape),
+                                                                            .clip(shape = CircleShape).background(Color.Transparent),
                                                                         painter = rememberAsyncImagePainter(model = Uri.parse(f.imageUri)),
                                                                         contentDescription = "Profile Image",
                                                                         contentScale = ContentScale.Crop
                                                                     )
                                                                 else
-                                                                    Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp))
+                                                                    Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp).background(Color.Transparent))
                                                             }
                                                             Column(modifier = Modifier
                                                                 .fillMaxSize()
-                                                                .weight(6f)
+                                                                .weight(6f).background(Color.Transparent)
                                                             ){
                                                                 Row(modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(top = 16.dp, bottom = 4.dp)
+                                                                    .padding(top = 0.dp, bottom = 0.dp).background(Color.Transparent)
                                                                 ){
                                                                     Text(text = f.name.toString(), fontWeight = FontWeight.ExtraLight)
                                                                 }
                                                                 Row(modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(top = 4.dp, bottom = 16.dp)
+                                                                    .padding(top = 0.dp, bottom = 0.dp).background(Color.Transparent)
                                                                 ){
                                                                     Text(text = f.nickname.toString())
                                                                 }
                                                             }
                                                             Checkbox(
-                                                            checked = isSelected.value,
-                                                            onCheckedChange = { isSelected.value = it }
+                                                                checked = isSelected.value,
+                                                                onCheckedChange = { isSelected.value = it },
+                                                                modifier = Modifier
+                                                                    .size(24.dp) // Imposta la dimensione della checkbox come desiderato
+                                                                    .padding(end = 20.dp)
+                                                                    .align(Alignment.CenterVertically)
                                                             )
                                                         }
                                                     }
