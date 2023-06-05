@@ -29,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -167,6 +166,7 @@ fun NotificationItem(
 ){
     val toastFriend = Toast.makeText(LocalContext.current, "Friend added!", Toast.LENGTH_SHORT)
     val toastInvite = Toast.makeText(LocalContext.current, "Invitation accepted!", Toast.LENGTH_SHORT)
+    reservationViewModel.getReservationById(notification.reservation)
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(start = 16.dp, end = 16.dp),
@@ -174,7 +174,7 @@ fun NotificationItem(
     ){
         Surface(color = Color.White){
             Row(modifier = Modifier
-                .padding(start = 16.dp)
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
             ){
                 Column(modifier = Modifier
                     .fillMaxSize()
@@ -197,13 +197,7 @@ fun NotificationItem(
                 ){
                     Row(modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp, bottom = 8.dp)
-                    ){
-                        Text(text = "${notification.toDate()} ${notification.toTime()}", fontWeight = FontWeight.ExtraLight)
-                    }
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
+                        .padding(top = 16.dp, bottom = 16.dp)
                     ){
                         if(notification.type == "friend")
                             Text(text = "Friend request from ${sender.nickname}")
@@ -248,11 +242,12 @@ fun NotificationItem(
                             textAlign = TextAlign.Start,
                             fontWeight = FontWeight.Normal,
                         )
-                        Text(
-                            text = court.address,
-                            textAlign = TextAlign.Start,
-                            fontWeight = FontWeight.ExtraLight,
-                        )
+                        if(reservationViewModel.reservation.value.id != "")
+                            Text(
+                                text = "${reservationViewModel.reservation.value.toDate()} at ${reservationViewModel.reservation.value.toTime()}",
+                                textAlign = TextAlign.Start,
+                                fontWeight = FontWeight.ExtraLight,
+                            )
                     }
                 }
             }
