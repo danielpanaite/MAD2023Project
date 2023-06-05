@@ -35,15 +35,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -409,6 +412,7 @@ private fun CourtItem(
 }
 
 //--------------------------------------------------------------------------------
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState",
     "SuspiciousIndentation", "RememberReturnType"
 )
@@ -755,7 +759,45 @@ fun Ciao(
                     }
 
 
+                    var showSheet by remember { mutableStateOf(true) }
+                    val modalBottomSheetState = rememberModalBottomSheetState()
+                    if (showSheet) {
+                        ModalBottomSheet(
+                            onDismissRequest = { showSheet = false },
+                            sheetState = modalBottomSheetState,
+                            dragHandle = { BottomSheetDefaults.DragHandle() },
+                        ) {
+                            val countries = listOf(
+                                Pair("United States", "\uD83C\uDDFA\uD83C\uDDF8"),
+                                Pair("Canada", "\uD83C\uDDE8\uD83C\uDDE6"),
+                                Pair("India", "\uD83C\uDDEE\uD83C\uDDF3"),
+                                Pair("Germany", "\uD83C\uDDE9\uD83C\uDDEA"),
+                                Pair("France", "\uD83C\uDDEB\uD83C\uDDF7"),
+                                Pair("Japan", "\uD83C\uDDEF\uD83C\uDDF5"),
+                                Pair("China", "\uD83C\uDDE8\uD83C\uDDF3"),
+                                Pair("Brazil", "\uD83C\uDDE7\uD83C\uDDF7"),
+                                Pair("Australia", "\uD83C\uDDE6\uD83C\uDDFA"),
+                                Pair("Russia", "\uD83C\uDDF7\uD83C\uDDFA"),
+                                Pair("United Kingdom", "\uD83C\uDDEC\uD83C\uDDE7"),
+                            )
 
+                            LazyColumn {
+                                items(countries) { (country, flag) ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 10.dp, horizontal = 20.dp)
+                                    ) {
+                                        Text(
+                                            text = flag,
+                                            modifier = Modifier.padding(end = 20.dp)
+                                        )
+                                        Text(text = country)
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     val showAddFriendDialog = remember { mutableStateOf(true)}
                     if(showAddFriendDialog.value) {
@@ -773,7 +815,7 @@ fun Ciao(
                                     .padding(vertical = 50.dp, horizontal = 50.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                firebaseUserViewModel.getUserByEmail(email = "gabriele.iannace@gmail.com")
+                                firebaseUserViewModel.getUserByEmail(email = userEmail!!)
                                 val friends = firebaseUserViewModel.user
 
                                 if (friends.value.friends.isNotEmpty()) {
