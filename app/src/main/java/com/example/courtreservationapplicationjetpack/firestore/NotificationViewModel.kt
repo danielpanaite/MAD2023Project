@@ -22,6 +22,7 @@ class NotificationViewModel: ViewModel() {
     private var _notifications = mutableStateOf<List<Notification>>(emptyList())
     val notifications: State<List<Notification>> = _notifications
 
+
     fun getUserNotifications(user: String) {
         val docRef = db.collection("notifications").whereEqualTo("receiver", user).whereEqualTo("status", "pending").orderBy("date", Query.Direction.DESCENDING)
 
@@ -52,5 +53,26 @@ class NotificationViewModel: ViewModel() {
                 Log.d(TAG, "Failed to update notification status")
             }
     }
+
+    fun createNotification(notification: Notification) {
+        val docRef = db.collection("notifications")
+        val hash = hashMapOf<String, Any>(
+            "receiver" to notification.receiver,
+            "sender" to notification.sender,
+            "status" to notification.status,
+            "type" to notification.type,
+            "court" to notification.court,
+            "reservation" to notification.reservation,
+            "date" to notification.date
+        )
+        docRef.document(docRef.id).set(hash)
+            .addOnSuccessListener {
+                Log.d(TAG, "Notification ${docRef.id} created successfully")
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to create notification ${docRef.id}")
+            }
+    }
+
 
 }

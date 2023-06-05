@@ -80,6 +80,8 @@ import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Notification
+import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.models.reviews.Review
@@ -156,6 +158,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = viewModel()
+    val firebaseNotificationViewModel: NotificationViewModel = viewModel()
 
     LaunchedEffect(pickedSport.value) {
         firebaseCourtViewModel.getCourtsBySport(pickedSport.value)

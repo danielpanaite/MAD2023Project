@@ -101,6 +101,8 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Notification
+import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
@@ -165,7 +167,6 @@ fun CourtsAvailable(
     val showDialog = remember { mutableStateOf(false) }
     val firebaseReservationViewModel: ReservationViewModel = viewModel()
     val reservationDetails by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
-    val userViewModel: UserViewModel = viewModel()
 
     val email = googleAuthUiClient.getSignedInUser()?.email
 
@@ -449,6 +450,8 @@ fun Ciao(
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
 
     val firebaseUserViewModel: UserViewModel = viewModel()
+
+    val notificationViewModel: NotificationViewModel = viewModel()
 
 
     LaunchedEffect(Unit) {
@@ -822,7 +825,16 @@ fun Ciao(
                                                 showDialog.value = false
                                                 // Stampa gli amici selezionati
                                                 selectedFriends.forEach { friend ->
-                                                    println(friend)
+                                                    val notifica = Notification(
+                                                        date = Timestamp.now(),
+                                                        sender = userEmail!!,
+                                                        receiver = friend,
+                                                        type = "play",
+                                                        status = "pending",
+                                                        court = courtState.value!!.id,
+                                                        reservation = "8tpf7y8NBR8u5AFkX0bb"
+                                                    )
+                                                    notificationViewModel.createNotification(notifica)
                                                 }
                                             }) {
                                                 Text(text = "Invia")
