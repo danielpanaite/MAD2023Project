@@ -905,6 +905,8 @@ fun Ciao(
                                                 if (isSelected.value) {
                                                     selectedFriends.add(f.email)
                                                 }
+                                                else
+                                                    selectedFriends.filter { it != f.email }
                                             }
                                         item {
                                             Column(
@@ -929,7 +931,13 @@ fun Ciao(
                                                     }
                                                     //showAddFriendDialog.value = false
                                                 }) {
-                                                    Text(text = "Confirm")
+                                                    val text = if (selectedFriends.isEmpty()) {
+                                                        "Close"
+                                                    } else {
+                                                        "Confirm"
+                                                    }
+                                                    Text(text = text)
+
                                                 }
                                             }
                                         }
