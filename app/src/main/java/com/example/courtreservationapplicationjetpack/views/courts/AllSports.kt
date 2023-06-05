@@ -334,17 +334,48 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             Spacer(modifier = Modifier.height(10.dp))
         }
 
+        if (courtList.isEmpty()) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.nothing_found),
+                        contentDescription = "Nothing Found",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            //.aspectRatio(1f)
+                            .padding(horizontal = 16.dp).padding(top = 16.dp)
+                            .background(color = Color.Transparent)
+                    )
+                    Text(
+                        text = "We are sorry, but we could not find the field you were looking for. Be sure you have entered the name of the city where you want to search...",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+
+
+
+
+
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color.White)
+                .background(color = Color.Transparent)
                 .padding(bottom = 50.dp)
         ) {
 
-
             LazyColumn {
                 itemsIndexed(courtList) { index, court ->
-                    if(courtList.isNotEmpty()) {
                         CourtCard(
                             pickedDate = pickedDate,
                             pickedSport = pickedSport,
@@ -352,10 +383,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             navController = navController,
                             key = index.toString() + court.toString() // Utilizza una combinazione di indici e valori di "court" come chiave
                         )
-                    }
-                    else{
-                        Text(text = "No courts found", modifier = Modifier.padding(16.dp).height(100.dp).background(Color.Red))
-                    }
                 }
             }
 
