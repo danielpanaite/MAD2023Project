@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack.views.courts
 
 import android.annotation.SuppressLint
 import android.media.MediaPlayer
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -33,16 +34,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -83,6 +89,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -99,6 +106,8 @@ import com.example.courtreservationapplicationjetpack.firestore.ReservationViewM
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.example.courtreservationapplicationjetpack.views.profile.AddFriendsItem
+import com.example.courtreservationapplicationjetpack.views.profile.FriendsItem
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.launch
@@ -779,35 +788,67 @@ fun Ciao(
 
                                 if (friends.value.friends.isNotEmpty()) {
                                     val selectedFriends = remember { mutableStateListOf<String>() }
-
+                                    if(friends.value.friends.isNotEmpty())
+                                        firebaseUserViewModel.getUserListByEmails(friends.value.friends)
                                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                        items(friends.value.friends) { friend ->
-                                            val isSelected = remember { mutableStateOf(false) }
-
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier
+                                        if(firebaseUserViewModel.users.value.isNotEmpty())
+                                            items(firebaseUserViewModel.users.value){f ->
+                                                val isSelected = remember { mutableStateOf(false) }
+                                                Card(modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clickable {
-                                                        isSelected.value = !isSelected.value
+                                                    .padding(start = 0.dp, end = 0.dp),
+                                                    elevation = CardDefaults.cardElevation( 8.dp )
+                                                ){
+                                                    Surface(color = Color.Transparent){
+                                                        Row(modifier = Modifier
+                                                            .padding(start = 0.dp, top = 8.dp, bottom = 8.dp)
+                                                            .clickable { isSelected.value = !isSelected.value }
+                                                        ){
+                                                            Column(modifier = Modifier
+                                                                .fillMaxSize()
+                                                                .align(Alignment.CenterVertically)
+                                                                .weight(2f)
+                                                            ){
+                                                                if(f.imageUri != "")
+                                                                    Image(
+                                                                        modifier = Modifier
+                                                                            .size(48.dp)
+                                                                            .clip(shape = CircleShape),
+                                                                        painter = rememberAsyncImagePainter(model = Uri.parse(f.imageUri)),
+                                                                        contentDescription = "Profile Image",
+                                                                        contentScale = ContentScale.Crop
+                                                                    )
+                                                                else
+                                                                    Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp))
+                                                            }
+                                                            Column(modifier = Modifier
+                                                                .fillMaxSize()
+                                                                .weight(6f)
+                                                            ){
+                                                                Row(modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(top = 16.dp, bottom = 4.dp)
+                                                                ){
+                                                                    Text(text = f.name.toString(), fontWeight = FontWeight.ExtraLight)
+                                                                }
+                                                                Row(modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(top = 4.dp, bottom = 16.dp)
+                                                                ){
+                                                                    Text(text = f.nickname.toString())
+                                                                }
+                                                            }
+                                                            Checkbox(
+                                                            checked = isSelected.value,
+                                                            onCheckedChange = { isSelected.value = it }
+                                                            )
+                                                        }
                                                     }
-                                                    .padding(vertical = 8.dp)
-                                            ) {
-                                                Checkbox(
-                                                    checked = isSelected.value,
-                                                    onCheckedChange = { isSelected.value = it }
-                                                )
-                                                Text(
-                                                    text = friend,
-                                                    modifier = Modifier.padding(start = 8.dp)
-                                                )
+                                                }
+                                                if (isSelected.value) {
+                                                    selectedFriends.add(f.email)
+                                                }
                                             }
-                                            Divider(color = Color.Gray, thickness = 1.dp)
-
-                                            if (isSelected.value) {
-                                                selectedFriends.add(friend)
-                                            }
-                                        }
                                         item {
                                             Column(
                                                 verticalArrangement = Arrangement.Center,
