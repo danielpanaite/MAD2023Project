@@ -71,6 +71,7 @@ import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.firestore.toTime
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -92,8 +93,10 @@ fun EditReservation(
     navController: NavController,
     onNavigateUp: () -> Unit,
     reservationArg: String?,
-    viewModel: ReservationViewModel = viewModel()
+    viewModel: ReservationViewModel = viewModel(),
+    googleAuthUiClient : GoogleAuthUiClient
 ){
+    val email = googleAuthUiClient.getSignedInUser()?.email
     var launchOnce by rememberSaveable { mutableStateOf(true) }
     if(launchOnce){
         viewModel.getReservationById(reservationArg!!)
@@ -143,10 +146,11 @@ fun EditReservation(
         }
     ) {
             innerPadding ->
-        if(reservationDetails.value.court != "")
+        if(reservationDetails.value.court != "" && email != null)
             EditReservationForm(
                 modifier = Modifier.padding(innerPadding),
-                reservation = reservationDetails
+                reservation = reservationDetails,
+                email = email
             )
     }
 
@@ -156,7 +160,8 @@ fun EditReservation(
 fun EditReservationForm(
     modifier: Modifier = Modifier,
     reservation: MutableState<Reservation>,
-    courtViewModel: CourtViewModel = viewModel()
+    courtViewModel: CourtViewModel = viewModel(),
+    email: String
 ) {
     courtViewModel.getCourtById(reservation.value.court) //get court info to be displayed
     val court = courtViewModel.court.value
@@ -262,7 +267,7 @@ fun EditReservationForm(
                             .height(1.dp)
                     )
 
-                    CalendarScreen(court, reservation)
+                    CalendarScreen(court, reservation, email)
                 }
             }
         }
@@ -273,7 +278,8 @@ fun EditReservationForm(
 fun CalendarScreen(
     court: Court,
     reservation: MutableState<Reservation>,
-    viewModel: ReservationViewModel = viewModel()
+    email: String,
+    viewModel: ReservationViewModel = viewModel(),
 ) {
     val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val localFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -290,26 +296,26 @@ fun CalendarScreen(
             )
         }
         if(viewModel.courtres.value.isNotEmpty()){
-            Log.d("FILTER", "before")
-            if(LocalDate.now().format(localFormat) == viewModel.reservation.value.toDate()){
-                Log.d("FILTER", "today")
-                TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
-                    .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } } //filter slots occupied by others
-                    .filter { LocalTime.parse(it, timeFormatter) > LocalTime.now() }
-                    , reservation)
-            }else{
-                Log.d("FILTER", "another")
-                TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
-                    .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } } //filter slots occupied by others
-                    , reservation)
-            }
+            if(reservation.value.invites.contains(email))
+                TextGrid(mutableListOf(reservation.value.toTime()), reservation)
+            else
+                if(LocalDate.now().format(localFormat) == viewModel.reservation.value.toDate()){
+                    TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                        .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } } //filter slots occupied by others
+                        .filter { LocalTime.parse(it, timeFormatter) > LocalTime.now() }
+                        , reservation)
+                }else{
+                    TextGrid(mutableListOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00")
+                        .filter { !viewModel.courtres.value.any { r -> (r.toTime() == it) && (r.id != reservation.value.id) } } //filter slots occupied by others
+                        , reservation)
+                }
         }
         Row(
             modifier = Modifier
                 .padding(horizontal = 0.dp)
         ) {
             var pickerValue by remember { mutableStateOf(1) }
-            pickerValue = reservation.value.people
+            pickerValue = reservation.value.people + reservation.value.invites.size
 
             Text(
                 text = "Number of people: $pickerValue",
@@ -319,8 +325,9 @@ fun CalendarScreen(
                     .fillMaxWidth()
                     .weight(4f)
                     .align(Alignment.CenterVertically)
+                    .padding(bottom = if(reservation.value.invites.contains(email)) 24.dp else 0.dp)
             )
-            if(court.id != "")
+            if(court.id != "" && !reservation.value.invites.contains(email))
                 NumberPicker(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -344,25 +351,38 @@ fun CalendarScreen(
             modifier = Modifier.padding(start = 0.dp)
         )
 
-        TextField(
-            value = reservation.value.notes,
-            onValueChange = { reservation.value = reservation.value.copy(notes = it) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 0.dp, vertical = 8.dp)
-                .background(MaterialTheme.colorScheme.surface),
-            textStyle = MaterialTheme.typography.bodyMedium,
-            placeholder = { Text(text = "Additional notes here") },
-            maxLines = 3,
-            singleLine = false,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                disabledContainerColor = MaterialTheme.colorScheme.surface,
-                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                unfocusedIndicatorColor = Color.Gray,
-            ),
-        )
+        if(!reservation.value.invites.contains(email))
+            TextField(
+                value = reservation.value.notes,
+                onValueChange = {
+                    if(!reservation.value.invites.contains(email))
+                        reservation.value = reservation.value.copy(notes = it)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 0.dp, vertical = 8.dp)
+                    .background(MaterialTheme.colorScheme.surface),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                placeholder = { Text(text = "Additional notes here") },
+                maxLines = 3,
+                singleLine = false,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = Color.Gray,
+                ),
+            )
+        else
+            Text(
+                text = reservation.value.notes,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 0.dp, vertical = 8.dp)
+                    .background(MaterialTheme.colorScheme.surface),
+                style = MaterialTheme.typography.bodyMedium,
+            )
     }
 }
 

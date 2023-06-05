@@ -60,9 +60,11 @@ class NotificationViewModel: ViewModel() {
         val friendRef = db.collection("users").whereEqualTo("nickname", friend)
         friendRef.get()
         .addOnSuccessListener {
-            friendMail = it.documents.first().toObject(Users::class.java)!!.email
-            createNotification(notification.copy(receiver = friendMail))
-            Log.d(UserViewModel.TAG, "Friend mail get successful")
+            if(it.documents.isNotEmpty()) {
+                friendMail = it.documents.first().toObject(Users::class.java)!!.email
+                createNotification(notification.copy(receiver = friendMail))
+                Log.d(UserViewModel.TAG, "Friend mail get successful")
+            }
         }
         .addOnFailureListener {
             Log.d(UserViewModel.TAG, "Failed to ge friend mail")
