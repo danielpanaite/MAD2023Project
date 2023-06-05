@@ -428,6 +428,14 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 16.dp)
             )
+            Text(
+                text = "City ${court.citta}",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier.padding(0.dp),
+                style = androidx.compose.material.MaterialTheme.typography.body1
+            )
             Row(
                 modifier = Modifier.padding(start = 16.dp, bottom = 32.dp)
             ) {

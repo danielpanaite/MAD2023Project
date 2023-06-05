@@ -7,5 +7,6 @@ data class Court(
     val address: String = "",
     val center: String = "",
     val sport: String = "",
-    val capacity: Int = 0
+    val capacity: Int = 0,
+    val citta: String = "",
 )
