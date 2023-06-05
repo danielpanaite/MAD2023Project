@@ -798,11 +798,7 @@ fun Ciao(
                                             items(firebaseUserViewModel.users.value){f ->
 
                                                 val isSelected = remember { mutableStateOf(false) }
-                                                Card(modifier = Modifier
-                                                    .fillMaxWidth().background(Color.Transparent)
-                                                    .padding(start = 0.dp, end = 0.dp),
-                                                    elevation = CardDefaults.cardElevation( 8.dp )
-                                                ){
+
                                                     Surface(color = Color.Transparent){
                                                         Row(modifier = Modifier
                                                             .padding(start = 0.dp, top = 8.dp, bottom = 8.dp).background(Color.Transparent)
@@ -852,7 +848,7 @@ fun Ciao(
                                                             )
                                                         }
                                                     }
-                                                }
+
                                                 if (isSelected.value) {
                                                     selectedFriends.add(f.email)
                                                 }
