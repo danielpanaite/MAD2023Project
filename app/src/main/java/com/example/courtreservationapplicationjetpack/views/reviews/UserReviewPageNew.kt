@@ -239,6 +239,11 @@ fun ReviewList(
                             modifier = Modifier
                                 .padding(end = 16.dp)
                         ) {
+                            Text(
+                                text = reservation.date.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().let{toReservationFormatter.format(it)},
+                                modifier = Modifier.padding(start = 20.dp, top = 19.dp, bottom = 10.dp)
+
+                            )
                             Button(
                                 onClick = {
                                     val daPassare = arrayOf(courtList[ci].idCourt, reservation.id)
@@ -252,6 +257,7 @@ fun ReviewList(
                                     .align(Alignment.CenterVertically)
                             ) {
                                 Log.d("reviewList", "$reviewList")
+
 
                                 if (!reviewList.none { it.court == courtList[ci].idCourt && it.idReservation == reservation.id}) {
                                     Text(text = "Edit")
@@ -274,11 +280,11 @@ fun ReviewList(
                                     val reviewDate = review[0].date?.toDate()?.toInstant()
                                         ?.atZone(ZoneId.systemDefault())?.toLocalDate()
                                     val formattedDate =
-                                        reviewDate?.let { reservationFormatter.format(it) }
-                                    Divider(
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.primaryContainer
-                                    )
+                                        reviewDate?.let { toReservationFormatter.format(it) }
+                                   //Divider(
+                                    //    thickness = 1.dp,
+                                    //    color = MaterialTheme.colorScheme.primaryContainer
+                                   // )
                                     Surface(color = Color.White) {
                                         Column(
                                             modifier = Modifier

@@ -262,7 +262,7 @@ class ReviewViewModel: ViewModel() {
            //     db.collection("reviews").whereEqualTo("user", reviewUiState.value.review.user)
             //        .whereEqualTo("court", reviewUiState.value.review.court).whereLessThan("date", Timestamp.now())
 
-            val esisteRef = db.collection("revies").whereEqualTo("id", reviewUiState.value.review.id)
+            val esisteRef = db.collection("reviews").whereEqualTo("id", reviewUiState.value.review.id)
             Log.d("user esiseRef", "${reviewUiState.value.review.user}")
             Log.d("esisteRef.court", "${reviewUiState.value.review.court}")
 
