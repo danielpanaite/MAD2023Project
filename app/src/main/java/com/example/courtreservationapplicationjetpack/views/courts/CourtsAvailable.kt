@@ -639,15 +639,20 @@ fun Ciao(
                     //.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 ){
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), shape = CircleShape)
+                                .background(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                                    shape = CircleShape
+                                )
                                 .clickable {
-                                           showSheet = true
+                                    showSheet = true
                                 }
                             ,
                             contentAlignment = Alignment.Center
@@ -817,7 +822,7 @@ fun Ciao(
                                 val friends = firebaseUserViewModel.user
 
                                 if (friends.value.friends.isNotEmpty()) {
-                                    val selectedFriends = remember { mutableStateListOf<String>() }
+                                    val selectedFriends = remember { mutableStateOf(mutableListOf<String>()) }
                                     if(friends.value.friends.isNotEmpty())
                                         firebaseUserViewModel.getUserListByEmails(friends.value.friends)
                                     LazyColumn(modifier = Modifier
@@ -901,12 +906,18 @@ fun Ciao(
                                                             }
                                                         }
                                                     }
+                                                if(firebaseUserViewModel.users.value.isNotEmpty()) {
+                                                    if (isSelected.value) {
 
-                                                if (isSelected.value) {
-                                                    selectedFriends.add(f.email)
+                                                        selectedFriends.value.add(f.email)
+                                                        println(isSelected.value)
+                                                        println(selectedFriends.value)
+                                                    } else {
+                                                        selectedFriends.value.remove(f.email)
+                                                        println(isSelected.value)
+                                                        println(selectedFriends.value)
+                                                    }
                                                 }
-                                                else
-                                                    selectedFriends.filter { it != f.email }
                                             }
                                         item {
                                             Column(
@@ -916,7 +927,7 @@ fun Ciao(
                                             ) {
                                                 Button(onClick = {
                                                     // Stampa gli amici selezionati
-                                                    selectedFriends.forEach { friend ->
+                                                    selectedFriends.value.forEach { friend ->
                                                         val notifica = Notification(
                                                             date = Timestamp.now(),
                                                             sender = userEmail!!,
@@ -931,7 +942,7 @@ fun Ciao(
                                                     }
                                                     //showAddFriendDialog.value = false
                                                 }) {
-                                                    val text = if (selectedFriends.isEmpty()) {
+                                                    val text = if (selectedFriends.value.isEmpty()) {
                                                         "Close"
                                                     } else {
                                                         "Confirm"
