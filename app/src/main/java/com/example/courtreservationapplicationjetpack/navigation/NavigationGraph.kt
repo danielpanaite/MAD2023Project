@@ -159,7 +159,8 @@ fun NavigationGraph(
             EditReservation(
                 navController = navController,
                 onNavigateUp = { navController.navigateUp() },
-                reservationArg = it.arguments?.getString("reservationIdArg")
+                reservationArg = it.arguments?.getString("reservationIdArg"),
+                googleAuthUiClient = googleAuthUiClient
             )
         }
         composable(
