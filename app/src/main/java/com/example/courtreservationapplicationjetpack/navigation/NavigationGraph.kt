@@ -91,7 +91,8 @@ fun NavigationGraph(
         ){
             Friends(
                 navController = navController,
-                googleAuthUiClient = googleAuthUiClient
+                googleAuthUiClient = googleAuthUiClient,
+                navigateBack = { navController.navigateUp() }
             )
         }
 

@@ -1,8 +1,11 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,23 +18,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,11 +46,13 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.Notification
+import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.ui.theme.ClearRed
+import com.google.firebase.Timestamp
 
 object FriendsDestination : NavigationDestination {
     override val route = "friends"
@@ -56,11 +64,12 @@ object FriendsDestination : NavigationDestination {
 fun Friends(
     navController: NavController,
     modifier: Modifier = Modifier,
-    googleAuthUiClient : GoogleAuthUiClient
+    googleAuthUiClient : GoogleAuthUiClient,
+    navigateBack: () -> Unit
 ){
     Scaffold(
         topBar = {
-            CourtTopAppBar(canNavigateBack = false, text = "Notifications")
+            CourtTopAppBar(canNavigateBack = true, navigateUp = navigateBack, text = "Friends")
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
 
@@ -94,6 +103,10 @@ fun FriendsBody(
         if(userViewModel.users.value.isNotEmpty())
             items(userViewModel.users.value){f ->
                 FriendsItem(friend = f)
+            }
+        if(email != null)
+            item{
+                AddFriendsItem(email = email)
             }
     }
 }
@@ -130,7 +143,7 @@ fun FriendsItem(
                 }
                 Column(modifier = Modifier
                     .fillMaxSize()
-                    .weight(5f)
+                    .weight(6f)
                 ){
                     Row(modifier = Modifier
                         .fillMaxWidth()
@@ -145,17 +158,50 @@ fun FriendsItem(
                         Text(text = friend.nickname.toString())
                     }
                 }
-                Column(modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-                ){
-                    IconButton(onClick = {
+            }
+        }
+    }
+}
 
-                    }, modifier = Modifier
-                        .fillMaxWidth()) {
-                        Icon(Icons.Default.Clear, contentDescription = "Clear", tint = ClearRed)
-                    }
+@Composable
+fun AddFriendsItem(
+    email: String,
+    notificationViewModel: NotificationViewModel = viewModel(),
+){
+    val toastFriend = Toast.makeText(LocalContext.current, "Friend request sent!", Toast.LENGTH_SHORT)
+    val nicknameState = remember { mutableStateOf("") }
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 16.dp, end = 16.dp)
+        .border(
+            BorderStroke(1.dp, MaterialTheme.colorScheme.primaryContainer),
+            MaterialTheme.shapes.small
+        )
+    ){
+        Row(modifier = Modifier
+            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+        ){
+            TextField(value = nicknameState.value, onValueChange = { nicknameState.value = it }, modifier = Modifier.fillMaxWidth())
+        }
+        Row(modifier = Modifier
+            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+        ){
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(onClick = {
+                    notificationViewModel.sendFriendRequestByNickname(
+                        Notification(
+                            sender = email,
+                            type = "friend",
+                            status = "pending",
+                            date = Timestamp.now()
+                        ), nicknameState.value)
+                    toastFriend.show()
+                }) {
+                    Text("Send friend request")
                 }
             }
         }
