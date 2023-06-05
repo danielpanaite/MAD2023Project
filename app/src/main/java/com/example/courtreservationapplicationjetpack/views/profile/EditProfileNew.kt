@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -141,7 +142,8 @@ fun EditProfile(
         topBar = {
             CourtTopAppBar(
                 canNavigateBack = true,
-                navigateUp = onNavigateUp
+                navigateUp = onNavigateUp,
+                text = "Edit Profile"
             )
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
@@ -220,9 +222,9 @@ fun ProfileEntryBody(
                         showErrorDialog = true
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
             ) {
-                Text(text = "EDIT PROFILE")
+                Text(text = "Save")
             }
 
         }
@@ -345,87 +347,81 @@ fun ProfileInputForm(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        Surface(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp),
-            color = Color.White,
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Log.d("imageChosen.value", "${imageChoosen.value}")
+            Log.d("imageChosen.value", "${imageChoosen.value}")
 
-                if(imageChoosen.value){
-                        // Mostra l'immagine selezionata dall'utente
-                        Log.d("chosenPhoto !=null", "${chosenPhoto.value}")
-                        Image(chosenPhoto.value.asImageBitmap(), contentDescription = "image",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape),
-                            colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
-                                ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
-                            } else {
-                                null
-                            })
+            if(imageChoosen.value){
+                    // Mostra l'immagine selezionata dall'utente
+                    Log.d("chosenPhoto !=null", "${chosenPhoto.value}")
+                    Image(chosenPhoto.value.asImageBitmap(), contentDescription = "image",
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                            ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                        } else {
+                            null
+                        })
 
-                    } else if (profileImageUrl!==null && profileImageUrl !=="") {
-                        // Mostra l'immagine del profilo esistente
-                             Image(painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(Uri.parse(profileImageUrl))
-                                .apply <ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
-                                    crossfade(true)
-                                    placeholder(R.drawable.baseline_person_24)
-                                    transformations(CircleCropTransformation())
-                                }).build()
+                } else if (profileImageUrl!==null && profileImageUrl !=="") {
+                    // Mostra l'immagine del profilo esistente
+                         Image(painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(Uri.parse(profileImageUrl))
+                            .apply <ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.baseline_person_24)
+                                transformations(CircleCropTransformation())
+                            }).build()
 
-                        )
-                             , contentDescription = "Selected Image",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape),
-                    colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
-                        ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
-                    } else {
-                        null
-                    })
-                    } else {
-                        // Mostra un'immagine di default
-                        Log.d("non c'è nessuna foto", "${user.value.imageUri}")
-                       Image(painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(data = R.drawable.baseline_person_24)
-                                .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
-                                    crossfade(true)
-                                    placeholder(R.drawable.baseline_person_24)
-                                    transformations(CircleCropTransformation())
-                                }).build(),
-                        )
-                           , contentDescription = "Selected Image",
-                           modifier = Modifier
-                               .size(100.dp)
-                               .clip(CircleShape),
-                           colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
-                               ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
-                           } else {
-                               null
-                           })
-
-                    }
-                IconButton(
-                    onClick = { showMenu.value = true },
-                    modifier = Modifier
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_camera),
-                        contentDescription = "camera icon",
-                        tint = Color.Black
                     )
+                         , contentDescription = "Selected Image",
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape),
+                colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                    ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                } else {
+                    null
+                })
+                } else {
+                    // Mostra un'immagine di default
+                    Log.d("non c'è nessuna foto", "${user.value.imageUri}")
+                   Image(painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(data = R.drawable.baseline_person_24)
+                            .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                                placeholder(R.drawable.baseline_person_24)
+                                transformations(CircleCropTransformation())
+                            }).build(),
+                    )
+                       , contentDescription = "Selected Image",
+                       modifier = Modifier
+                           .size(100.dp)
+                           .clip(CircleShape),
+                       colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                           ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
+                       } else {
+                           null
+                       })
+
                 }
+            IconButton(
+                onClick = { showMenu.value = true },
+                modifier = Modifier
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_camera),
+                    contentDescription = "camera icon",
+                    tint = Color.Black
+                )
             }
         }
 

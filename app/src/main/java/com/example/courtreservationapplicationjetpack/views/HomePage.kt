@@ -43,7 +43,7 @@ fun MainScreen(
 
     Scaffold(
         topBar = {
-            CourtTopAppBar(canNavigateBack = false)
+            CourtTopAppBar(canNavigateBack = false, text = "Home")
         },
         bottomBar = { BottomBar(navController = navController as NavHostController)}
 

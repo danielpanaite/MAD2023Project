@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -110,7 +111,7 @@ fun Achievements(
     }
 
     Scaffold(
-        topBar = { CourtTopAppBar(canNavigateBack = true,  navigateUp = navigateToProfileDestination) },
+        topBar = { CourtTopAppBar(canNavigateBack = true,  navigateUp = navigateToProfileDestination, text = "Achievements") },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         Column(
@@ -269,7 +270,11 @@ fun AchievementsItem(
                     ) {
 
                         Text(
-                            text = "Sport: ${achievement.sportName}",
+                            text = "Sport: ${achievement.sportName.replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase(
+                                    Locale.getDefault()
+                                ) else it.toString()
+                            }}",
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier
                                 .background(Color.White.copy(0.7f), RoundedCornerShape(4.dp))

@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -82,8 +83,6 @@ fun NewAchievements(
     navigateToAchievementsDestination: () -> Unit,
     googleAuthUiClient: GoogleAuthUiClient,
     viewModel: UserViewModel = viewModel(),
-    //viewModel: AchievementsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    //viewModelSports : AllSportsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
     val email = googleAuthUiClient.getSignedInUser()?.email
@@ -95,36 +94,25 @@ fun NewAchievements(
 
     val sportsList by remember { mutableStateOf(viewModel.sports) } //reservation to be edited
 
-    //val sportsUiState by viewModelSports.allSportsUiState.collectAsState()
-
 
     Scaffold(
         topBar = { CourtTopAppBar(canNavigateBack = true,
-            navigateUp = onNavigateUp) },
+            navigateUp = onNavigateUp, text = "Insert your achievement") },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) { innerPadding ->
         Box(
             modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Color.White)
                 .verticalScroll(rememberScrollState())
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(text = "Insert your achievement",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-
-                )
-                Spacer(modifier = Modifier.height(20.dp))
                 NewAchievementsBody(
                     sportsList = sportsList,
                     modifier = modifier,
-                    //viewModel = viewModel,
                     email = email,
                     navigateToAchievementsDestination  =navigateToAchievementsDestination
                 )
@@ -133,13 +121,11 @@ fun NewAchievements(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewAchievementsBody(
     sportsList: State<List<String>>,
     modifier: Modifier = Modifier,
     email: String?,
-    //viewModel: AchievementsViewModel,
     viewModel: UserViewModel = viewModel(),
 
     navigateToAchievementsDestination: () -> Unit
@@ -203,10 +189,10 @@ fun NewAchievementsBody(
                 ) {
 
                     sportsList.value.forEach { sport ->
-                        Log.d("sport", "$sport")
+                        Log.d("sport", sport)
                         DropdownMenuItem(
                             modifier = Modifier.fillMaxWidth(),
-                            text = { Text(sport, color = Color.Black) },
+                            text = { Text(sport.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }, color = Color.Black) },
                             onClick = {
                                 selectedSport = sport
                                 isMenuExpanded = false
@@ -272,9 +258,7 @@ fun NewAchievementsBody(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .padding(top = 5.dp)
-
                 .height(60.dp)
-                .background(Color.White)
         )
         OutlinedTextField(
             value = additionalInfo,
@@ -286,10 +270,6 @@ fun NewAchievementsBody(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .padding(top = 5.dp)
-
-                .background(Color.White)
-
-
         )
         Button(
             onClick = {
@@ -328,9 +308,8 @@ fun NewAchievementsBody(
                 .padding(top = 16.dp)
 
                 .height(56.dp)
-                .background(Color.White, RoundedCornerShape(16.dp))
         ) {
-            Text(text = "Salva")
+            Text(text = "Save")
         }
         if (showErrorDialog) {
             AlertDialog(
