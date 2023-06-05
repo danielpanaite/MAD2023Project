@@ -211,7 +211,8 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
             Log.d(TAG, "Failed to update document ${reservation.value.id}")
         }
     }
-    fun insertReservation(reservation: Reservation) {
+
+    fun insertReservation(reservation: Reservation, notificationViewModel: NotificationViewModel, notificationArray: MutableState<MutableList<Notification?>>) {
         // Creating a reference to the collection "reservations" and generating a new document id
         val docRef = db.collection("reservations").document()
 
@@ -228,6 +229,13 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
         // Inserting the reservation data to Firestore
         docRef.set(hash).addOnSuccessListener {
             Log.d(TAG, "Reservation ${docRef.id} inserted successfully")
+
+            if(notificationArray.value.isNotEmpty()) {
+                notificationArray.value.forEach {notification ->
+                    notification?.reservation = docRef.id
+                    notificationViewModel.createNotification(notification!!)
+                }
+            }
         }.addOnFailureListener {
             Log.d(TAG, "Failed to insert reservation ${docRef.id}")
         }

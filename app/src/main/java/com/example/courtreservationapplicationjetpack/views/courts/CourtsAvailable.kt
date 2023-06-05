@@ -31,21 +31,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonDefaults.textButtonColors
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -59,11 +53,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import com.example.courtreservationapplicationjetpack.CourtTopAppBar
-import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.views.reservations.ReservationDetailsDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -79,7 +69,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -90,7 +79,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
-import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.airbnb.lottie.compose.LottieAnimation
@@ -108,19 +96,9 @@ import com.example.courtreservationapplicationjetpack.firestore.ReservationViewM
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.signIn.SignInDestination
-import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination.hourOptArg
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
@@ -167,9 +145,9 @@ fun CourtsAvailable(
     val showDialog = remember { mutableStateOf(false) }
     val firebaseReservationViewModel: ReservationViewModel = viewModel()
     val reservationDetails by remember { mutableStateOf(firebaseReservationViewModel.reservation) }
-
+    val notificationViewModel: NotificationViewModel = viewModel()
     val email = googleAuthUiClient.getSignedInUser()?.email
-
+    val friendsNotificationArray = remember { mutableStateOf(mutableListOf<Notification?>()) }
 
     LaunchedEffect(selectedDate.value){
         pickedHour.value = pickedHour.value
@@ -201,7 +179,9 @@ fun CourtsAvailable(
 //                                    additionsText,
 //                                    pickedPeople
 //                                )
-                                firebaseReservationViewModel.insertReservation(reservationDetails.value)
+                                //todo: add notification
+                                Log.d("notifiche", friendsNotificationArray.value.toString())
+                                firebaseReservationViewModel.insertReservation(reservationDetails.value, notificationViewModel = notificationViewModel, notificationArray = friendsNotificationArray)
                                 showDialog.value = true
                             }
                         }
@@ -346,7 +326,9 @@ fun CourtsAvailable(
             allSportViewModel = allSportViewModel,
             reservationDetails = reservationDetails,
             userEmail = email,
-            pickedPeople = pickedPeople
+            pickedPeople = pickedPeople,
+            notificationViewModel = notificationViewModel,
+            friendsNotificationArray = friendsNotificationArray
         )
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
@@ -444,14 +426,16 @@ fun Ciao(
     allSportViewModel: AllSportsViewModel,
     reservationDetails: MutableState<Reservation>,
     userEmail: String?,
-    pickedPeople: String
+    pickedPeople: String,
+    notificationViewModel: NotificationViewModel,
+    friendsNotificationArray: MutableState<MutableList<Notification?>>
 ) {
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
 
     val firebaseUserViewModel: UserViewModel = viewModel()
 
-    val notificationViewModel: NotificationViewModel = viewModel()
+
 
 
     LaunchedEffect(Unit) {
@@ -769,75 +753,84 @@ fun Ciao(
 
 
                     }
-                    Dialog(
-                        onDismissRequest = { showDialog.value = false },
-                        properties = DialogProperties(
-                            dismissOnBackPress = true,
-                            dismissOnClickOutside = true
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White, RoundedCornerShape(16.dp))
-                                .padding(vertical = 50.dp, horizontal = 50.dp),
-                            contentAlignment = Alignment.Center
+
+
+
+
+                    val showAddFriendDialog = remember { mutableStateOf(true)}
+                    if(showAddFriendDialog.value) {
+                        Dialog(
+                            onDismissRequest = { showDialog.value = false },
+                            properties = DialogProperties(
+                                dismissOnBackPress = true,
+                                dismissOnClickOutside = true
+                            )
                         ) {
-                            firebaseUserViewModel.getUserByEmail(email = "gabriele.iannace@gmail.com")
-                            val friends = firebaseUserViewModel.user
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .padding(vertical = 50.dp, horizontal = 50.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                firebaseUserViewModel.getUserByEmail(email = "gabriele.iannace@gmail.com")
+                                val friends = firebaseUserViewModel.user
 
-                            if (friends.value.friends.isNotEmpty()) {
-                                val selectedFriends = remember { mutableStateListOf<String>() }
+                                if (friends.value.friends.isNotEmpty()) {
+                                    val selectedFriends = remember { mutableStateListOf<String>() }
 
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                    items(friends.value.friends) { friend ->
-                                        val isSelected = remember { mutableStateOf(false) }
+                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                        items(friends.value.friends) { friend ->
+                                            val isSelected = remember { mutableStateOf(false) }
 
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable { isSelected.value = !isSelected.value }
-                                                .padding(vertical = 8.dp)
-                                        ) {
-                                            Checkbox(
-                                                checked = isSelected.value,
-                                                onCheckedChange = { isSelected.value = it }
-                                            )
-                                            Text(text = friend, modifier = Modifier.padding(start = 8.dp))
-                                        }
-                                        Divider(color = Color.Gray, thickness = 1.dp)
-
-                                        if (isSelected.value) {
-                                            selectedFriends.add(friend)
-                                        }
-                                    }
-                                    item {
-                                        Column(
-                                            verticalArrangement = Arrangement.Center,
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Button(onClick = { showDialog.value = false }) {
-                                                Text(text = "Chiudi")
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        isSelected.value = !isSelected.value
+                                                    }
+                                                    .padding(vertical = 8.dp)
+                                            ) {
+                                                Checkbox(
+                                                    checked = isSelected.value,
+                                                    onCheckedChange = { isSelected.value = it }
+                                                )
+                                                Text(
+                                                    text = friend,
+                                                    modifier = Modifier.padding(start = 8.dp)
+                                                )
                                             }
-                                            Button(onClick = {
-                                                showDialog.value = false
-                                                // Stampa gli amici selezionati
-                                                selectedFriends.forEach { friend ->
-                                                    val notifica = Notification(
-                                                        date = Timestamp.now(),
-                                                        sender = userEmail!!,
-                                                        receiver = friend,
-                                                        type = "play",
-                                                        status = "pending",
-                                                        court = courtState.value!!.id,
-                                                        reservation = "8tpf7y8NBR8u5AFkX0bb"
-                                                    )
-                                                    notificationViewModel.createNotification(notifica)
+                                            Divider(color = Color.Gray, thickness = 1.dp)
+
+                                            if (isSelected.value) {
+                                                selectedFriends.add(friend)
+                                            }
+                                        }
+                                        item {
+                                            Column(
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Button(onClick = {
+                                                    // Stampa gli amici selezionati
+                                                    selectedFriends.forEach { friend ->
+                                                        val notifica = Notification(
+                                                            date = Timestamp.now(),
+                                                            sender = userEmail!!,
+                                                            receiver = friend,
+                                                            type = "play",
+                                                            status = "pending",
+                                                            court = courtState.value!!.id,
+                                                            reservation = ""
+                                                        )
+                                                        friendsNotificationArray.value.add(notifica)
+                                                    }
+                                                    showAddFriendDialog.value = false
+                                                }) {
+                                                    Text(text = "Confirm")
                                                 }
-                                            }) {
-                                                Text(text = "Invia")
                                             }
                                         }
                                     }
