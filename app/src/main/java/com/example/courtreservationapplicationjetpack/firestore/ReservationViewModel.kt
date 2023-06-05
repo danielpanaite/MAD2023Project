@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -164,7 +165,16 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
         return reservationsLiveData
     }
 
+    fun acceptInvitation(reservation: String, receiver: String){
+        // Creating a reference to document by id
+        val docRef = db.document("reservations/$reservation")
 
+        docRef.update("invites", FieldValue.arrayUnion(receiver)).addOnSuccessListener {
+            Log.d(TAG, "Document $reservation updated successfully")
+        }.addOnFailureListener {
+            Log.d(TAG, "Failed to update document $reservation")
+        }
+    }
 
     fun getReservationById(id: String) {
         // Creating a reference to document by id

@@ -11,6 +11,7 @@ data class Notification(
     val status: String = "",
     val type: String = "",
     val court: String = "",
+    val reservation: String = "",
     val date: Timestamp = Timestamp.now()
 )
 

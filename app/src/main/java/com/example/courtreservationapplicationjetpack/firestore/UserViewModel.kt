@@ -194,6 +194,14 @@ class UserViewModel: ViewModel(){
             .addOnFailureListener {
                 Log.d(TAG, "Failed to add friend")
             }
+        val doc2Ref = db.collection("users").document(friend)
+        doc2Ref.update("friends", FieldValue.arrayUnion(email))
+            .addOnSuccessListener {
+                Log.d(TAG, "Friend added successfully")
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to add friend")
+            }
     }
 
     fun addAchievement(
