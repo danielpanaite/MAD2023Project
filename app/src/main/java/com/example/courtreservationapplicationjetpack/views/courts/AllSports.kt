@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -357,7 +359,6 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
         Box(
             modifier = Modifier.aspectRatio(1.5f)
         ) {
-            println(court.name + " " + court.sport + " " + (court.URL ?: "NONE"))
             CoilImage(
                 modifier = Modifier
                     .shadow(10.dp, RoundedCornerShape(0.dp))
@@ -367,6 +368,33 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 sport = court.sport,
                 URL = court.URL ?: null
             )
+            Row(
+                modifier = Modifier.align(Alignment.BottomStart)
+            ) {
+                Text(
+                    text = court.name,
+                    style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.weight(3f).padding(16.dp)
+                )
+                Text(
+                    text = "${court.prezzo}$",
+                    style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 16.dp, horizontal = 16.dp)
+                        .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
+                        .align(Alignment.CenterVertically)
+                        //.fillMaxHeight()
+                )
+            }
+
+
             Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -386,19 +414,9 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                     modifier = Modifier.size(24.dp)
                 )
             }
-
-            Text(
-                text = court.name,
-                style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 26.sp,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp)
-            )
         }
     }
+
 
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -429,11 +447,11 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 modifier = Modifier.padding(start = 16.dp)
             )
             Text(
-                text = "City ${court.citta}",
+                text = "City of ${court.citta}",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 fontStyle = FontStyle.Italic,
-                modifier = Modifier.padding(0.dp),
+                modifier = Modifier.padding(start = 16.dp),
                 style = androidx.compose.material.MaterialTheme.typography.body1
             )
             Row(

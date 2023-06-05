@@ -9,4 +9,5 @@ data class Court(
     val sport: String = "",
     val capacity: Int = 0,
     val citta: String = "",
+    val prezzo: Int = 0,
 )
