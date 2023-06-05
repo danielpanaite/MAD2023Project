@@ -30,6 +30,8 @@ import com.example.courtreservationapplicationjetpack.views.profile.Achievements
 import com.example.courtreservationapplicationjetpack.views.profile.AchievementsDestination
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfile
 import com.example.courtreservationapplicationjetpack.views.profile.EditProfileDestination
+import com.example.courtreservationapplicationjetpack.views.profile.Friends
+import com.example.courtreservationapplicationjetpack.views.profile.FriendsDestination
 import com.example.courtreservationapplicationjetpack.views.profile.NewAchievements
 import com.example.courtreservationapplicationjetpack.views.profile.NewAchievementsDestination
 import com.example.courtreservationapplicationjetpack.views.profile.Profile
@@ -79,6 +81,15 @@ fun NavigationGraph(
             route = NotificationScreenDestination.route
         ){
             Notifications(
+                navController = navController,
+                googleAuthUiClient = googleAuthUiClient
+            )
+        }
+
+        composable(
+            route = FriendsDestination.route
+        ){
+            Friends(
                 navController = navController,
                 googleAuthUiClient = googleAuthUiClient
             )

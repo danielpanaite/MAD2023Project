@@ -45,9 +45,6 @@ class UserViewModel: ViewModel(){
     private val _achievements = MutableStateFlow(AchievementsUi(isLoading = true))
     val achievements: StateFlow<AchievementsUi> = _achievements
 
-    private var _friends = mutableStateOf<List<String>>(emptyList())
-    val friends: State<List<String>> = _friends
-
     //----------------------Methods----------------------
 
     fun getUserByEmail(email: String) {

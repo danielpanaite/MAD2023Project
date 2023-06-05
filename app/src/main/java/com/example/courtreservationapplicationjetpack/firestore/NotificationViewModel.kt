@@ -47,7 +47,8 @@ class NotificationViewModel: ViewModel() {
         val docRef = db.collection("notifications").document(id)
         docRef.update("status", status)
             .addOnSuccessListener {
-                Log.d(TAG, "Notification status updated successfully")
+                docRef.id
+                Log.d(TAG, docRef.id)
             }
             .addOnFailureListener {
                 Log.d(TAG, "Failed to update notification status")

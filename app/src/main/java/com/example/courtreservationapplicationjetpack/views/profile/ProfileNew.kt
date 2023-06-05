@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
@@ -144,7 +145,8 @@ fun ProfileBody(
                 OptionsItemStyle(
                     user = user,
                     navigateToSportPreferencesDestination = navigateToSportPreferencesDestination,
-                    navigateToAchievementsDestination = navigateToAchievementsDestination
+                    navigateToAchievementsDestination = navigateToAchievementsDestination,
+                    navController = navController
                 )
             }
         }
@@ -247,6 +249,7 @@ navController: NavController
 private fun OptionsItemStyle(
     navigateToSportPreferencesDestination: () -> Unit,
     navigateToAchievementsDestination: () -> Unit,
+    navController: NavController,
     user: Users
 ) {
     Row(
@@ -356,6 +359,68 @@ private fun OptionsItemStyle(
                 // Sub title
                 Text(
                     text = "Manage your achievements",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        letterSpacing = (0.8).sp,
+                        //fontFamily = FontFamily(Font(R.font.roboto_regular, FontWeight.Normal)),
+                        color = Color.Gray
+                    )
+                )
+
+            }
+
+            // Right arrow icon
+            Icon(
+                modifier = Modifier
+                    .weight(weight = 1f, fill = false),
+                imageVector = Icons.Outlined.KeyboardArrowRight,
+                contentDescription = "Achievements",
+                tint = Color.Black.copy(alpha = 0.70f)
+            )
+        }
+
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+
+            .clickable(
+                onClick = {
+                    navController.navigate(FriendsDestination.route)
+                })
+            .padding(all = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Default.Face,
+            contentDescription = "Friend",
+            modifier = Modifier.size(40.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(weight = 3f, fill = false)
+                    .padding(start = 16.dp)
+            ) {
+
+                // Title
+                Text(
+                    text = "Friends",
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        // fontFamily = FontFamily(Font(R.font.roboto_medium, FontWeight.Medium))
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                // Sub title
+                Text(
+                    text = "Manage your friend list",
                     style = TextStyle(
                         fontSize = 14.sp,
                         letterSpacing = (0.8).sp,
