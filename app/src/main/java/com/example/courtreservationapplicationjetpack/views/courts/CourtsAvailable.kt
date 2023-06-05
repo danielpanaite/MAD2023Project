@@ -827,6 +827,7 @@ fun Ciao(
                                                             reservation = ""
                                                         )
                                                         friendsNotificationArray.value.add(notifica)
+                                                        showSheet = false
                                                     }
                                                     //showAddFriendDialog.value = false
                                                 }) {
