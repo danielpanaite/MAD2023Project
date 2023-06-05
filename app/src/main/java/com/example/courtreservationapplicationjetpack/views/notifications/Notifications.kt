@@ -166,7 +166,8 @@ fun NotificationItem(
 ){
     val toastFriend = Toast.makeText(LocalContext.current, "Friend added!", Toast.LENGTH_SHORT)
     val toastInvite = Toast.makeText(LocalContext.current, "Invitation accepted!", Toast.LENGTH_SHORT)
-    reservationViewModel.getReservationById(notification.reservation)
+    if(notification.reservation != "")
+        reservationViewModel.getReservationById(notification.reservation)
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(start = 16.dp, end = 16.dp),
@@ -259,15 +260,16 @@ fun NotificationItem(
                 .padding(end = 16.dp)
             ) {
                 IconButton(onClick = {
-                    viewModel.updateNotificationStatus(notification.id, "confirmed")
-                    if(notification.type == "friend") {
-                        userViewModel.addFriend(notification.receiver, notification.sender)
-                        toastFriend.show()
-                    }else{
-                        reservationViewModel.acceptInvitation(notification.reservation, notification.receiver)
-                        toastInvite.show()
-                    }
-                                     }, modifier = Modifier
+                        viewModel.updateNotificationStatus(notification.id, "confirmed")
+                        if(notification.type == "friend") {
+                            userViewModel.addFriend(notification.receiver, notification.sender)
+                            toastFriend.show()
+                        }else{
+                            reservationViewModel.acceptInvitation(notification.reservation, notification.receiver)
+                            toastInvite.show()
+                        }
+                    },
+                    modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)) {
                     Icon(Icons.Default.Check, contentDescription = "Check", tint = ConfirmGreen)

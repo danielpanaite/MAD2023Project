@@ -55,6 +55,20 @@ class NotificationViewModel: ViewModel() {
             }
     }
 
+    fun sendFriendRequestByNickname(notification: Notification, friend: String) { //friend is just a nickname
+        var friendMail: String
+        val friendRef = db.collection("users").whereEqualTo("nickname", friend)
+        friendRef.get()
+        .addOnSuccessListener {
+            friendMail = it.documents.first().toObject(Users::class.java)!!.email
+            createNotification(notification.copy(receiver = friendMail))
+            Log.d(UserViewModel.TAG, "Friend mail get successful")
+        }
+        .addOnFailureListener {
+            Log.d(UserViewModel.TAG, "Failed to ge friend mail")
+        }
+    }
+
     fun createNotification(notification: Notification) {
         val docRef = db.collection("notifications").document()
         val hash = hashMapOf<String, Any>(
