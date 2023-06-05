@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,8 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,6 +56,7 @@ import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.example.courtreservationapplicationjetpack.ui.theme.GreyItemInactive
 import com.google.firebase.Timestamp
 
 object FriendsDestination : NavigationDestination {
@@ -102,7 +107,7 @@ fun FriendsBody(
     ) {
         if(userViewModel.users.value.isNotEmpty())
             items(userViewModel.users.value){f ->
-                FriendsItem(friend = f)
+                FriendsItem(friend = f, false)
             }
         if(email != null)
             item{
@@ -113,7 +118,8 @@ fun FriendsBody(
 
 @Composable
 fun FriendsItem(
-    friend: Users
+    friend: Users,
+    invite: Boolean
 ){
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -143,21 +149,39 @@ fun FriendsItem(
                 }
                 Column(modifier = Modifier
                     .fillMaxSize()
-                    .weight(6f)
+                    .padding(start = 8.dp)
+                    .weight(5f)
                 ){
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp, bottom = 4.dp)
                     ){
-                        Text(text = friend.name.toString(), fontWeight = FontWeight.ExtraLight)
+                        Text(text = "@${friend.nickname.toString()}", fontWeight = FontWeight.ExtraLight, style = MaterialTheme.typography.bodyMedium)
                     }
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp, bottom = 16.dp)
                     ){
-                        Text(text = friend.nickname.toString())
+                        Text(text = friend.name.toString())
                     }
                 }
+                if(invite)
+                    Column(modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 16.dp)
+                        .weight(1f)
+                    ){
+                        Icon(Icons.Outlined.AddCircle,
+                            contentDescription = "Add",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable {
+
+                                },
+                            tint = GreyItemInactive
+                        )
+                    }
             }
         }
     }

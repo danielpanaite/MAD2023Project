@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -21,7 +22,7 @@ import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 object MyReservationsDestination : NavigationDestination {
     override val route = "my_reservation"
     override val titleRes = "Reservations"
-    override val icon = Icons.Default.Star
+    override val icon = Icons.Default.DateRange
 }
 
 @ExperimentalMaterial3Api

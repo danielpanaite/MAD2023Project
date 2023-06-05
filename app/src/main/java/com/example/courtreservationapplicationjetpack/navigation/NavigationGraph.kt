@@ -24,6 +24,8 @@ import com.example.courtreservationapplicationjetpack.views.courts.AllSports
 import com.example.courtreservationapplicationjetpack.views.courts.AllSportsDestination
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailable
 import com.example.courtreservationapplicationjetpack.views.courts.CourtsAvailableDestination
+import com.example.courtreservationapplicationjetpack.views.notifications.FindFriends
+import com.example.courtreservationapplicationjetpack.views.notifications.FindFriendsDestination
 import com.example.courtreservationapplicationjetpack.views.notifications.NotificationScreenDestination
 import com.example.courtreservationapplicationjetpack.views.notifications.Notifications
 import com.example.courtreservationapplicationjetpack.views.profile.Achievements
@@ -73,7 +75,8 @@ fun NavigationGraph(
             MainScreen(
                 navController = navController,
                 navigateToAllSports = {navController.navigate(AllSportsDestination.route)},
-                navigateToReviews = {navController.navigate(ReviewMainPageDestination.route)}
+                navigateToReviews = {navController.navigate(ReviewMainPageDestination.route)},
+                navigateToFindFriends = {navController.navigate(FindFriendsDestination.route)}
             )
         }
 
@@ -90,6 +93,16 @@ fun NavigationGraph(
             route = FriendsDestination.route
         ){
             Friends(
+                navController = navController,
+                googleAuthUiClient = googleAuthUiClient,
+                navigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = FindFriendsDestination.route
+        ){
+            FindFriends(
                 navController = navController,
                 googleAuthUiClient = googleAuthUiClient,
                 navigateBack = { navController.navigateUp() }

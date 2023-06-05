@@ -20,6 +20,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
+import com.example.courtreservationapplicationjetpack.views.notifications.FindFriendsDestination
 
 
 object MainScreenDestination : NavigationDestination {
@@ -33,6 +34,7 @@ object MainScreenDestination : NavigationDestination {
 fun MainScreen(
     navigateToAllSports: () -> Unit,
     navigateToReviews: () -> Unit,
+    navigateToFindFriends: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -54,7 +56,8 @@ fun MainScreen(
             //navController = navController,
             modifier = modifier.padding(innerPadding),
             navigateToAllSports = navigateToAllSports,
-            navigateToReviews = navigateToReviews
+            navigateToReviews = navigateToReviews,
+            navigateToFindFriends = navigateToFindFriends,
         )
     }
 
@@ -67,6 +70,7 @@ private fun HomeBody(
     navController: NavController = rememberNavController(),
     navigateToAllSports: () -> Unit,
     navigateToReviews: () -> Unit,
+    navigateToFindFriends: () -> Unit
 ){
     Column(modifier = modifier.fillMaxSize()){
         Card(
@@ -137,6 +141,42 @@ private fun HomeBody(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Leave a rating for the courts you have played on!",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+
+        Card(
+            onClick = navigateToFindFriends,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation( 8.dp )
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter
+                    (
+                    model ="https://imgur.com/iXKM4GF.png",
+
+                    ), contentDescription = null,
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .aspectRatio(4f / 3f)
+            )
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Friends",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Find new partners to play with based on your chosen sports!",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))

@@ -25,6 +25,7 @@ class UserViewModel: ViewModel(){
     private lateinit var reg1: ListenerRegistration
     private lateinit var reg2: ListenerRegistration
     private lateinit var reg3: ListenerRegistration
+    private lateinit var reg4: ListenerRegistration
 
     companion object{
         const val TAG = "UserViewModel"
@@ -69,6 +70,24 @@ class UserViewModel: ViewModel(){
 
         docRef.get().addOnSuccessListener {
             Log.d(TAG, "getUserListByEmails")
+            val list = mutableListOf<Users>()
+            for (document in it.documents) {
+                val res = document.toObject(Users::class.java)
+                res?.id = document.id // Map the document ID to the "id" property of the Reservation object
+                res?.let { r -> list.add(r) }
+            }
+            _users.value = list
+        }.addOnFailureListener {
+            Log.d(TAG, "Error getting data", it)
+        }
+    }
+
+    fun getUserListBySports(friends: List<String>){
+        Log.d(TAG, friends.toString())
+        val docRef = db.collection("users").whereNotIn(FieldPath.documentId(), friends)
+
+        docRef.get().addOnSuccessListener {
+            Log.d(TAG, "getUserListBySports")
             val list = mutableListOf<Users>()
             for (document in it.documents) {
                 val res = document.toObject(Users::class.java)
@@ -336,6 +355,8 @@ class UserViewModel: ViewModel(){
             reg2.remove()
         if(this::reg3.isInitialized)
             reg3.remove()
+        if(this::reg4.isInitialized)
+            reg4.remove()
         Log.d(TAG, "Registration removed")
     }
 

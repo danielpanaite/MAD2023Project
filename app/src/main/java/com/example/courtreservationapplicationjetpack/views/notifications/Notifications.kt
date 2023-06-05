@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.notifications
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -31,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -43,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.R
@@ -183,7 +187,17 @@ fun NotificationItem(
                     .weight(1f)
                 ){
                     if(notification.type == "friend")
-                        Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp))
+                        if(sender.imageUri != "")
+                            Image(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(shape = CircleShape),
+                                painter = rememberAsyncImagePainter(model = Uri.parse(sender.imageUri)),
+                                contentDescription = "Profile Image",
+                                contentScale = ContentScale.Crop
+                            )
+                        else
+                            Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier.size(40.dp))
                     else if(court != null)
                         Image(
                             painter = painterResource(SportDrawables.getDrawable(court.sport)),
