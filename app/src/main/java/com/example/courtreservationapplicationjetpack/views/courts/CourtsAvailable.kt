@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
@@ -923,9 +924,9 @@ fun Ciao(
 fun CircleCheckbox(selected: Boolean, enabled: Boolean = true, onChecked: () -> Unit) {
 
     val color = MaterialTheme.colorScheme
-    val imageVector = if (selected) Icons.Filled.CheckCircle else  Icons.Outlined.CheckCircle
-    val tint = if (selected) color.primary.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f)
-    val background = if (selected) Color.Transparent else Color.White
+    val imageVector = if (selected) Icons.Filled.CheckCircle else  Icons.Outlined.AddCircle
+    val tint = if (selected) color.primary.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f)
+    val background = if (selected) Color.Gray.copy(alpha = 0.1f) else Color.White
 
     IconButton(onClick = { onChecked() },
         modifier = Modifier.offset(x = 4.dp, y = 4.dp),
