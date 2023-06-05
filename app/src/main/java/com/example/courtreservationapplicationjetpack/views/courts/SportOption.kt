@@ -19,7 +19,8 @@ internal fun OptionSample3(
     sportList: List<String>,
     optionState: UseCaseState,
     pickedSport: MutableState<String>,
-    firebaseCourtViewModel: CourtViewModel
+    firebaseCourtViewModel: CourtViewModel,
+    pickedCity: MutableState<String>,
     ) {
 
     val options = sportList.filter { sport ->
@@ -48,7 +49,7 @@ internal fun OptionSample3(
             options = options
         ) { indices, _ ->
             pickedSport.value = sportList[indices]
-            firebaseCourtViewModel.getCourtsBySport(sportList[indices])
+            firebaseCourtViewModel.getCourtsBySport(sportList[indices], pickedCity.value)
         },
         config = OptionConfig(
             mode = DisplayMode.GRID_VERTICAL,

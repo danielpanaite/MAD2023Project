@@ -146,7 +146,13 @@ fun AllSports(
         },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
-    PrenotaCampo(sportsList = allSportsUiState.sportsList, courtsViewModel = courtsViewModel, viewModel = viewModel, navController = navController, userReviews = userReviews.reviewList)
+    PrenotaCampo(
+        sportsList = allSportsUiState.sportsList,
+        courtsViewModel = courtsViewModel,
+        viewModel = viewModel,
+        navController = navController,
+        userReviews = userReviews.reviewList,
+    )
     }
 }
 
@@ -168,9 +174,12 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val firebaseNotificationViewModel: NotificationViewModel = viewModel()
+    val cityList = listOf<String>("Torino", "Milano", "Roma", "Napoli", "Palermo", "Bologna", "Firenze", "Bari")
+    var pickedCity = remember { mutableStateOf("") }
+
 
     LaunchedEffect(pickedSport.value) {
-        firebaseCourtViewModel.getCourtsBySport(pickedSport.value)
+        firebaseCourtViewModel.getCourtsBySport(pickedSport.value, pickedCity.value)
     }
 
     val courtList by remember { firebaseCourtViewModel.courts }
@@ -181,7 +190,8 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
             sportList = sportsList,
             optionState = optionState,
             pickedSport = pickedSport,
-            firebaseCourtViewModel = firebaseCourtViewModel
+            firebaseCourtViewModel = firebaseCourtViewModel,
+            pickedCity = pickedCity,
         )
 
 
@@ -214,7 +224,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-
+                                println(courtList.toString())
                             }
                     )
                 },
@@ -229,7 +239,10 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                     .fillMaxWidth()
                     .background(color = Color.White)
             ) {
-                CityPicker(modifier = Modifier.padding(horizontal = 16.dp))
+
+                CityPicker(modifier = Modifier.padding(horizontal = 16.dp), cityList = cityList, pickedCity = pickedCity){
+                    firebaseCourtViewModel.getCourtsBySport(pickedSport.value, pickedCity.value)
+                }
             }
             Row(
                 modifier = Modifier
@@ -331,13 +344,18 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
             LazyColumn {
                 itemsIndexed(courtList) { index, court ->
-                    CourtCard(
-                        pickedDate = pickedDate,
-                        pickedSport = pickedSport,
-                        court = court,
-                        navController = navController,
-                        key = index.toString() + court.toString() // Utilizza una combinazione di indici e valori di "court" come chiave
-                    )
+                    if(courtList.isNotEmpty()) {
+                        CourtCard(
+                            pickedDate = pickedDate,
+                            pickedSport = pickedSport,
+                            court = court,
+                            navController = navController,
+                            key = index.toString() + court.toString() // Utilizza una combinazione di indici e valori di "court" come chiave
+                        )
+                    }
+                    else{
+                        Text(text = "No courts found", modifier = Modifier.padding(16.dp).height(100.dp).background(Color.Red))
+                    }
                 }
             }
 
@@ -596,10 +614,10 @@ fun HourButtons(courtID: String, date: LocalDate, reservedSlot: List<String>, na
 }
 
 @Composable
-fun CityPicker(modifier: Modifier) {
-    val cityList = listOf<String>("Torino", "Milano", "Roma", "Napoli", "Palermo", "Bologna", "Firenze", "Bari")
+fun CityPicker(modifier: Modifier, cityList: List<String>, pickedCity:  MutableState<String>, onFinish: (Unit) -> Unit) {
+
     var isMenuExpanded by remember { mutableStateOf(false) }
-    var selectedCity by remember { mutableStateOf("") }
+
 
     Box(modifier = modifier) {
         OutlinedButton(
@@ -617,12 +635,14 @@ fun CityPicker(modifier: Modifier) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = if (selectedCity.isEmpty()) "Choose the city" else selectedCity,
+                    text = if (pickedCity.value.isEmpty()) "Choose the city" else pickedCity.value,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.weight(1f).padding(start = 8.dp),
-                    color = if (selectedCity.isEmpty()) Color.Gray else Color.Black
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                    color = if (pickedCity.value.isEmpty()) Color.Gray else Color.Black
                 )
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
@@ -647,7 +667,8 @@ fun CityPicker(modifier: Modifier) {
                     modifier = Modifier.fillMaxWidth(),
                     text = { Text(city, color = Color.Black) },
                     onClick = {
-                        selectedCity = city
+                        pickedCity.value = city
+                        onFinish(Unit)
                         isMenuExpanded = false
                     }
                 )
