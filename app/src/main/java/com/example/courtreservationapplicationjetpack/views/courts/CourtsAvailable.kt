@@ -767,51 +767,10 @@ fun Ciao(
                             sheetState = modalBottomSheetState,
                             dragHandle = { BottomSheetDefaults.DragHandle() },
                         ) {
-                            val countries = listOf(
-                                Pair("United States", "\uD83C\uDDFA\uD83C\uDDF8"),
-                                Pair("Canada", "\uD83C\uDDE8\uD83C\uDDE6"),
-                                Pair("India", "\uD83C\uDDEE\uD83C\uDDF3"),
-                                Pair("Germany", "\uD83C\uDDE9\uD83C\uDDEA"),
-                                Pair("France", "\uD83C\uDDEB\uD83C\uDDF7"),
-                                Pair("Japan", "\uD83C\uDDEF\uD83C\uDDF5"),
-                                Pair("China", "\uD83C\uDDE8\uD83C\uDDF3"),
-                                Pair("Brazil", "\uD83C\uDDE7\uD83C\uDDF7"),
-                                Pair("Australia", "\uD83C\uDDE6\uD83C\uDDFA"),
-                                Pair("Russia", "\uD83C\uDDF7\uD83C\uDDFA"),
-                                Pair("United Kingdom", "\uD83C\uDDEC\uD83C\uDDE7"),
-                            )
-
-                            LazyColumn {
-                                items(countries) { (country, flag) ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 10.dp, horizontal = 20.dp)
-                                    ) {
-                                        Text(
-                                            text = flag,
-                                            modifier = Modifier.padding(end = 20.dp)
-                                        )
-                                        Text(text = country)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    val showAddFriendDialog = remember { mutableStateOf(true)}
-                    if(showAddFriendDialog.value) {
-                        Dialog(
-                            onDismissRequest = { showDialog.value = false },
-                            properties = DialogProperties(
-                                dismissOnBackPress = true,
-                                dismissOnClickOutside = true
-                            )
-                        ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .background(Color.Transparent, RoundedCornerShape(16.dp))
                                     .padding(vertical = 50.dp, horizontal = 50.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -869,7 +828,7 @@ fun Ciao(
                                                         )
                                                         friendsNotificationArray.value.add(notifica)
                                                     }
-                                                    showAddFriendDialog.value = false
+                                                    //showAddFriendDialog.value = false
                                                 }) {
                                                     Text(text = "Confirm")
                                                 }
@@ -878,8 +837,90 @@ fun Ciao(
                                     }
                                 }
                             }
-                        }
+                            }
                     }
+
+                    //val showAddFriendDialog = remember { mutableStateOf(true)}
+//                    if(showAddFriendDialog.value) {
+//                        Dialog(
+//                            onDismissRequest = { showDialog.value = false },
+//                            properties = DialogProperties(
+//                                dismissOnBackPress = true,
+//                                dismissOnClickOutside = true
+//                            )
+//                        ) {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .background(Color.White, RoundedCornerShape(16.dp))
+//                                    .padding(vertical = 50.dp, horizontal = 50.dp),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                firebaseUserViewModel.getUserByEmail(email = userEmail!!)
+//                                val friends = firebaseUserViewModel.user
+//
+//                                if (friends.value.friends.isNotEmpty()) {
+//                                    val selectedFriends = remember { mutableStateListOf<String>() }
+//
+//                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+//                                        items(friends.value.friends) { friend ->
+//                                            val isSelected = remember { mutableStateOf(false) }
+//
+//                                            Row(
+//                                                verticalAlignment = Alignment.CenterVertically,
+//                                                modifier = Modifier
+//                                                    .fillMaxWidth()
+//                                                    .clickable {
+//                                                        isSelected.value = !isSelected.value
+//                                                    }
+//                                                    .padding(vertical = 8.dp)
+//                                            ) {
+//                                                Checkbox(
+//                                                    checked = isSelected.value,
+//                                                    onCheckedChange = { isSelected.value = it }
+//                                                )
+//                                                Text(
+//                                                    text = friend,
+//                                                    modifier = Modifier.padding(start = 8.dp)
+//                                                )
+//                                            }
+//                                            Divider(color = Color.Gray, thickness = 1.dp)
+//
+//                                            if (isSelected.value) {
+//                                                selectedFriends.add(friend)
+//                                            }
+//                                        }
+//                                        item {
+//                                            Column(
+//                                                verticalArrangement = Arrangement.Center,
+//                                                horizontalAlignment = Alignment.CenterHorizontally,
+//                                                modifier = Modifier.fillMaxWidth()
+//                                            ) {
+//                                                Button(onClick = {
+//                                                    // Stampa gli amici selezionati
+//                                                    selectedFriends.forEach { friend ->
+//                                                        val notifica = Notification(
+//                                                            date = Timestamp.now(),
+//                                                            sender = userEmail!!,
+//                                                            receiver = friend,
+//                                                            type = "play",
+//                                                            status = "pending",
+//                                                            court = courtState.value!!.id,
+//                                                            reservation = ""
+//                                                        )
+//                                                        friendsNotificationArray.value.add(notifica)
+//                                                    }
+//                                                    showAddFriendDialog.value = false
+//                                                }) {
+//                                                    Text(text = "Confirm")
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
 
                     Row {
                         AdditionsInput(setAdditionsText,onAdditionsChanged = {})
