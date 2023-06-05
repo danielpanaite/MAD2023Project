@@ -135,13 +135,15 @@ fun EditReservation(
                 ) {
                     Text(text = "Save")
                 }
-                OutlinedButton(
-                    onClick = { deleteConfirmationRequired = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ){
-                    Text(text = "Delete")
-                }
+                if(email != null)
+                    if(!reservationDetails.value.invites.contains(email))
+                        OutlinedButton(
+                            onClick = { deleteConfirmationRequired = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ){
+                            Text(text = "Delete")
+                        }
             }
         }
     ) {
@@ -187,7 +189,7 @@ fun EditReservationForm(
             Box(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg")
+                        .data(court.URL)
                         .crossfade(true)
                         .build(),
                     placeholder = painterResource(R.drawable.placeholder),
@@ -339,7 +341,7 @@ fun CalendarScreen(
                         pickerValue = it
                         reservation.value = reservation.value.copy(people = it)
                     },
-                    dividersColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    dividersColor = Color.Black.copy(alpha = 0.7f),
                 )
         }
     }
@@ -415,7 +417,7 @@ fun TextGrid(
                                     if (isSelected) MaterialTheme.shapes.small else MaterialTheme.shapes.small
                                 )
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(
+                                    if (isSelected) Color.Black.copy(
                                         alpha = 0.7f
                                     ) else Color.Transparent
                                 )
@@ -436,7 +438,7 @@ fun TextGrid(
                                 text = textList[index],
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isSelected) Color.Black else Color.Black
+                                    color = if (isSelected) Color.White else Color.Black
                                 ),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
