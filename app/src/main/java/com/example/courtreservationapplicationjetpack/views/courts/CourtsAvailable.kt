@@ -330,7 +330,7 @@ fun CourtsAvailable(
             )
         }
 
-        Ciao(
+        Body(
             courtID = courtID,
             viewModel = viewModel,
             selectedDate = selectedDate,
@@ -431,7 +431,7 @@ private fun CourtItem(
     "SuspiciousIndentation", "RememberReturnType"
 )
 @Composable
-fun Ciao(
+fun Body(
     courtID: String,
     viewModel: CourtsAvailableViewModel,
     selectedDate: MutableState<LocalDate>,
