@@ -94,8 +94,8 @@ fun MonthCalendar(
         viewModel.getUserReservations(email)
     val reservationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val resList = viewModel.reservations.value
-//        .filter { LocalDate.parse(it.toDate(), reservationFormatter) >= LocalDate.now() }
-//        .filter { LocalTime.parse(it.toTime(), timeFormatter) > LocalTime.now() }
+        //        .filter { LocalDate.parse(it.toDate(), reservationFormatter) >= LocalDate.now() }
+        //        .filter { LocalTime.parse(it.toTime(), timeFormatter) > LocalTime.now() }
         .groupBy { LocalDate.parse(it.toDate(), reservationFormatter) }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(500) }
@@ -104,8 +104,9 @@ fun MonthCalendar(
     val daysOfWeek = remember { daysOfWeek() }
     val colors: List<Int> = listOf(R.color.blue_200, R.color.orange_200, R.color.green_200, R.color.red_200, R.color.cyan_200, R.color.yellow_200)
     val date = selection?.date
-    val reservationsInSelectedDate =
-        if (date == null) emptyList() else resList[date].orEmpty()
+    var reservationsInSelectedDate: List<Reservation> = listOf()
+    if(viewModel.reservations.value.isNotEmpty())
+        reservationsInSelectedDate = if (date == null) emptyList() else resList[date].orEmpty()
     LaunchedEffect(selection){
         if(reservationsInSelectedDate.isNotEmpty())
             courtViewModel.getReservationCourts(reservationsInSelectedDate.map{ it.court })
@@ -186,7 +187,7 @@ fun MonthCalendar(
                             )
                         }
                     }else {
-                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty() && (reservationsInSelectedDate.size == courtViewModel.reservationcourts.value.size) && email != null)
+                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty() && (reservationsInSelectedDate.distinctBy { it.court }.size == courtViewModel.reservationcourts.value.size) && email != null)
                             for( i in reservationsInSelectedDate.indices){
                                 item{
                                     ReservationInformation(reservationsInSelectedDate[i], courtViewModel.reservationcourts.value.first{ it.id == reservationsInSelectedDate[i].court }, onReservationClick, colors, email)
