@@ -1,7 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.notifications
 
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -122,7 +121,6 @@ fun NotificationsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
     ) {
-        Log.d("COURTS", courts.toString())
         if(courts.isNotEmpty()) {
             if (viewModel.notifications.value.isNotEmpty() &&
                 userViewModel.users.value.isNotEmpty() &&

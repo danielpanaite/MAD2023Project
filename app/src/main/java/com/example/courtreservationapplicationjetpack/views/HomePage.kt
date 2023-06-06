@@ -8,19 +8,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
-import com.example.courtreservationapplicationjetpack.views.notifications.FindFriendsDestination
+import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.example.courtreservationapplicationjetpack.views.profile.ProfileDestination
 
 
 object MainScreenDestination : NavigationDestination {
@@ -37,6 +43,7 @@ fun MainScreen(
     navigateToFindFriends: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
+    googleAuthUiClient : GoogleAuthUiClient,
 ) {
 
 // Dentro il componibile
@@ -52,12 +59,12 @@ fun MainScreen(
     ) {
             innerPadding ->
         HomeBody(
-            navController = rememberNavController(),
-            //navController = navController,
+            navController = navController,
             modifier = modifier.padding(innerPadding),
             navigateToAllSports = navigateToAllSports,
             navigateToReviews = navigateToReviews,
             navigateToFindFriends = navigateToFindFriends,
+            googleAuthUiClient = googleAuthUiClient
         )
     }
 
@@ -67,11 +74,17 @@ fun MainScreen(
 @Composable
 private fun HomeBody(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
+    navController: NavController,
     navigateToAllSports: () -> Unit,
     navigateToReviews: () -> Unit,
-    navigateToFindFriends: () -> Unit
+    navigateToFindFriends: () -> Unit,
+    googleAuthUiClient : GoogleAuthUiClient,
+    userViewModel: UserViewModel = viewModel()
 ){
+    var profileComplete by rememberSaveable { mutableStateOf(false) }
+    val email = googleAuthUiClient.getSignedInUser()?.email
+    if(email != null)
+        userViewModel.getUserByEmail(email)
     Column(modifier = modifier.fillMaxSize()){
         Card(
             onClick = navigateToAllSports,
@@ -147,41 +160,82 @@ private fun HomeBody(
             }
         }
 
-        Card(
-            onClick = navigateToFindFriends,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation( 8.dp )
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter
-                    (
-                    model ="https://imgur.com/iXKM4GF.png",
-
-                    ), contentDescription = null,
+        if(userViewModel.user.value.id != "")
+            Card(
+                onClick = {
+                    if(userViewModel.user.value.nickname != "")
+                        navigateToFindFriends()
+                    else
+                        profileComplete = true
+                },
                 modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .aspectRatio(4f / 3f)
-            )
-            Column(
-                modifier = Modifier.padding(8.dp)
+                    .padding(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation( 8.dp )
             ) {
-                Text(
-                    text = "Friends",
-                    style = MaterialTheme.typography.titleLarge
+                Image(
+                    painter = rememberAsyncImagePainter
+                        (
+                        model ="https://imgur.com/iXKM4GF.png",
+
+                        ), contentDescription = null,
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .aspectRatio(4f / 3f)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Find new partners to play with based on your chosen sports!",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        text = "Friends",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Find new partners to play with based on your chosen sports!",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
+        if (profileComplete) {
+            CompleteProfileDialog(
+                onConfirm = {
+                    profileComplete = false
+                    navController.navigate(ProfileDestination.route)
+                },
+                onCancel = {
+                    profileComplete = false
+                }
+            )
         }
     }
 
+}
+
+@Composable
+private fun CompleteProfileDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = { /* Do nothing */ },
+        title = { Text("Wait!") },
+        text = { Text("You need to add a nickname for your account before adding friends") },
+        modifier = modifier.padding(16.dp),
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text(text = "Close")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = "Go to profile")
+            }
+        }
+    )
 }
