@@ -57,8 +57,10 @@ object CourtReviewPageDestination : NavigationDestination {
 @Composable
 fun CourtReviewPage(
     navController: NavController,
-    onNavigateUp: () -> Unit,
+    navigateBack: () -> Unit,
     courtIdArg: String,
+    onNavigateUp: () -> Unit,
+
     viewModel: ReviewViewModel = viewModel(),
     ) {
     //val courtReservationsState by viewModel.courtReviewsState.collectAsState()
@@ -79,13 +81,13 @@ fun CourtReviewPage(
     }
 
             Scaffold(
-        topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = onNavigateUp, text = "Court reviews") },
+        topBar = { CourtTopAppBar(canNavigateBack = true, navigateUp = navigateBack, text = "Court reviews") },
         bottomBar = { BottomBar(navController = navController as NavHostController) }
     ) {
             innerPadding ->
         CourtReviewsBody(
             modifier = Modifier.padding(innerPadding),
-            reviewList = reviewsState.reviewList
+            reviewList = reviewsState.reviewList,
         )
     }
 }
@@ -93,7 +95,7 @@ fun CourtReviewPage(
 @Composable
 fun CourtReviewsBody(
     modifier: Modifier = Modifier,
-    reviewList: List<Review>
+    reviewList: List<Review>,
 ){
 
         // Otherwise, show the list of reviews

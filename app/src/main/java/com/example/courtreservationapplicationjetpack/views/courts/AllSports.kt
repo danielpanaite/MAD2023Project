@@ -326,7 +326,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                                 tint = Color.Black,
                             )
                         }
-
                     }
                 }
             }
@@ -409,9 +408,16 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
     val dateInTimeZone = pickedDate.value.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
     val slots = remember { mutableStateOf(firebaseReservationViewModel.getCourtReservations2(court.id, Timestamp(dateInTimeZone, 0))) }
 
-    reviewViewModel.getAverageRatingForCourt(courtId = court.id)
-    val reviewCourtAvg by reviewViewModel.avg.collectAsState()
-    Log.d("reviewCourt", "$reviewCourtAvg")
+    //reviewViewModel.getAverageRatingForCourt(courtId = court.id)
+    //val reviewCourtAvg by reviewViewModel.avg.collectAsState()
+    //Log.d("reviewCourt", "$reviewCourtAvg")
+
+    LaunchedEffect(Unit) {
+        reviewViewModel.getAverageRatingForCourt()
+    }
+    val averageRatingMap = remember { mutableStateOf(reviewViewModel.averageRatingMap) }
+
+
 
 
 //    LaunchedEffect(court){
@@ -504,16 +510,17 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 verticalAlignment = Alignment.CenterVertically
             ){
                 com.gowtham.ratingbar.RatingBar(
-                    value = reviewCourtAvg,
+                    value = averageRatingMap.value[court.id] ?: 0f,
                     config = RatingBarConfig()
                         .style(RatingBarStyle.HighLighted)
                         .size(18.dp)
-                        .inactiveColor(Color(0xffffecb3))
-                        .activeColor(Orange200),
+                        .inactiveColor(Color.Black)
+                        .activeColor(Orange200)
+                        .hideInactiveStars(false),
                     onValueChange = {},
                     onRatingChanged = {},
                     modifier = Modifier
-                        .background(Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                        .background(Color.Gray.copy(alpha = 0.7f), RoundedCornerShape(10.dp))
 
                 )
                 Icon(
@@ -521,8 +528,6 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                     contentDescription = "see reviews",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
-                        .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
-
                         .clickable{
                         navController.navigate("${CourtReviewPageDestination.route}/${court.id}")
                     },
