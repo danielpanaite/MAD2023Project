@@ -110,10 +110,6 @@ fun FriendsBody(
             items(userViewModel.users.value){f ->
                 FriendsItem(friend = f, false)
             }
-        if(email != null)
-            item{
-                AddFriendsItem(email = email)
-            }
     }
 }
 
@@ -215,51 +211,6 @@ fun FriendsItem(
 
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AddFriendsItem(
-    email: String,
-    notificationViewModel: NotificationViewModel = viewModel(),
-){
-    val toastFriend = Toast.makeText(LocalContext.current, "Friend request sent!", Toast.LENGTH_SHORT)
-    val nicknameState = remember { mutableStateOf("") }
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(start = 16.dp, end = 16.dp)
-        .border(
-            BorderStroke(1.dp, MaterialTheme.colorScheme.primaryContainer),
-            MaterialTheme.shapes.small
-        )
-    ){
-        Row(modifier = Modifier
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-        ){
-            TextField(value = nicknameState.value, onValueChange = { nicknameState.value = it }, modifier = Modifier.fillMaxWidth())
-        }
-        Row(modifier = Modifier
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-        ){
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(onClick = {
-                    notificationViewModel.sendFriendRequestByNickname(
-                        Notification(
-                            sender = email,
-                            type = "friend",
-                            status = "pending",
-                            date = Timestamp.now()
-                        ), nicknameState.value)
-                    toastFriend.show()
-                }) {
-                    Text("Send friend request")
                 }
             }
         }

@@ -69,7 +69,6 @@ import androidx.navigation.NavController
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.ui.appViewModel.AppViewModelProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -89,8 +88,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -110,8 +107,6 @@ import com.example.courtreservationapplicationjetpack.firestore.ReservationViewM
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
-import com.example.courtreservationapplicationjetpack.views.profile.AddFriendsItem
-import com.example.courtreservationapplicationjetpack.views.profile.FriendsItem
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.delay

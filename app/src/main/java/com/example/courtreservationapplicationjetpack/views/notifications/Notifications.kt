@@ -116,7 +116,7 @@ fun NotificationsBody(
         val users = viewModel.notifications.value.distinctBy { it.sender }.map { it.sender }
         userViewModel.getUserListByEmails(users)
     }
-    if(viewModel.notifications.value.isNotEmpty()){
+    if(viewModel.notifications.value.map{ it.reservation }.isNotEmpty()){
         reservationViewModel.getReservationsByIdList(viewModel.notifications.value.filter { it.reservation != "" }.map{it.reservation})
     }
     LazyColumn(
@@ -188,7 +188,7 @@ fun NotificationItem(
                 Column(modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.CenterVertically)
-                    .weight(1f)
+                    .weight(2f)
                 ){
                     if(notification.type == "friend")
                         if(sender.imageUri != "")
