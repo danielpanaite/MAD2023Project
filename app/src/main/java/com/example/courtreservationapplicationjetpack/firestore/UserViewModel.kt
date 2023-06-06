@@ -1,5 +1,7 @@
 package com.example.courtreservationapplicationjetpack.firestore
 
+import android.content.res.Resources
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -145,9 +147,10 @@ class UserViewModel: ViewModel(){
     }
 
 
-    fun updateProfile(imageUri: ByteArray) {
+    fun updateProfile(imageUri: ByteArray, imageChoosen: MutableState<Boolean>) {
         var updatedUser = user.value
-        if(imageUri.isNotEmpty()){
+        if(imageUri.isNotEmpty() && imageChoosen.value){
+            Log.d("imageUri", "$imageUri")
             updatedUser = user.value.copy(imageUri = imageUri?.toString())
         }
         val docRef = db.document("users/${user.value.email}")

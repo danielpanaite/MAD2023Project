@@ -1,6 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,11 +30,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -155,33 +159,43 @@ fun AchievementsBody(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    if (achievementList.isNullOrEmpty()) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+        if (achievementList.isNullOrEmpty()) {
+            Box(
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "You don't have any achievements saved, click on the add button to insert a new one",
-
-                    style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center
-
-
-                )
-
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.nothing_found),
+                        contentDescription = "Nothing Found",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            //.aspectRatio(1f)
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp)
+                            .background(color = Color.Transparent)
+                    )
+                    Text(
+                        text = "You don't have any achievements saved, click on the add button to insert a new one...",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
-        }
+
 
 
     } else {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp)
+            contentPadding = PaddingValues(16.dp),
+
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            //contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
         ) {
             items(achievementList) { achievement ->
                 AchievementsItem(
@@ -195,6 +209,7 @@ fun AchievementsBody(
 
                         }
                     }
+                    //modifier = modifier.padding(bottom = 5.dp)
                 )
             }
         }
@@ -203,14 +218,146 @@ fun AchievementsBody(
 @Composable
 fun AchievementsItem(
     achievement: Achievements,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
 ) {
 
     val showDialog = remember { mutableStateOf(false) }
 
     Log.d("achievement", "$achievement")
     Log.d("achievement.toData", achievement.toDate())
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 16.dp, end = 16.dp),
+        elevation = CardDefaults.cardElevation( 8.dp )
+    ) {
+        Surface(color = Color.White) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .height(80.dp)
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(2f)
+                ) {
+                    val imageUrl = when (achievement.sportName) {
+                        "calcio" -> "https://www.parrocchiecurtatone.it/wp-content/uploads/2020/07/WhatsApp-Image-2020-07-23-at-17.53.36-1984x1200.jpeg"
+                        "basket" -> "https://images.unsplash.com/photo-1467809941367-bbf259d44dd6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+                        "tennis" -> "https://images.unsplash.com/photo-1627246939899-23f10c79192c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                        "pallavolo" -> "https://th.bing.com/th/id/R.9f02eacbdc53b2217aa8c260cbb5e082?rik=FY%2bHCt5RL6u%2bKQ&riu=http%3a%2f%2fwww.adamsport.it%2fwp-content%2fuploads%2f2015%2f02%2fpallavolo1.jpg&ehk=kYTqz5c7R7TDVrHOW%2frwqBEQ3iadw%2bsTrr99esCAj10%3d&risl=&pid=ImgRaw&r=0"
+                        "pallamano" -> "https://static.lvengine.net/reconquista/thumb/&w=500&h=300&zc=1&q=95&src=/Imgs/articles/article_59133/IMG_9969_f5.jpg"
+                        "rugby" -> "https://th.bing.com/th/id/OIP.IWZf734cG-wtATrKOojZVQHaEK?pid=ImgDet&rs=1"
+                        "softball" -> "https://th.bing.com/th/id/OIP.Md4VheCpdtIgWg5F5UuiiQHaEh?pid=ImgDet&rs=1"
+                        "beach volley" -> "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1307&q=80"
+                        else -> R.drawable.placeholder // Immagine predefinita per sport sconosciuti
+                    }
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        placeholder = painterResource(R.drawable.placeholder),
+                        contentDescription = "Court Image",
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(6f)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 8.dp)
+                ) {
+                    Column() {
+                        Text(
+                            text = "Sport: ${
+                                achievement.sportName.replaceFirstChar {
+                                    if (it.isLowerCase()) it.titlecase(
+                                        Locale.getDefault()
+                                    ) else it.toString()
+                                }
+                            }",
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Normal,
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Date: ${achievement.toDate()}",
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.ExtraLight,
+                        )
 
+                    }
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.TopEnd
+                    ) {
+                        IconButton(
+                            onClick = {
+                                showDialog.value = true
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = Color.Red
+                            )
+                        }
+                    }
+                    if (showDialog.value) {
+                        AlertDialog(
+                            onDismissRequest = { showDialog.value = false },
+                            title = { Text("Delete Achievement") },
+                            text = { Text("Are you sure you want to delete this achievement?") },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showDialog.value = false
+                                        onDeleteClick()
+                                    }
+                                ) {
+                                    Text("Delete")
+                                }
+                            },
+                            dismissButton = {
+                                Button(
+                                    onClick = { showDialog.value = false }
+                                ) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+                Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
+
+                        Surface(color = Color.White) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Title: ${achievement.title}",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.padding(vertical = 8.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(4.dp)
+                                )
+                                Text(
+                                    text = "Description: ${achievement.description}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(bottom = 16.dp).background(Color.White.copy(0.7f), RoundedCornerShape(4.dp)).padding(4.dp)
+                                )
+                        }
+                    }
+                }
+            }
+
+
+/*
 
     Box(
         modifier = Modifier
@@ -345,6 +492,31 @@ fun AchievementsItem(
         }
     }
 }
+
+ */
+
+/*
+   if (achievementList.isNullOrEmpty()) {
+       Box(
+           modifier = modifier
+               .fillMaxSize()
+               .verticalScroll(rememberScrollState())
+       ) {
+           Column(
+               modifier = Modifier.padding(16.dp),
+               verticalArrangement = Arrangement.spacedBy(16.dp)
+           ) {
+               Text(
+                   text = "You don't have any achievements saved, click on the add button to insert a new one",
+
+                   style = MaterialTheme.typography.titleMedium,
+                   textAlign = TextAlign.Center
+
+
+               )
+
+           }
+       }*/
 
 
 fun Achievements.toDate(): String{

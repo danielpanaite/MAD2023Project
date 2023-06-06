@@ -114,6 +114,11 @@ fun EditProfile(
     val myImage: Bitmap = BitmapFactory.decodeResource(Resources.getSystem(), android.R.mipmap.sym_def_app_icon)
     val chosenPhoto = remember { mutableStateOf<Bitmap>(myImage) }
 
+    Log.d("chosenPhoto", "$chosenPhoto")
+
+    val imageChoosen = remember { mutableStateOf(false) }
+
+
 
 
     //val chosenPhotoUri = remember { mutableStateOf<Uri?>(null) }
@@ -156,16 +161,19 @@ fun EditProfile(
                 val baos = ByteArrayOutputStream()
                 chosenPhoto.value.compress(Bitmap.CompressFormat.JPEG, 100, baos)
                 val data = baos.toByteArray()
-                viewModel.updateProfile(data)
+                viewModel.updateProfile(data, imageChoosen)
+if(imageChoosen.value){
+    viewModel.uploadImageToStorage(data)
 
-                viewModel.uploadImageToStorage(data)
+}
 
                 navigateToProfileDestination()
             },
             //chosenPhotoUri = chosenPhotoUri,
             chosenPhoto = chosenPhoto,
             modifier = modifier.padding(innerPadding),
-            profileImageUrl = profileImageUrl.value
+            profileImageUrl = profileImageUrl.value,
+            imageChoosen = imageChoosen
         )
     }
 
@@ -175,6 +183,7 @@ fun EditProfile(
 @Composable
 fun ProfileEntryBody(
     user: MutableState<Users>,
+    imageChoosen: MutableState<Boolean>,
     //chosenPhotoUri: MutableState<Uri?>,
     chosenPhoto: MutableState<Bitmap>,
     onSaveClick: () -> Unit,
@@ -198,6 +207,8 @@ fun ProfileEntryBody(
 
      */
 
+    val phonePattern = Regex("^\\+(?:[0-9]●?){6,14}[0-9]$")
+
 
 
     LazyColumn(
@@ -207,12 +218,24 @@ fun ProfileEntryBody(
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         item {
-            ProfileInputForm(user = user, chosenPhoto = chosenPhoto, onSaveClick = onSaveClick, profileImageUrl = profileImageUrl)
+            ProfileInputForm(user = user,
+                chosenPhoto = chosenPhoto,
+                onSaveClick = onSaveClick,
+                profileImageUrl = profileImageUrl,
+                imageChoosen = imageChoosen
+
+                )
         }
         item {
             Button(
                 onClick = {
-                    if (user.value.name != "" && user.value.email != "") {
+// Verifica se il numero di telefono corrisponde al pattern
+                    val isValidPhoneNumber = user.value.phone?.let { phonePattern.matches(it) }
+                    if (user.value.name != "" && user.value.email != "" &&
+                        (user.value.age!=null && user.value.age!! >13)
+                        && isValidPhoneNumber == true
+
+                    ) {
                         onSaveClick()
 
                         // Carica l'immagine nello storage di Firebase
@@ -235,9 +258,13 @@ fun ProfileEntryBody(
             onDismissRequest = { showErrorDialog = false },
             title = { Text(text = "Error") },
             text = if (user.value.name == "") {
-                { Text(text = "Please insert at least a name and an email") }
+                { Text(text = "Please insert at least a name") }
             } else if (!user.value.email.matches(Regex("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"))) {
                 { Text(text = "Insert a valid email") }
+            }else if (user.value.age!! <14) {
+                    { Text(text = "You need to be at least 14 to use the app ") }
+            }else if(user.value.phone?.let { phonePattern.matches(it) } == false){
+                {Text(text = "Insert a valid phone number with the correct prefix")}
             } else {
                 { Text(text = "I valori inseriti non sono validi.") }
             },
@@ -256,13 +283,13 @@ fun ProfileEntryBody(
 fun ProfileInputForm(
     user: MutableState<Users>,
     onSaveClick: () -> Unit,
+    imageChoosen: MutableState<Boolean>,
     chosenPhoto: MutableState<Bitmap>,
     modifier: Modifier = Modifier,
     profileImageUrl: String, // URL dell'immagine del profilo
     enabled: Boolean = true
 ) {
 
-    val imageChoosen = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val loadImageCamera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
         if (it != null) {
@@ -271,14 +298,16 @@ fun ProfileInputForm(
         }
     }
 
-    val loadImageGal = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()){
-        if(Build.VERSION.SDK_INT<29){
-            chosenPhoto.value = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            imageChoosen.value = true
-        }else{
-            val source = it?.let { it1 -> ImageDecoder.createSource(context.contentResolver, it1) }
-            chosenPhoto.value = source?.let { it1 -> ImageDecoder.decodeBitmap(it1) }!!
-            imageChoosen.value = true
+    val loadImageGal = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            if (Build.VERSION.SDK_INT < 29) {
+                chosenPhoto.value = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                imageChoosen.value = true
+            } else {
+                val source = it.let { uri -> ImageDecoder.createSource(context.contentResolver, uri) }
+                chosenPhoto.value = source?.let { it1 -> ImageDecoder.decodeBitmap(it1) }!!
+                imageChoosen.value = true
+            }
         }
     }
 
@@ -297,6 +326,7 @@ fun ProfileInputForm(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -310,7 +340,7 @@ fun ProfileInputForm(
                     Log.d("chosenPhoto !=null", "${chosenPhoto.value}")
                     Image(chosenPhoto.value.asImageBitmap(), contentDescription = "image",
                         modifier = Modifier
-                            .size(150.dp)
+                            .size(100.dp)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop,
                         colorFilter = if (imageChoosen.value && profileImageUrl == "") {
@@ -373,39 +403,35 @@ fun ProfileInputForm(
                     tint = Color.Black
                 )
             }
+            DropdownMenu(
+                expanded = showMenu.value,
+                onDismissRequest = { showMenu.value = false },
+                modifier = Modifier
+                    .wrapContentSize()
+            ) {
+                DropdownMenuItem(
+                    onClick = {
+                        showMenu.value = false
+                        loadImageGal.launch("image/*")
+                    },
+                    text = { Text("Select Image from gallery", color = Color.Black) },
+                )
+                DropdownMenuItem(
+                    onClick = {
+                        showMenu.value = false
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    },
+                    text = { Text("Take a photo from camera", color = Color.Black) },
+                )
+            }
         }
 
-        DropdownMenu(
-            expanded = showMenu.value,
-            onDismissRequest = { showMenu.value = false },
-            modifier = Modifier
-                .wrapContentSize()
-        ) {
-            DropdownMenuItem(
-                onClick = {
 
-                    showMenu.value = false
-                    loadImageGal.launch("image/*")
-
-                },
-                text = { Text("Select Image from gallery", color = Color.Black) },
-            )
-            DropdownMenuItem(
-                onClick = {
-                    showMenu.value = false
-                    //chosenPhotoUri.value = null
-                    permissionLauncher.launch(Manifest.permission.CAMERA)
-
-
-                },
-                text = { Text("take a photo from camera", color = Color.Black) },
-            )
-        }
 
         Column(
             modifier = Modifier
                 .padding(8.dp)
-                .padding(top = 180.dp)
+                .padding(top = 130.dp)
                 .fillMaxWidth()
         ) {
             Row(

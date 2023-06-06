@@ -1,5 +1,7 @@
 package com.example.courtreservationapplicationjetpack.views.reviews
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,12 +32,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
+import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
 import com.example.courtreservationapplicationjetpack.firestore.Review
 import com.example.courtreservationapplicationjetpack.firestore.ReviewViewModel
@@ -100,13 +105,47 @@ fun CourtReviewsBody(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            /*
+        }
             if (reviewList.isEmpty()) {
                 Text(
                     text = "No reviews for this court",
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
-            } else {
+
+             */
+                if (reviewList.isEmpty()) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.nothing_found),
+                                contentDescription = "Nothing Found",
+                                contentScale = ContentScale.FillWidth,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    //.aspectRatio(1f)
+                                    .padding(horizontal = 16.dp)
+                                    .padding(top = 16.dp)
+                                    .background(color = Color.Transparent)
+                            )
+                            Text(
+                                text = "No reviews for this court",
+                                color = Color.Gray,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+
+
+                } else {
                 CourtReviewList(
                     reviewList = reviewList
                 )

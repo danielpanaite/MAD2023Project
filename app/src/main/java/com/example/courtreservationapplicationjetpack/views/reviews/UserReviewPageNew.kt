@@ -1,6 +1,8 @@
 package com.example.courtreservationapplicationjetpack.views.reviews
 
 import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -157,14 +159,45 @@ fun MyReviewsBody(
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (reservationList.isEmpty() && courtList.isEmpty() && reviewList.isEmpty()) {
+       /* if (reservationList.isEmpty() && courtList.isEmpty() && reviewList.isEmpty()) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = modifier.align(Alignment.CenterHorizontally)
             )
-        } else {
+        }*/
+        if (reservationList.isEmpty() && courtList.isEmpty() && reviewList.isEmpty()) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.nothing_found),
+                        contentDescription = "Nothing Found",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            //.aspectRatio(1f)
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp)
+                            .background(color = Color.Transparent)
+                    )
+                    Text(
+                        text = text,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+
+
+        }else {
             ReviewList(
                 courtList,
                 reviewList,
