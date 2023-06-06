@@ -213,7 +213,7 @@ fun SignInScreen(
                 modifier = Modifier
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = "The first app that lets you play whenever and wherever you want with friends. \nLog in and join us!!",
+                text = "The first app that lets you play with friends whenever and wherever you want. \nLog in and join us!!",
                 color = Color.White,
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                 fontWeight = FontWeight.Normal
