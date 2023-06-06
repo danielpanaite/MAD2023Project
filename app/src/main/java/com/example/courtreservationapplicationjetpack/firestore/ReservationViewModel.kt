@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.ListenerRegistration
@@ -191,6 +192,23 @@ class ReservationViewModel: ViewModel(), CoroutineScope {
                 res?.id = snapshot.id // Map the document ID to the "id" property of the Reservation object
                 _reservation.value = res!!
             }
+        }
+    }
+
+    fun getReservationsByIdList(reservations: List<String>){
+        val docRef = db.collection("reservations").whereIn(FieldPath.documentId(), reservations)
+
+        docRef.get().addOnSuccessListener {
+            Log.d(TAG, "getReservationsByIdList")
+            val list = mutableListOf<Reservation>()
+            for (document in it.documents) {
+                val res = document.toObject(Reservation::class.java)
+                res?.id = document.id // Map the document ID to the "id" property of the Reservation object
+                res?.let { r -> list.add(r) }
+            }
+            _reservations.value = list
+        }.addOnFailureListener {
+            Log.d(UserViewModel.TAG, "Error getting data", it)
         }
     }
 
