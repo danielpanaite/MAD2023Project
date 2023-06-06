@@ -92,6 +92,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.CityViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Notification
@@ -188,10 +189,15 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val firebaseNotificationViewModel: NotificationViewModel = viewModel()
-    val cityList = listOf<String>("Torino", "Milano", "Savigliano", "Cuneo", "Saluzzo", "Rho", "Monza")
+    val firebaseCityViewModel: CityViewModel = viewModel()
+
+    firebaseCityViewModel.getCities()
+    val test = firebaseCityViewModel.cities.value.map { it.city }
+    val cityList = test.toList()
+    //val cityList = listOf<String>("Torino", "Milano", "Savigliano", "Cuneo", "Saluzzo", "Rho", "Monza")
     var pickedCity = remember { mutableStateOf("") }
 
-
+    Log.d("CITY", "CITY: $cityList")
     LaunchedEffect(pickedSport.value) {
         firebaseCourtViewModel.getCourtsBySport(pickedSport.value, pickedCity.value)
     }
