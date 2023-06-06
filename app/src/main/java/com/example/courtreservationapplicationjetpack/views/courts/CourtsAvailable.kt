@@ -165,6 +165,7 @@ fun CourtsAvailable(
     val notificationViewModel: NotificationViewModel = viewModel()
     val email = googleAuthUiClient.getSignedInUser()?.email
     val friendsNotificationArray = remember { mutableStateOf(mutableListOf<Notification?>()) }
+    val firebaseCourtViewModel: CourtViewModel = viewModel()
 
     LaunchedEffect(selectedDate.value){
         pickedHour.value = pickedHour.value
@@ -183,7 +184,7 @@ fun CourtsAvailable(
                 .padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {
-                        if(pickedHour.value.isNotEmpty()) {
+                        if(pickedHour.value.isNotEmpty() && firebaseCourtViewModel.court.value.id != "") {
                             isMissingSomething.value = false
                             coroutineScope.launch {
 //                                viewModel.addReservation(
@@ -330,7 +331,7 @@ fun CourtsAvailable(
             )
         }
 
-        Ciao(
+        Body(
             courtID = courtID,
             viewModel = viewModel,
             selectedDate = selectedDate,
@@ -345,7 +346,8 @@ fun CourtsAvailable(
             userEmail = email,
             pickedPeople = pickedPeople,
             notificationViewModel = notificationViewModel,
-            friendsNotificationArray = friendsNotificationArray
+            friendsNotificationArray = friendsNotificationArray,
+            firebaseCourtViewModel = firebaseCourtViewModel
         )
 //        CourtsBody(
 //            courtList = courtsAvailableUiState.courtsAvailableList,
@@ -431,7 +433,7 @@ private fun CourtItem(
     "SuspiciousIndentation", "RememberReturnType"
 )
 @Composable
-fun Ciao(
+fun Body(
     courtID: String,
     viewModel: CourtsAvailableViewModel,
     selectedDate: MutableState<LocalDate>,
@@ -446,9 +448,10 @@ fun Ciao(
     userEmail: String?,
     pickedPeople: String,
     notificationViewModel: NotificationViewModel,
-    friendsNotificationArray: MutableState<MutableList<Notification?>>
+    friendsNotificationArray: MutableState<MutableList<Notification?>>,
+    firebaseCourtViewModel: CourtViewModel
 ) {
-    val firebaseCourtViewModel: CourtViewModel = viewModel()
+
     val courtState = remember { mutableStateOf<com.example.courtreservationapplicationjetpack.firestore.Court?>(null) }
 
     val firebaseUserViewModel: UserViewModel = viewModel()
