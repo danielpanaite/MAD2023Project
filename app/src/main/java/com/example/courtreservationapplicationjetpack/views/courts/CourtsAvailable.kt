@@ -1081,7 +1081,7 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
 }
 
 fun convertLocalDateToDate(localDate: LocalDate): Date {
-    val zoneId = ZoneId.systemDefault()
+    val zoneId = ZoneId.of("Europe/Rome")
     return Date.from(localDate.atStartOfDay(zoneId).toInstant())
 }
 
