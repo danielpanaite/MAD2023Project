@@ -78,7 +78,8 @@ fun NavigationGraph(
                 navController = navController,
                 navigateToAllSports = {navController.navigate(AllSportsDestination.route)},
                 navigateToReviews = {navController.navigate(ReviewMainPageDestination.route)},
-                navigateToFindFriends = {navController.navigate(FindFriendsDestination.route)}
+                navigateToFindFriends = {navController.navigate(FindFriendsDestination.route)},
+                googleAuthUiClient = googleAuthUiClient
             )
         }
 
