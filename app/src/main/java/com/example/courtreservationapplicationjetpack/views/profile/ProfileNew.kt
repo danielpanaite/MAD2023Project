@@ -2,7 +2,6 @@ package com.example.courtreservationapplicationjetpack.views.profile
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -176,7 +175,6 @@ navController: NavController
             .padding(16.dp)
 
         ) {
-        Log.d("email", user.email)
 
 
         // User's image

@@ -96,17 +96,19 @@ fun FindFriendsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
     ) {
-        if(userViewModel.users.value.isNotEmpty() && email != null) {
+        if(email!= null){
             item {
                 AddFriendsItem(email)
             }
+        }
+        if(userViewModel.users.value.isNotEmpty() && email != null) {
             items(userViewModel.users.value) { f ->
                 FriendsItem(friend = f, true, email = email)
             }
         }else{
             item {
                 Text(
-                    text = "No people available for your chosen sports",
+                    text = "No friends available!",
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
