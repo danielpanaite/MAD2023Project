@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.views.profile
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -56,6 +57,8 @@ import com.example.courtreservationapplicationjetpack.firestore.SportsPreference
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -112,8 +115,6 @@ fun SportsBody(
     viewModel: UserViewModel = viewModel()
 ){
 
-
-
     val selectedSportsWithLevels by viewModel.sportsPreferencesUiState.collectAsState()
 
     if (selectedSportsWithLevels.isLoading) {
@@ -154,6 +155,19 @@ fun SportsBody(
             }
         }
 
+        val saveClick = {
+            coroutineScope.launch {
+                val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
+                    Sport(sportName, masteryLevel)
+                }
+                val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
+                if (email != null) {
+                    viewModel.updateSportsPreferences(email, sports, uncheckedSports)
+                }
+                Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
+                navigateToProfileDestination()
+            } }
+
         SportsList(
             sportsList = sportsList.value,
             onSportCheckedChange = { sport, isChecked, masteryLevel ->
@@ -166,31 +180,9 @@ fun SportsBody(
                 }
             },
             selectedSportsWithLevels = selectedSportsWithLevels,
-            initialLevels = initialLevels
+            initialLevels = initialLevels,
+            saveClick = saveClick
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            val sports = sportsWithLevels.map { (sportName, masteryLevel) ->
-                                Sport(sportName, masteryLevel)
-                            }
-                            val uncheckedSports = sportsList.value.filter { !selectedSports.contains(it) }
-                            if (email != null) {
-                                viewModel.updateSportsPreferences(email, sports, uncheckedSports)
-                            }
-                            Toast.makeText(context, "Saved successfully", Toast.LENGTH_SHORT).show()
-                            navigateToProfileDestination()
-                        }
-                    },
-                    modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth()
-                ) {
-                    Text(text = "Save", fontWeight = FontWeight.Bold)
-                }
-            }
-        }
     }
 }
 
@@ -199,7 +191,8 @@ private fun SportsList(
     sportsList: List<String>,
     onSportCheckedChange: (String, Boolean, String) -> Unit,
     selectedSportsWithLevels: SportsPreferencesUiState,
-    initialLevels: Map<String, String>
+    initialLevels: Map<String, String>,
+    saveClick: () -> Job
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -260,7 +253,21 @@ private fun SportsList(
 
             Divider()
         }
-
+        item{
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = {
+                            saveClick()
+                        },
+                        modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth()
+                    ) {
+                        Text(text = "Save", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
     }
 }
 
