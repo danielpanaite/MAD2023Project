@@ -213,7 +213,7 @@ fun SignInScreen(
                 modifier = Modifier
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = "La prima app che ti permette di prenotare ogni maledettissimo giorno il campo stella\nEffettua il Login!",
+                text = "The first app that lets you play whenever and wherever you want with friends. \nLog in and join us!!",
                 color = Color.White,
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                 fontWeight = FontWeight.Normal
