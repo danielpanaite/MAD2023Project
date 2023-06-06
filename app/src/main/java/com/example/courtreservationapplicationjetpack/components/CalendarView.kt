@@ -1,6 +1,5 @@
 package com.example.courtreservationapplicationjetpack.components
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,10 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.courtreservationapplicationjetpack.R
 import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.toDate
 import com.example.courtreservationapplicationjetpack.firestore.toTime
 import com.example.courtreservationapplicationjetpack.models.sport.SportDrawables
@@ -82,9 +84,9 @@ private val inActiveTextColor: Color @Composable get() = GreyItemInactive
 
 @Composable
 fun MonthCalendar(
-    onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
-    viewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    courtViewModel: CourtViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    onReservationClick: (Reservation) -> Unit,
+    viewModel: ReservationViewModel = viewModel(),
+    courtViewModel: CourtViewModel = viewModel(),
     googleAuthUiClient : GoogleAuthUiClient,
 ) {
     val email = googleAuthUiClient.getSignedInUser()?.email
@@ -184,10 +186,10 @@ fun MonthCalendar(
                             )
                         }
                     }else {
-                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty() && (reservationsInSelectedDate.size == courtViewModel.reservationcourts.value.size))
+                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty() && (reservationsInSelectedDate.size == courtViewModel.reservationcourts.value.size) && email != null)
                             for( i in reservationsInSelectedDate.indices){
                                 item{
-                                    ReservationInformation(reservationsInSelectedDate[i], courtViewModel.reservationcourts.value[i], onReservationClick, colors)
+                                    ReservationInformation(reservationsInSelectedDate[i], courtViewModel.reservationcourts.value.first{ it.id == reservationsInSelectedDate[i].court }, onReservationClick, colors, email)
                                 }
                             }
                     }
@@ -273,11 +275,14 @@ private fun MonthHeader(
 
 @Composable
 private fun LazyItemScope.ReservationInformation(
-    reservation: com.example.courtreservationapplicationjetpack.firestore.Reservation,
+    reservation: Reservation,
     courtDetails: Court,
-    onReservationClick: (com.example.courtreservationapplicationjetpack.firestore.Reservation) -> Unit,
-    colors: List<Int>
+    onReservationClick: (Reservation) -> Unit,
+    colors: List<Int>,
+    email: String,
+    userViewModel: UserViewModel = viewModel()
 ) {
+    userViewModel.getUserByEmail(reservation.user)
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
@@ -287,17 +292,17 @@ private fun LazyItemScope.ReservationInformation(
                 onReservationClick(reservation)
             }
     ) {
-        Log.d("HASHCODE", (reservation.hashCode()*-1).toString())
         Surface(shape = MaterialTheme.shapes.small, modifier = Modifier.padding(2.dp)) {
             Box(
                 modifier = Modifier
                     .background(color = colorResource(colors[(1) % colors.size]))
+                    .padding(bottom = if(reservation.invites.contains(email)) 8.dp else 0.dp)
                     .fillParentMaxWidth(1 / 7f)
                     .aspectRatio(1f)
                     .weight(1f),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                     val sportIcon = SportDrawables.getDrawable(courtDetails.sport)
                     Text(
                         modifier = Modifier.padding(bottom = 4.dp),
@@ -336,6 +341,14 @@ private fun LazyItemScope.ReservationInformation(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                if(reservation.invites.contains(email) && userViewModel.user.value.id != "")
+                    Text(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        text = "invite from ${userViewModel.user.value.nickname}",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = GreyItemInactive
+                    )
             }
         }
     }
