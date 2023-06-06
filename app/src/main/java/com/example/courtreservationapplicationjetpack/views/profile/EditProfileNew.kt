@@ -209,6 +209,8 @@ fun ProfileEntryBody(
 
     val phonePattern = Regex("^\\+(?:[0-9]●?){6,14}[0-9]$")
 
+    val agePattern = Regex("^[0-9]+$")
+
 
 
     LazyColumn(
@@ -233,7 +235,8 @@ fun ProfileEntryBody(
                     val isValidPhoneNumber = user.value.phone?.let { phonePattern.matches(it) }
                     if (user.value.name != "" && user.value.email != "" &&
                         (user.value.age!=null && user.value.age!! >13)
-                        && isValidPhoneNumber == true
+                        && (user.value.phone!="" && isValidPhoneNumber == true)
+                        && agePattern.matches(user.value.age.toString()) == true
 
                     ) {
                         onSaveClick()
@@ -261,6 +264,8 @@ fun ProfileEntryBody(
                 { Text(text = "Please insert at least a name") }
             } else if (!user.value.email.matches(Regex("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"))) {
                 { Text(text = "Insert a valid email") }
+            }else if (agePattern.matches(user.value.age.toString())== false) {
+                { Text(text = "Choose a valid age ") }
             }else if (user.value.age!! <14) {
                     { Text(text = "You need to be at least 14 to use the app ") }
             }else if(user.value.phone?.let { phonePattern.matches(it) } == false){
@@ -522,12 +527,15 @@ fun ProfileInputForm(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ){
+
                 OutlinedTextField(
-                    value = user.value.age.toString(),
-                    onValueChange = { user.value = user.value.copy(age = it.toIntOrNull()) },
+                    value = user.value.age?.toString() ?: "",
+                    onValueChange = { input ->
+                        val age = if (input.isNotEmpty()) input.toIntOrNull() else null
+                        user.value = user.value.copy(age = age)
+                    },
                     label = { Text(text = "Age") },
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = enabled
                 )
             }

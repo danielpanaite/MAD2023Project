@@ -82,7 +82,7 @@ class SignInViewModel(
                                     "name" to (UserData?.username ?: ""),
                                     "nickname" to "",
                                     "address" to "",
-                                    "age" to 1,
+                                    "age" to 18,
                                     "phone" to "",
                                     "imageUri" to (UserData?.profilePictureUrl ?: ""),
                                     "sportPreferences" to emptyList<Sport>(),

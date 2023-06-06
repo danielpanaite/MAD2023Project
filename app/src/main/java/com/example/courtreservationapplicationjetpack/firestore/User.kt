@@ -11,7 +11,7 @@ data class Users(
     val nickname: String? = "",
     val email: String = "",
     val address: String? = "",
-    val age: Int? = 0,
+    val age: Int? = 18,
     val phone: String? = "",
     val imageUri: String? = "",
     val sportPreferences: MutableList<Sport> = mutableListOf(),
