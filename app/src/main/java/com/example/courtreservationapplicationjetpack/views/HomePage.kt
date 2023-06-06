@@ -232,12 +232,12 @@ private fun CompleteProfileDialog(
         text = { Text("You need to add a nickname for your account before adding friends") },
         modifier = modifier.padding(16.dp),
         dismissButton = {
-            TextButton(onClick = onCancel) {
+            Button(onClick = onCancel) {
                 Text(text = "Close")
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            Button(onClick = onConfirm) {
                 Text(text = "Go to profile")
             }
         }
