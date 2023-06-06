@@ -13,6 +13,7 @@ class NotificationViewModel: ViewModel() {
 
     private val db = Firebase.firestore
     private lateinit var reg1: ListenerRegistration
+    private lateinit var reg2: ListenerRegistration
 
     companion object{
         const val TAG = "NotificationViewModel"
@@ -21,6 +22,8 @@ class NotificationViewModel: ViewModel() {
     //DATA
     private var _notifications = mutableStateOf<List<Notification>>(emptyList())
     val notifications: State<List<Notification>> = _notifications
+    private var _sentrequests = mutableStateOf<List<Notification>?>(null)
+    val sentrequests: State<List<Notification>?> = _sentrequests
 
 
     fun getUserNotifications(user: String) {
@@ -34,11 +37,29 @@ class NotificationViewModel: ViewModel() {
                 val list = mutableListOf<Notification>()
                 for (document in snapshot.documents) {
                     val res = document.toObject(Notification::class.java)
-                    res?.id =
-                        document.id // Map the document ID to the "id" property of the Reservation object
+                    res?.id = document.id // Map the document ID to the "id" property of the Reservation object
                     res?.let { r -> list.add(r) }
                 }
                 _notifications.value = list
+            }
+        }
+    }
+
+    fun getUserSentFriendRequests(user: String) {
+        val docRef = db.collection("notifications").whereEqualTo("sender", user).whereEqualTo("type", "friend")
+
+        reg2 = docRef.addSnapshotListener { snapshot, e ->
+            if (e != null)
+                Log.d(ReservationViewModel.TAG, "Error getting data", e)
+            if (snapshot != null) {
+                Log.d(TAG, "getUserSentFriendRequests")
+                val list = mutableListOf<Notification>()
+                for (document in snapshot.documents) {
+                    val res = document.toObject(Notification::class.java)
+                    res?.id = document.id // Map the document ID to the "id" property of the Reservation object
+                    res?.let { r -> list.add(r) }
+                }
+                _sentrequests.value = list
             }
         }
     }
@@ -91,5 +112,13 @@ class NotificationViewModel: ViewModel() {
             }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        if(this::reg1.isInitialized)
+            reg1.remove()
+        if(this::reg2.isInitialized)
+            reg2.remove()
+        Log.d(TAG, "Registration removed")
+    }
 
 }

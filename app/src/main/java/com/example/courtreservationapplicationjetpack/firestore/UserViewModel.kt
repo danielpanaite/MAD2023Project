@@ -82,9 +82,8 @@ class UserViewModel: ViewModel(){
         }
     }
 
-    fun getUserListBySports(friends: List<String>){
-        Log.d(TAG, friends.toString())
-        val docRef = db.collection("users").whereNotIn(FieldPath.documentId(), friends)
+    fun getUsersNotFriends(friends: List<String>, notifications: List<Notification>){
+        val docRef = db.collection("users").whereNotIn(FieldPath.documentId(), friends.plus(notifications.map { it.receiver }))
 
         docRef.get().addOnSuccessListener {
             Log.d(TAG, "getUserListBySports")

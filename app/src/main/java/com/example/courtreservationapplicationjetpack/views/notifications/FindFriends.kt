@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.courtreservationapplicationjetpack.CourtTopAppBar
 import com.example.courtreservationapplicationjetpack.components.BottomBar
+import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.navigation.NavigationDestination
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
@@ -58,15 +59,19 @@ fun FindFriends(
 fun FindFriendsBody(
     modifier: Modifier = Modifier,
     googleAuthUiClient : GoogleAuthUiClient,
-    userViewModel: UserViewModel = viewModel()
+    userViewModel: UserViewModel = viewModel(),
+    notificationViewModel: NotificationViewModel = viewModel(),
 ){
     val email = googleAuthUiClient.getSignedInUser()?.email
     if(email != null)
         userViewModel.getUserByEmail(email)
-    if(userViewModel.user.value.id != "" && email != null) {
+    if(email != null) {
+        notificationViewModel.getUserSentFriendRequests(email)
+    }
+    if(userViewModel.user.value.id != "" && email != null && notificationViewModel.sentrequests.value != null){
         val friends: MutableList<String> = mutableListOf(*userViewModel.user.value.friends.toTypedArray())
         friends.add(email)
-        userViewModel.getUserListBySports(friends)
+        userViewModel.getUsersNotFriends(friends, notificationViewModel.sentrequests.value!!)
     }
     LazyColumn(
         modifier = modifier
@@ -75,9 +80,9 @@ fun FindFriendsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
     ) {
-        if(userViewModel.users.value.isNotEmpty())
+        if(userViewModel.users.value.isNotEmpty() && email != null)
             items(userViewModel.users.value){f ->
-                FriendsItem(friend = f, true)
+                FriendsItem(friend = f, true, email = email)
             }
         else
             item{

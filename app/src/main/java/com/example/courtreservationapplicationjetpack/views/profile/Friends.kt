@@ -13,20 +13,20 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -58,6 +58,7 @@ import com.example.courtreservationapplicationjetpack.navigation.NavigationDesti
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
 import com.example.courtreservationapplicationjetpack.ui.theme.GreyItemInactive
 import com.google.firebase.Timestamp
+import java.util.Locale
 
 object FriendsDestination : NavigationDestination {
     override val route = "friends"
@@ -119,7 +120,9 @@ fun FriendsBody(
 @Composable
 fun FriendsItem(
     friend: Users,
-    invite: Boolean
+    invite: Boolean,
+    email: String = "",
+    notificationViewModel: NotificationViewModel = viewModel()
 ){
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -177,11 +180,42 @@ fun FriendsItem(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clickable {
-
+                                    notificationViewModel.createNotification(
+                                        Notification(
+                                            sender = email,
+                                            receiver = friend.email,
+                                            type = "friend",
+                                            status = "pending",
+                                            date = Timestamp.now()
+                                        )
+                                    )
                                 },
                             tint = GreyItemInactive
                         )
                     }
+            }
+        }
+        if(friend.sportPreferences.isNotEmpty()) {
+            Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
+            Surface(color = Color.White) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "Interests", modifier = Modifier.padding(top = 4.dp), color = GreyItemInactive)
+                    for (i in friend.sportPreferences.indices) {
+                        Row(
+                            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp).offset(x = (-8).dp)
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth().weight(1f), horizontalAlignment = Alignment.End){
+                                Text(text = "${friend.sportPreferences[i].sportName.replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase(Locale.getDefault())
+                                else it.toString() }} ")
+                            }
+                            Column(modifier = Modifier.fillMaxWidth().weight(1f), horizontalAlignment = Alignment.Start){
+                                Text(text = "- ${friend.sportPreferences[i].masteryLevel}")
+                            }
+
+                        }
+                    }
+                }
             }
         }
     }
