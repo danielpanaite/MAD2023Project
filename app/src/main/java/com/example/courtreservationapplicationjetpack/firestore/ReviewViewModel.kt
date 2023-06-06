@@ -57,10 +57,62 @@ class ReviewViewModel: ViewModel() {
     private val _courtReviewsState = MutableStateFlow<MyReviewsUiState>(MyReviewsUiState(isLoading = false))
     val courtReviewsState: StateFlow<MyReviewsUiState> = _courtReviewsState
 
+    private val _averageRatingMap = mutableMapOf<String, Float>()
+    val averageRatingMap: MutableMap<String, Float> = _averageRatingMap
+
+
+
 
 
     //----------------------Methods----------------------
 
+    fun getAverageRatingForCourt() {
+        val courtCollection = db.collection("courts")
+        val courtList = mutableListOf<CourtWithId>()
+
+        // Ottieni tutti i documenti dalla collezione "courts"
+        courtCollection.get().addOnSuccessListener { courtsSnapshot ->
+            for (courtSnapshot in courtsSnapshot.documents) {
+                val courtId = courtSnapshot.id
+                val court = courtSnapshot.toObject(Court::class.java)
+                court?.let { courtList.add(CourtWithId(courtId, it)) }
+            }
+
+            val averageRatingMap = mutableMapOf<String, Float>()
+
+            val reviewsCollection = db.collection("reviews")
+
+            // Calcola la media delle recensioni per ciascun courtId
+            for (courtWithId in courtList) {
+                val courtId = courtWithId.idCourt
+                Log.d("courtId", "${courtId}")
+                var totalRating = 0
+                var numReviews = 0
+
+                // Ottieni tutte le recensioni corrispondenti al courtId
+                reviewsCollection.whereEqualTo("court", courtId).get().addOnSuccessListener { reviewsSnapshot ->
+                    for (reviewSnapshot in reviewsSnapshot.documents) {
+                        val review = reviewSnapshot.toObject(Review::class.java)
+                        review?.let {
+                            totalRating += it.rating
+                            numReviews++
+                        }
+                    }
+
+                    val averageRating = if (numReviews > 0) totalRating.toFloat() / numReviews.toFloat() else 0f
+
+                    averageRatingMap[courtId] = averageRating
+                    _averageRatingMap[courtId] = averageRating
+
+                    // Puoi utilizzare la mappa averageRatingMap per le tue esigenze
+                }.addOnFailureListener {
+                    Log.d(TAG, "Error getting reviews data", it)
+                }
+            }
+        }.addOnFailureListener {
+            Log.d(TAG, "Error getting courts data", it)
+        }
+    }
 
     fun getAverageRatingForCourt(courtId: String) {
         // Creating a reference to collection

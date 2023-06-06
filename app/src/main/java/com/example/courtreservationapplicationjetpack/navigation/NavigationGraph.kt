@@ -235,6 +235,7 @@ fun NavigationGraph(
             it.arguments?.getString("courtIdArg")?.let { it1 ->
                 CourtReviewPage(
                     navController = navController,
+                    navigateBack = { navController.popBackStack() },
                     onNavigateUp = { navController.navigateUp() },
                     courtIdArg = it1,
                 )
