@@ -243,9 +243,6 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                println(courtList.toString())
-                            }
                     )
                 },
                 backgroundColor = Color.White,
