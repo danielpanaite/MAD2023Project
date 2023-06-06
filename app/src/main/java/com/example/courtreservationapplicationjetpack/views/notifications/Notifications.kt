@@ -116,7 +116,7 @@ fun NotificationsBody(
         val users = viewModel.notifications.value.distinctBy { it.sender }.map { it.sender }
         userViewModel.getUserListByEmails(users)
     }
-    if(viewModel.notifications.value.map{ it.reservation }.isNotEmpty()){
+    if(viewModel.notifications.value.filter{ it.reservation != "" }.isNotEmpty()){
         reservationViewModel.getReservationsByIdList(viewModel.notifications.value.filter { it.reservation != "" }.map{it.reservation})
     }
     LazyColumn(
