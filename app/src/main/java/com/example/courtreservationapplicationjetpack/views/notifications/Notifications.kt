@@ -54,6 +54,7 @@ import com.example.courtreservationapplicationjetpack.firestore.Court
 import com.example.courtreservationapplicationjetpack.firestore.CourtViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Notification
 import com.example.courtreservationapplicationjetpack.firestore.NotificationViewModel
+import com.example.courtreservationapplicationjetpack.firestore.Reservation
 import com.example.courtreservationapplicationjetpack.firestore.ReservationViewModel
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.firestore.Users
@@ -101,6 +102,7 @@ fun NotificationsBody(
     viewModel: NotificationViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
     courtViewModel: CourtViewModel = viewModel(),
+    reservationViewModel: ReservationViewModel = viewModel()
 ){
     val email = googleAuthUiClient.getSignedInUser()?.email
     var courts = emptyList<String>()
@@ -114,6 +116,9 @@ fun NotificationsBody(
         val users = viewModel.notifications.value.distinctBy { it.sender }.map { it.sender }
         userViewModel.getUserListByEmails(users)
     }
+    if(viewModel.notifications.value.isNotEmpty()){
+        reservationViewModel.getReservationsByIdList(viewModel.notifications.value.filter { it.reservation != "" }.map{it.reservation})
+    }
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -126,15 +131,16 @@ fun NotificationsBody(
                 userViewModel.users.value.isNotEmpty() &&
                 courtViewModel.reservationcourts.value.isNotEmpty() &&
                 (viewModel.notifications.value.distinctBy { it.sender }.size == userViewModel.users.value.size) &&
-                (viewModel.notifications.value.filter { it.court != "" }
-                    .distinctBy { it.court }.size == courtViewModel.reservationcourts.value.size)
+                (viewModel.notifications.value.filter { it.court != "" }.distinctBy { it.court }.size == courtViewModel.reservationcourts.value.size) &&
+                (viewModel.notifications.value.filter { it.reservation != "" }.size == reservationViewModel.reservations.value.size)
             )
                 for (i in viewModel.notifications.value.indices) {
                     item {
                         NotificationItem(
                             notification = viewModel.notifications.value[i],
                             sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender },
-                            court = courtViewModel.reservationcourts.value.firstOrNull { it.id == viewModel.notifications.value[i].court }
+                            court = courtViewModel.reservationcourts.value.firstOrNull { it.id == viewModel.notifications.value[i].court },
+                            reservation = reservationViewModel.reservations.value.firstOrNull { it.id == viewModel.notifications.value[i].reservation }
                         )
                     }
                 }
@@ -149,7 +155,8 @@ fun NotificationsBody(
                         NotificationItem(
                             notification = viewModel.notifications.value[i],
                             sender = userViewModel.users.value.first { it.email == viewModel.notifications.value[i].sender },
-                            court = null
+                            court = null,
+                            reservation = null
                         )
                     }
                 }
@@ -162,14 +169,13 @@ fun NotificationItem(
     notification: Notification,
     sender: Users,
     court: Court?,
+    reservation: Reservation?,
     viewModel: NotificationViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
-    reservationViewModel: ReservationViewModel = viewModel()
+    reservationViewModel: ReservationViewModel = viewModel(),
 ){
     val toastFriend = Toast.makeText(LocalContext.current, "Friend added!", Toast.LENGTH_SHORT)
     val toastInvite = Toast.makeText(LocalContext.current, "Invitation accepted!", Toast.LENGTH_SHORT)
-    if(notification.reservation != "")
-        reservationViewModel.getReservationById(notification.reservation)
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(start = 16.dp, end = 16.dp),
@@ -255,12 +261,12 @@ fun NotificationItem(
                             textAlign = TextAlign.Start,
                             fontWeight = FontWeight.Normal,
                         )
-                        if(reservationViewModel.reservation.value.id != "")
-                            Text(
-                                text = "${reservationViewModel.reservation.value.toDate()} at ${reservationViewModel.reservation.value.toTime()}",
-                                textAlign = TextAlign.Start,
-                                fontWeight = FontWeight.ExtraLight,
-                            )
+                        if(reservation != null)
+                                Text(
+                                    text = "${reservation.toDate()} at ${reservation.toTime()}",
+                                    textAlign = TextAlign.Start,
+                                    fontWeight = FontWeight.ExtraLight,
+                                )
                     }
                 }
             }
@@ -282,8 +288,8 @@ fun NotificationItem(
                         }
                     },
                     modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)) {
+                        .fillMaxWidth()
+                        .weight(1f)) {
                     Icon(Icons.Default.Check, contentDescription = "Check", tint = ConfirmGreen)
                 }
                 IconButton(onClick = {
