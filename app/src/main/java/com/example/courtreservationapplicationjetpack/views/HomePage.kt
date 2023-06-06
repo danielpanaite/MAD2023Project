@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
@@ -85,99 +86,59 @@ private fun HomeBody(
     val email = googleAuthUiClient.getSignedInUser()?.email
     if(email != null)
         userViewModel.getUserByEmail(email)
-    Column(modifier = modifier.fillMaxSize()){
-        Card(
-            onClick = navigateToAllSports,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation( 8.dp )
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter
-                    (
-                    model ="https://images.unsplash.com/photo-1511415221243-04dab195b318?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=908&q=80",
-
-                    ), contentDescription = null,
-
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .aspectRatio(4f / 3f)
-            )
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "Reserve a court",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Check to see all the available courts",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-            }
-        }
-
-        Card(
-            onClick = navigateToReviews,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation( 8.dp )
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter
-                    (
-                    model ="https://media.istockphoto.com/id/1208411337/photo/consumer-reviews-concepts-with-bubble-people-review-comments-and-smartphone-rating-or.jpg?s=612x612&w=0&k=20&c=Rs8wAo4zS3FBEs4N_4a76zTSukulfrS6AErBKHZVJ9c=",
-
-                    ), contentDescription = null,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .aspectRatio(4f / 3f)
-            )
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "Review courts",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Leave a rating for the courts you have played on!",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-        }
-
-        if(userViewModel.user.value.id != "")
+    LazyColumn(modifier = modifier.fillMaxSize()){
+        item {
             Card(
-                onClick = {
-                    if(userViewModel.user.value.nickname != "")
-                        navigateToFindFriends()
-                    else
-                        profileComplete = true
-                },
+                onClick = navigateToAllSports,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation( 8.dp )
+                elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Image(
                     painter = rememberAsyncImagePainter
                         (
-                        model ="https://imgur.com/iXKM4GF.png",
+                        model = "https://images.unsplash.com/photo-1511415221243-04dab195b318?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=908&q=80",
+
+                        ), contentDescription = null,
+
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .aspectRatio(4f / 3f)
+                )
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        text = "Reserve a court",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Check to see all the available courts",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                }
+            }
+        }
+        item {
+            Card(
+                onClick = navigateToReviews,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(8.dp)
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter
+                        (
+                        model = "https://media.istockphoto.com/id/1208411337/photo/consumer-reviews-concepts-with-bubble-people-review-comments-and-smartphone-rating-or.jpg?s=612x612&w=0&k=20&c=Rs8wAo4zS3FBEs4N_4a76zTSukulfrS6AErBKHZVJ9c=",
 
                         ), contentDescription = null,
                     modifier = Modifier
@@ -190,30 +151,73 @@ private fun HomeBody(
                     modifier = Modifier.padding(8.dp)
                 ) {
                     Text(
-                        text = "Friends",
+                        text = "Review courts",
                         style = MaterialTheme.typography.titleLarge
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Find new partners to play with based on your chosen sports!",
+                        text = "Leave a rating for the courts you have played on!",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
-        if (profileComplete) {
-            CompleteProfileDialog(
-                onConfirm = {
-                    profileComplete = false
-                    navController.navigate(ProfileDestination.route)
-                },
-                onCancel = {
-                    profileComplete = false
+        }
+        item {
+            if (userViewModel.user.value.id != "")
+                Card(
+                    onClick = {
+                        if (userViewModel.user.value.nickname != "")
+                            navigateToFindFriends()
+                        else
+                            profileComplete = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(8.dp)
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter
+                            (
+                            model = "https://imgur.com/iXKM4GF.png",
+
+                            ), contentDescription = null,
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .aspectRatio(4f / 3f)
+                    )
+                    Column(
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Text(
+                            text = "Friends",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Find new partners to play with based on your chosen sports!",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
                 }
-            )
         }
     }
-
+    if (profileComplete) {
+        CompleteProfileDialog(
+            onConfirm = {
+                profileComplete = false
+                navController.navigate(ProfileDestination.route)
+            },
+            onCancel = {
+                profileComplete = false
+            }
+        )
+    }
 }
 
 @Composable

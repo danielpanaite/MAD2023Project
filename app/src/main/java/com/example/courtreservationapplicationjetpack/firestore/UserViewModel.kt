@@ -56,7 +56,7 @@ class UserViewModel: ViewModel(){
         reg3 = docRef.addSnapshotListener { snapshot, e ->
             if (e != null)
                 Log.d(TAG, "Error getting data", e)
-            if (snapshot != null) {
+            if (snapshot != null && snapshot.exists()) {
                 Log.d(TAG, "getUserByEmail")
                 val res = snapshot.toObject(Users::class.java)
                 res?.id = snapshot.id // Map the document ID to the "id" property of the Reservation object
