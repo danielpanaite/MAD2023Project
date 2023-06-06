@@ -195,7 +195,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     val test = firebaseCityViewModel.cities.value.map { it.city }
     val cityList = test.toList()
     //val cityList = listOf<String>("Torino", "Milano", "Savigliano", "Cuneo", "Saluzzo", "Rho", "Monza")
-    var pickedCity = remember { mutableStateOf("") }
+    var pickedCity = remember { mutableStateOf("Torino") }
 
     Log.d("CITY", "CITY: $cityList")
     LaunchedEffect(pickedSport.value) {
@@ -707,7 +707,6 @@ fun HourButtons(courtID: String, date: LocalDate, reservedSlot: List<String>, na
 fun CityPicker(modifier: Modifier, cityList: List<String>, pickedCity:  MutableState<String>, onFinish: (Unit) -> Unit) {
 
     var isMenuExpanded by remember { mutableStateOf(false) }
-
 
     Box(modifier = modifier) {
         OutlinedButton(
