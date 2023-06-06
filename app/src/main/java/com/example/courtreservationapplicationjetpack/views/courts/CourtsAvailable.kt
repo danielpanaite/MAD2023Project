@@ -771,7 +771,7 @@ fun Ciao(
 
                     Row(
                         modifier = Modifier
-                            .padding(horizontal = 0.dp, vertical = 8.dp)
+                            .padding(horizontal = 0.dp, vertical = 0.dp)
                         //.padding(8.dp)
                     ) {
                         var pickerValue by remember { mutableStateOf(1) }
@@ -1062,21 +1062,6 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
                 )
             }
         }
-        Row(
-            modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = "Timeslot available for the day ${
-                    selectedDate.value.format(
-                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                    )
-                }",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray
-            )
-        }
-
-
     }
 }
 
@@ -1124,6 +1109,22 @@ fun TextGrid(pickedHour: MutableState<String>, textList: List<String>, selectedD
         textList
     }
     println("hoursList $hoursList")
+
+
+    var displayedText = "Timeslot available for the day ${selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+    if(hoursList.isEmpty()) {
+        displayedText = "No Timeslot available for the day ${selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+    }
+
+    Row(
+        modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp)
+    ) {
+        Text(
+            text = displayedText,
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.Gray
+        )
+    }
 
     Column {
         repeat(rows) { rowIndex ->

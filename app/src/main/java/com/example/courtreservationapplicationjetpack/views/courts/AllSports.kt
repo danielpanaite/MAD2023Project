@@ -187,7 +187,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
     //questo è il viewmodel firebase
     val firebaseCourtViewModel: CourtViewModel = viewModel()
     val firebaseNotificationViewModel: NotificationViewModel = viewModel()
-    val cityList = listOf<String>("Torino", "Milano", "Roma", "Napoli", "Palermo", "Bologna", "Firenze", "Bari")
+    val cityList = listOf<String>("Torino", "Milano", "Savigliano", "Cuneo", "Saluzzo", "Rho", "Monza")
     var pickedCity = remember { mutableStateOf("") }
 
 
