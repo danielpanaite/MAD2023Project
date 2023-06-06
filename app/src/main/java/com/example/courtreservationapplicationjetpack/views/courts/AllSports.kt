@@ -228,7 +228,7 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
 
 
 
-    Column() {
+    Column {
         Row() {
             TopAppBar(
                 title = {
@@ -392,11 +392,12 @@ fun PrenotaCampo(sportsList: List<String>, courtsViewModel: CourtsAvailableViewM
                             reviewViewModel = reviewViewModel,
                             key = index.toString() + court.toString() // Utilizza una combinazione di indici e valori di "court" come chiave
                         )
+                    if(index == courtList.size - 1){
+                        Spacer(modifier = Modifier.height(40.dp))
+                    }
                 }
             }
-
         }
-
     }
 }
 
@@ -534,10 +535,11 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                     painter = rememberVectorPainter(Icons.Default.ArrowForward),
                     contentDescription = "see reviews",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                        .clickable{
-                        navController.navigate("${CourtReviewPageDestination.route}/${court.id}")
-                    },
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            navController.navigate("${CourtReviewPageDestination.route}/${court.id}")
+                        },
                 )
             }
         }
@@ -566,12 +568,12 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 16.dp)
             )
-            Text(
-                text = "${court.center}",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(start = 16.dp)
-            )
+//            Text(
+//                text = "${court.center}",
+//                fontSize = 14.sp,
+//                color = Color.Gray,
+//                modifier = Modifier.padding(start = 16.dp)
+//            )
             Text(
                 text = "City of ${court.citta}",
                 fontSize = 14.sp,
@@ -580,23 +582,24 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 modifier = Modifier.padding(start = 16.dp),
                 style = androidx.compose.material.MaterialTheme.typography.body1
             )
-            Row(
-                modifier = Modifier.padding(start = 16.dp, bottom = 32.dp)
-            ) {
-                Text(
-                    text = "${court.capacity}",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-                Icon(
-                    painter = rememberVectorPainter(Icons.Default.Person),
-                    contentDescription = "reservation available"
-                )
-            }
+//            Row(
+//                modifier = Modifier.padding(start = 16.dp, bottom = 32.dp)
+//            ) {
+//                Text(
+//                    text = "${court.capacity}",
+//                    fontSize = 14.sp,
+//                    color = Color.Gray
+//                )
+//                Icon(
+//                    painter = rememberVectorPainter(Icons.Default.Person),
+//                    contentDescription = "reservation available"
+//                )
+//            }
 
 
         }
     }
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
 
