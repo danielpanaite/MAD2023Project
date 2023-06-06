@@ -15,9 +15,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -107,6 +110,8 @@ import com.example.courtreservationapplicationjetpack.firestore.ReservationViewM
 import com.example.courtreservationapplicationjetpack.firestore.UserViewModel
 import com.example.courtreservationapplicationjetpack.models.courts.Court
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.example.courtreservationapplicationjetpack.views.notifications.FindFriendsDestination
+import com.example.courtreservationapplicationjetpack.views.profile.FriendsDestination
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.delay
@@ -971,9 +976,47 @@ fun Ciao(
 
                                         }
                                     }
-                                    else{
-                                        Text(text = "You don't have friends yet")
+//                                    else{
+//                                        Text(text = "You don't have friends yet")
+//                                    }
+                                }
+                                else{
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(0.5f)
+                                                .align(Alignment.TopCenter),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            val fcomposition = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.no_friends))
+                                            LottieAnimation(
+                                                modifier = Modifier
+                                                    .size(190.dp)
+                                                    .align(Alignment.CenterHorizontally),
+                                                contentScale = ContentScale.FillWidth,
+                                                composition = fcomposition.value,
+                                                progress = { progress },
+                                                maintainOriginalImageBounds = true
+                                            )
+                                            Text(
+                                                text = "Oops..looks like you don't have any friends on Sportify yet! You can add them by pressing here.",
+                                                color = Color.Gray,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.padding(top = 8.dp)
+                                            )
+                                            Button(onClick = ({
+                                                navController.navigate("${FindFriendsDestination.route}")
+                                            }), modifier = Modifier.padding(vertical = 8.dp).padding(bottom = 32.dp) ) {
+                                                Text(text = "Add friends")
+                                            }
+                                        }
                                     }
+
+
+
+
                                 }
                             }
                         }
