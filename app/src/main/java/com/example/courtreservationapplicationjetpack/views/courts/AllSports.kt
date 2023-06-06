@@ -480,7 +480,8 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                         .padding(16.dp)
                 )
                 Text(
-                    text = "${court.prezzo}$",
+                    //€
+                    text = "${court.prezzo}€",
                     style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 22.sp,
