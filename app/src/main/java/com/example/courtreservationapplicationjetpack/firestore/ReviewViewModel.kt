@@ -54,7 +54,7 @@ class ReviewViewModel: ViewModel() {
     val _avg = MutableStateFlow<Float>(0F)
     var avg: MutableStateFlow<Float> = _avg
 
-    private val _courtReviewsState = MutableStateFlow<MyReviewsUiState>(MyReviewsUiState(isLoading = false))
+    private val _courtReviewsState = MutableStateFlow<MyReviewsUiState>(MyReviewsUiState(isLoading = true))
     val courtReviewsState: StateFlow<MyReviewsUiState> = _courtReviewsState
 
     private val _averageRatingMap = mutableMapOf<String, Float>()

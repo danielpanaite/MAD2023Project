@@ -70,9 +70,6 @@ fun CourtReviewPage(
 
     val reviewsState by viewModel.courtReviewsState.collectAsState()
 
-
-    var isLoading by remember { mutableStateOf(true) } // Add flag to track loading state
-
     if (reviewsState.isLoading) { // Show circular progress indicator while loading
         Box(modifier = Modifier.fillMaxSize()){
             CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))

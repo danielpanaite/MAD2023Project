@@ -256,7 +256,6 @@ fun ProfileEntryBody(
 fun ProfileInputForm(
     user: MutableState<Users>,
     onSaveClick: () -> Unit,
-    //chosenPhotoUri: MutableState<Uri?>,
     chosenPhoto: MutableState<Bitmap>,
     modifier: Modifier = Modifier,
     profileImageUrl: String, // URL dell'immagine del profilo
@@ -264,23 +263,12 @@ fun ProfileInputForm(
 ) {
 
     val imageChoosen = remember { mutableStateOf(false) }
-
-
-    //val context = LocalContext.current
-    //val file = context.createImageFile()
-    /*val uri = FileProvider.getUriForFile(
-        Objects.requireNonNull(context),
-        BuildConfig.APPLICATION_ID + ".provider", file
-    )*/
-    var nuova = false
-
     val context = LocalContext.current
     val loadImageCamera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
         if (it != null) {
             chosenPhoto.value = it
             imageChoosen.value = true
         }
-
     }
 
     val loadImageGal = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()){
@@ -294,30 +282,6 @@ fun ProfileInputForm(
         }
     }
 
-
-    //var photoUri by rememberSaveable { mutableStateOf<Uri?>(Uri.parse(user.value.imageUri)) }
-    //var chosenPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
-
-    /*
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        chosenPhotoUri.value = uri
-        user.value = user.value.copy(imageUri = uri.toString())
-        Log.d("launcher gallery", "${chosenPhotoUri.value}")
-
-    }
-
-     */
-
-/*
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
-        chosenPhotoUri.value  = uri
-        user.value = user.value.copy(imageUri = uri.toString())
-        Log.d("launcher camera", "${chosenPhotoUri.value}")
-
-    }
-
- */
-
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
@@ -328,21 +292,7 @@ fun ProfileInputForm(
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
     }
-
-    //val chosenPhotUriState = rememberUpdatedState(chosenPhoto)
-
     val showMenu = remember { mutableStateOf(false) }
-
-
-/*
-    LaunchedEffect(chosenPhotoUri) {
-        user.value = user.value.copy(imageUri = chosenPhotoUri.value.toString())
-        Log.d("chosenPhoto launched Effec", "$chosenPhotoUri")
-    }
-
- */
-
-
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -363,13 +313,13 @@ fun ProfileInputForm(
                             .size(150.dp)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop,
-                        colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                        colorFilter = if (imageChoosen.value && profileImageUrl == "") {
                             ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
                         } else {
                             null
                         })
 
-                } else if (profileImageUrl!==null && profileImageUrl !=="") {
+                } else if (profileImageUrl !=="") {
                     // Mostra l'immagine del profilo esistente
                          Image(painter = rememberAsyncImagePainter(
                         ImageRequest.Builder(LocalContext.current)
@@ -385,7 +335,7 @@ fun ProfileInputForm(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape),
-                colorFilter = if (chosenPhoto == null && profileImageUrl == "") {
+                colorFilter = if (imageChoosen.value && profileImageUrl == "") {
                     ColorFilter.tint(Color.Black.copy(alpha = 0.3f))
                 } else {
                     null

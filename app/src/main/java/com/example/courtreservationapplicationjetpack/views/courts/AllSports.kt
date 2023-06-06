@@ -60,6 +60,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -412,9 +413,15 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
     //val reviewCourtAvg by reviewViewModel.avg.collectAsState()
     //Log.d("reviewCourt", "$reviewCourtAvg")
 
-    LaunchedEffect(Unit) {
+    var launchOnce by rememberSaveable { mutableStateOf(true) }
+    if(launchOnce){
         reviewViewModel.getAverageRatingForCourt()
+        launchOnce = false
     }
+
+    //LaunchedEffect(Unit) {
+     //   reviewViewModel.getAverageRatingForCourt()
+    //}
     val averageRatingMap = remember { mutableStateOf(reviewViewModel.averageRatingMap) }
 
 
@@ -512,7 +519,7 @@ fun CourtCard(pickedDate: MutableState<LocalDate>, pickedSport: MutableState<Str
                 com.gowtham.ratingbar.RatingBar(
                     value = averageRatingMap.value[court.id] ?: 0f,
                     config = RatingBarConfig()
-                        .style(RatingBarStyle.HighLighted)
+                        .style(RatingBarStyle.Normal)
                         .size(18.dp)
                         .inactiveColor(Color.Black)
                         .activeColor(Orange200)
