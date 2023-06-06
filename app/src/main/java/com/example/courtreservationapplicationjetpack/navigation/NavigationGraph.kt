@@ -3,13 +3,12 @@ package com.example.courtreservationapplicationjetpack.navigation
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.courtreservationapplicationjetpack.Screen
 import com.example.courtreservationapplicationjetpack.SplashScreen
@@ -52,9 +51,11 @@ import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreate
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewCreatePageDestination
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPage
 import com.example.courtreservationapplicationjetpack.views.reviews.ReviewMainPageDestination
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
@@ -62,12 +63,14 @@ fun NavigationGraph(
     context: Context,
     googleAuthUiClient: GoogleAuthUiClient
 ){
-    NavHost(
+    AnimatedNavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
         modifier = modifier
     ){
-        composable(route = Screen.Splash.route) {
+        composable(
+            route = Screen.Splash.route
+        ) {
             SplashScreen(navController = navController)
         }
 

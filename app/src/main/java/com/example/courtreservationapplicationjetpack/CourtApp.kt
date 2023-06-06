@@ -2,6 +2,7 @@ package com.example.courtreservationapplicationjetpack
 
 
 import android.content.Context
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -14,17 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.courtreservationapplicationjetpack.R.string
 import com.example.courtreservationapplicationjetpack.navigation.NavigationGraph
 import com.example.courtreservationapplicationjetpack.signIn.GoogleAuthUiClient
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 
 /**
  * Top level composable that represents screens for the application.
  */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CourtApp(navController: NavHostController = rememberNavController(), context: Context, googleAuthUiClient: GoogleAuthUiClient) {
+fun CourtApp(navController: NavHostController = rememberAnimatedNavController(), context: Context, googleAuthUiClient: GoogleAuthUiClient) {
     NavigationGraph(navController = navController, context = context, googleAuthUiClient = googleAuthUiClient)
 }
 
