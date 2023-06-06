@@ -114,6 +114,7 @@ import com.example.courtreservationapplicationjetpack.views.profile.AddFriendsIt
 import com.example.courtreservationapplicationjetpack.views.profile.FriendsItem
 import com.example.courtreservationapplicationjetpack.views.reservations.MyReservationsDestination
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -804,13 +805,17 @@ fun Ciao(
 
                     val modalBottomSheetState = rememberModalBottomSheetState()
                     val selectedFriends = remember { mutableStateOf(mutableListOf<String>()) }
+                    val tmpFriends = remember { mutableStateOf(mutableListOf<String>()) }
+
+
+
                     if (showSheet) {
                         ModalBottomSheet(
                             modifier = Modifier
                                 .background(Color.Transparent),
                             onDismissRequest = {
                                 showSheet = false
-                                selectedFriends.value.clear()
+                                tmpFriends.value.clear()
                             },
                             sheetState = modalBottomSheetState,
                             dragHandle = { BottomSheetDefaults.DragHandle() },
@@ -829,120 +834,150 @@ fun Ciao(
 
                                     if(friends.value.friends.isNotEmpty())
                                         firebaseUserViewModel.getUserListByEmails(friends.value.friends)
-                                    LazyColumn(modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Transparent)) {
-                                        if(firebaseUserViewModel.users.value.isNotEmpty())
 
-                                            items(firebaseUserViewModel.users.value){f ->
+                                    if(firebaseUserViewModel.users.value.isNotEmpty()) {
+                                        LazyColumn(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Transparent)
+                                        ) {
+                                            item {
+                                                Column(
+                                                    verticalArrangement = Arrangement.Center,
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Button(onClick = {
+                                                        selectedFriends.value.clear()
+                                                        tmpFriends.value.forEach { friend ->
+                                                            if (!selectedFriends.value.contains(friend)) {
+                                                                selectedFriends.value.add(friend)
+                                                            }
+                                                        }
+                                                        tmpFriends.value.clear()
+                                                        friendsNotificationArray.value.clear()
+                                                        // Stampa gli amici selezionati
+                                                        selectedFriends.value.forEach { friend ->
+                                                            val notifica = Notification(
+                                                                date = Timestamp.now(),
+                                                                sender = userEmail!!,
+                                                                receiver = friend,
+                                                                type = "play",
+                                                                status = "pending",
+                                                                court = courtState.value!!.id,
+                                                                reservation = ""
+                                                            )
+                                                            friendsNotificationArray.value.add(
+                                                                notifica
+                                                            )
+                                                            showSheet = false
+                                                        }
+                                                        //showAddFriendDialog.value = false
+                                                    }) {
+                                                        Text(text = "Apply changes")
+
+                                                    }
+                                                }
+                                            }
+                                            items(firebaseUserViewModel.users.value) { f ->
 
                                                 val isSelected = remember { mutableStateOf(false) }
 
-                                                    Surface(color = Color.Transparent){
-                                                        Row(modifier = Modifier
-                                                            .padding(
-                                                                start = 0.dp,
-                                                                top = 8.dp,
-                                                                bottom = 8.dp
-                                                            )
-                                                            .background(Color.Transparent)
-                                                            .clickable {
-                                                                isSelected.value = !isSelected.value
-                                                            }
-                                                        ){
-                                                            Column(modifier = Modifier
+                                                Surface(color = Color.Transparent) {
+                                                    Row(modifier = Modifier
+                                                        .padding(
+                                                            start = 0.dp,
+                                                            top = 8.dp,
+                                                            bottom = 8.dp
+                                                        )
+                                                        .background(Color.Transparent)
+                                                        .clickable {
+                                                            isSelected.value = !isSelected.value
+                                                        }
+                                                    ) {
+                                                        Column(
+                                                            modifier = Modifier
                                                                 .fillMaxSize()
                                                                 .align(Alignment.CenterVertically)
                                                                 .weight(2f)
                                                                 .background(Color.Transparent)
-                                                            ){
-                                                                if(f.imageUri != "")
-                                                                    Image(
-                                                                        modifier = Modifier
-                                                                            .size(48.dp)
-                                                                            .clip(shape = CircleShape)
-                                                                            .background(Color.Transparent),
-                                                                        painter = rememberAsyncImagePainter(model = Uri.parse(f.imageUri)),
-                                                                        contentDescription = "Profile Image",
-                                                                        contentScale = ContentScale.Crop
-                                                                    )
-                                                                else
-                                                                    Icon(Icons.Default.Face, contentDescription = "Friend", modifier = Modifier
+                                                        ) {
+                                                            if (f.imageUri != "")
+                                                                Image(
+                                                                    modifier = Modifier
+                                                                        .size(48.dp)
+                                                                        .clip(shape = CircleShape)
+                                                                        .background(Color.Transparent),
+                                                                    painter = rememberAsyncImagePainter(
+                                                                        model = Uri.parse(f.imageUri)
+                                                                    ),
+                                                                    contentDescription = "Profile Image",
+                                                                    contentScale = ContentScale.Crop
+                                                                )
+                                                            else
+                                                                Icon(
+                                                                    Icons.Default.Face,
+                                                                    contentDescription = "Friend",
+                                                                    modifier = Modifier
                                                                         .size(40.dp)
-                                                                        .background(Color.Transparent))
-                                                            }
-                                                            Column(modifier = Modifier
+                                                                        .background(Color.Transparent)
+                                                                )
+                                                        }
+                                                        Column(
+                                                            modifier = Modifier
                                                                 .fillMaxSize()
                                                                 .weight(6f)
                                                                 .background(Color.Transparent)
-                                                            ){
-                                                                Row(modifier = Modifier
+                                                        ) {
+                                                            Row(
+                                                                modifier = Modifier
                                                                     .fillMaxWidth()
                                                                     .padding(
                                                                         top = 0.dp,
                                                                         bottom = 0.dp
                                                                     )
                                                                     .background(Color.Transparent)
-                                                                ){
-                                                                    Text(text = f.name.toString(), fontWeight = FontWeight.ExtraLight)
-                                                                }
-                                                                Row(modifier = Modifier
-                                                                    .fillMaxWidth()
-                                                                    .padding(
-                                                                        top = 0.dp,
-                                                                        bottom = 0.dp
-                                                                    )
-                                                                    .background(Color.Transparent)
-                                                                ){
-                                                                    Text(text = f.nickname.toString())
-                                                                }
+                                                            ) {
+                                                                Text(
+                                                                    text = f.name.toString(),
+                                                                    fontWeight = FontWeight.ExtraLight
+                                                                )
                                                             }
-                                                            CircleCheckbox(isSelected.value, true) {
-                                                                isSelected.value = !isSelected.value
+                                                            Row(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(
+                                                                        top = 0.dp,
+                                                                        bottom = 0.dp
+                                                                    )
+                                                                    .background(Color.Transparent)
+                                                            ) {
+                                                                Text(text = f.nickname.toString())
                                                             }
                                                         }
+                                                        CircleCheckbox(isSelected.value, true) {
+                                                            isSelected.value = !isSelected.value
+                                                        }
                                                     }
-                                                if(firebaseUserViewModel.users.value.isNotEmpty()) {
+                                                }
+                                                if (firebaseUserViewModel.users.value.isNotEmpty()) {
                                                     if (isSelected.value) {
 
-                                                        selectedFriends.value.add(f.email)
+                                                        tmpFriends.value.add(f.email)
                                                         println(isSelected.value)
-                                                        println(selectedFriends.value)
+                                                        println(tmpFriends.value)
                                                     } else {
-                                                        selectedFriends.value.remove(f.email)
+                                                        tmpFriends.value.remove(f.email)
                                                         println(isSelected.value)
-                                                        println(selectedFriends.value)
+                                                        println(tmpFriends.value)
                                                     }
                                                 }
                                             }
-                                        item {
-                                            Column(
-                                                verticalArrangement = Arrangement.Center,
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                modifier = Modifier.fillMaxWidth()
-                                            ) {
-                                                Button(onClick = {
-                                                    // Stampa gli amici selezionati
-                                                    selectedFriends.value.forEach { friend ->
-                                                        val notifica = Notification(
-                                                            date = Timestamp.now(),
-                                                            sender = userEmail!!,
-                                                            receiver = friend,
-                                                            type = "play",
-                                                            status = "pending",
-                                                            court = courtState.value!!.id,
-                                                            reservation = ""
-                                                        )
-                                                        friendsNotificationArray.value.add(notifica)
-                                                        showSheet = false
-                                                    }
-                                                    //showAddFriendDialog.value = false
-                                                }) {
-                                                    Text(text = "Save changes")
 
-                                                }
-                                            }
                                         }
+                                    }
+                                    else{
+                                        Text(text = "You don't have friends yet")
                                     }
                                 }
                             }
@@ -1045,6 +1080,10 @@ fun CalendarScreen(selectedDate: MutableState<LocalDate>, pickedHour: MutableSta
     }
 }
 
+fun convertLocalDateToDate(localDate: LocalDate): Date {
+    val zoneId = ZoneId.systemDefault()
+    return Date.from(localDate.atStartOfDay(zoneId).toInstant())
+}
 
 @Composable
 fun TextGrid(pickedHour: MutableState<String>, textList: List<String>, selectedDate: LocalDate, allSportViewModel: AllSportsViewModel, courtID: String) {
@@ -1056,9 +1095,10 @@ fun TextGrid(pickedHour: MutableState<String>, textList: List<String>, selectedD
     if (courtID != null) {
         val firebaseReservationViewModel: ReservationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
-
         val dateInTimeZone = selectedDate.atStartOfDay(ZoneId.of("Europe/Rome")).toInstant().epochSecond
-        firebaseReservationViewModel.getCourtReservations(courtID, Timestamp(dateInTimeZone, 0))
+        firebaseReservationViewModel.getCourtReservations(courtID, Timestamp(convertLocalDateToDate(selectedDate)))
+
+        println("slotsEEEEEEEEEEEEEEEEEEEEEE ${firebaseReservationViewModel.courtres.value}")
 
         val slots = firebaseReservationViewModel.courtres.value.map { reservation ->
             val date = Date(reservation.date.seconds * 1000 + reservation.date.nanoseconds / 1000000)
