@@ -471,12 +471,12 @@ private fun DeleteConfirmationDialog(
         text = { Text("Do you want to delete your reservation?") },
         modifier = modifier.padding(16.dp),
         dismissButton = {
-            TextButton(onClick = onDeleteCancel) {
+            Button(onClick = onDeleteCancel) {
                 Text(text = stringResource(R.string.no))
             }
         },
         confirmButton = {
-            TextButton(onClick = onDeleteConfirm) {
+            Button(onClick = onDeleteConfirm) {
                 Text(text = stringResource(R.string.yes))
             }
         }
