@@ -1,5 +1,6 @@
 package com.example.courtreservationapplicationjetpack.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -187,12 +188,13 @@ fun MonthCalendar(
                             )
                         }
                     }else {
-                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty() && (reservationsInSelectedDate.distinctBy { it.court }.size == courtViewModel.reservationcourts.value.size) && email != null)
-                            for( i in reservationsInSelectedDate.indices){
-                                item{
-                                    ReservationInformation(reservationsInSelectedDate[i], courtViewModel.reservationcourts.value.first{ it.id == reservationsInSelectedDate[i].court }, onReservationClick, colors, email)
+                        if(reservationsInSelectedDate.isNotEmpty() && courtViewModel.reservationcourts.value.isNotEmpty())
+                            if((reservationsInSelectedDate.distinctBy { it.court }.map{it.court}.sorted() == courtViewModel.reservationcourts.value.distinctBy { it.id }.map { it.id }.sorted()) && email != null)
+                                for( i in reservationsInSelectedDate.indices){
+                                    item{
+                                        ReservationInformation(reservationsInSelectedDate[i], courtViewModel.reservationcourts.value.first{ it.id == reservationsInSelectedDate[i].court }, onReservationClick, colors, email)
+                                    }
                                 }
-                            }
                     }
                 }
             }
@@ -297,7 +299,7 @@ private fun LazyItemScope.ReservationInformation(
             Box(
                 modifier = Modifier
                     .background(color = colorResource(colors[(1) % colors.size]))
-                    .padding(bottom = if(reservation.invites.contains(email)) 8.dp else 0.dp)
+                    .padding(bottom = if (reservation.invites.contains(email)) 8.dp else 0.dp)
                     .fillParentMaxWidth(1 / 7f)
                     .aspectRatio(1f)
                     .weight(1f),
@@ -344,7 +346,9 @@ private fun LazyItemScope.ReservationInformation(
                 )
                 if(reservation.invites.contains(email) && userViewModel.user.value.id != "")
                     Text(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
                         text = "invite from ${userViewModel.user.value.nickname}",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium,
