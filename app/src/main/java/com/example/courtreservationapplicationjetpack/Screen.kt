@@ -96,7 +96,7 @@ fun SplashScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .height(200.dp)
                 .align(Alignment.BottomCenter)
-                .offset(y = (-16).dp) // sposta di 16.dp in alto
+                .offset(y = (-50).dp) // sposta di 16.dp in alto
                 .background(Color.White)
         )
     }
